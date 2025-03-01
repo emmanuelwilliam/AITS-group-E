@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from rest_framework import viewsets
 from .models import student
 from .models import Administrator
@@ -13,3 +14,11 @@ class AdministratorViewSet(viewsets.ModelViewSet):
     queryset = Administrator.object.all()
     serializer_class = AdministratorSerializer
     
+=======
+from django.http import HttpResponse
+
+# Create your views here.
+
+def hello(request):
+  return HttpResponse("Hello, Welcome to the Makerere Academic Issue Tracking System")
+>>>>>>> f96cec4d295c3247fa0950c0581828ebf4eaeed1
