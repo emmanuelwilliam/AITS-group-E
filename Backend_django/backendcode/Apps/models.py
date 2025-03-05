@@ -1,5 +1,5 @@
 from django.db import models
-from Apps.models import Student, Administrato
+
 
 # Create your models here.
 class Student(models.Model):
