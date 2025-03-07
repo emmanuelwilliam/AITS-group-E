@@ -18,6 +18,14 @@ class Administrator(User):
     
     def __str__(self):
         return self.admin_id
+
+class Lecturer(User):
+    id_number = models.CharField(max_length=15, unique=True)
+    employment_id = models.CharField(max_length=20, unique=True)
+    position = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"{self.username} - {self.position}"
     
     
     
