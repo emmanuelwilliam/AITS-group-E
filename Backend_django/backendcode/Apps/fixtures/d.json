@@ -1,0 +1,26 @@
+[
+    {
+        "model": "Apps.student",
+        "pk": 1,
+        "fields": {
+            "student_id": "2400724330",
+            "reg_no": "24/U/24330/PS"
+        }
+    },
+    {
+        "model": "Apps.student",
+        "pk": 2,
+        "fields": {
+            "student_id": "-------",
+            "reg_no": "24/U/06836/PS"
+        }
+    },
+    {
+        "model": "Apps.student",
+        "pk": 3,
+        "fields": {
+            "student_id": "1111",
+            "reg_no": "24/U/04071/PS"
+        }
+    }
+]
