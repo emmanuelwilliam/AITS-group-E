@@ -11,13 +11,29 @@ class CustomUser(AbstractUser):
 
 class Student(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='student_profile')
-    department = models.CharField(max_length=100)
+    college = models.CharField(max_length=100)
 
 class Lecturer(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='lecturer_profile')
     employee_id = models.CharField(max_length=50)
+    ###
+    Having a position here seems weird but we are trying 
+    to distinguish between assistant lecturers, junior lecturers , senior lecturers 
+    thus the position prompt
+    ### 
     position = models.CharField(max_length=100)
+    course_units = models.ManytoManyField("CourseUnit",related_name="lecturers")
 
+    def __str__(self):
+        return f"{self.user.get_full_name()} - {self.position else 'Lecturer'}"
+
+class CourseUnit(models.Model):
+    course_code = models.CharField(max_length=8, unique=True)
+    course_name = models.CharField(max_length=30)
+
+    def __str__(self):
+        return f "{self.course_code} - {self.course_name}"
+    
 class Administrator(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='admin_profile')
     contact_email = models.EmailField()
