@@ -1,0 +1,71 @@
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #34495e;
+  color: white;
+  height: 60px;
+  z-index: 1000; /* Ensure it stays on top */
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.topbar-left .logo {
+  width: 40px;
+  margin-right: 10px;
+}
+
+.topbar-left h1 {
+  font-size: 20px;
+  margin: 0;
+}
+
+.topbar-right .student-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topbar-right .student-profile span {
+  margin-right: 10px;
+}
+
+.topbar-right .student-profile .profile-pic {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  background-color: white;
+  border: 1px solid #bdc3c7;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.dropdown-item {
+  padding: 10px 20px;
+  color: #2c3e50;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background-color: #f5f6fa;
+}

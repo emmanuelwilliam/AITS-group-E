@@ -1,0 +1,89 @@
+/* src/styles/login.css */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  position: relative; /* Ensure it stays above the faint background */
+}
+
+.login-box {
+  background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent white background */
+  padding: 40px;
+  border-radius: 8px;
+  backdrop-filter: blur(5px); /* Add a slight blur effect to the form */
+  width: 400px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+}
+
+.logo {
+  width: 150px; /* Adjust the size of the logo */
+  margin-bottom: 20px;
+}
+
+.login-box h2 {
+  margin-bottom: 20px;
+  color: #2c3e50;
+  font-size: 24px;
+}
+
+.login-box input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #bdc3c7;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent input background */
+}
+
+.login-box button {
+  width: 100%;
+  padding: 10px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.login-box button:hover {
+  background-color: #2980b9;
+}
+
+.remember-forgot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.remember-forgot label {
+  display: flex;
+  align-items: center;
+  color: #2c3e50;
+}
+
+.remember-forgot a {
+  color: #3498db;
+  text-decoration: none;
+}
+
+.remember-forgot a:hover {
+  text-decoration: underline;
+}
+
+.register-link {
+  margin-top: 10px;
+  color: #2c3e50;
+}
+
+.register-link a {
+  color: #3498db;
+  text-decoration: none;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
+}

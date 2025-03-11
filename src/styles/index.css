@@ -1,0 +1,17 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  margin-left: 250px; /* Same width as the sidebar */
+  margin-top: 60px; /* Same height as the top bar */
+  padding: 20px;
+  width: calc(100% - 250px);
+}
+
+.content {
+  background-color: #f5f6fa;
+  padding: 20px;
+  border-radius: 8px;
+}
