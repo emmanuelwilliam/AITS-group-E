@@ -1,119 +1,92 @@
-
-from django.shortcuts import render, get_object_or_404,redirect
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Issue, Message, CustomUser
-
-# Student Views
-@login_required
-def log_issue(complaint):
-    if complaint.method == "POST":
-        title = complaint.POST.get("title")
-        description = complaint.POST.get("description")
-        lecturer_id = complaint.POST.get("lecturer_id")
-        lecturer = get_object_or_404 (CustomUser, id =lecturer_id, role="lecturer")
-
-        issue = Issue.objects.create(
-            student = complaint.user,
-            lecturer = lecturer, 
-            title = title,
-            description=description,
-            status = "Pending"
-        )
-        messages.success(complaint, "Issue submitted successfully!")
-        return redirect ("view_issues")
-    
-    lecturers= CustomUser.objects.filter(role="lecturer")
-    return render(complaint, "submit_issue.html",{"lecturers": lecturers})
-
-@login_required
-def view_issues(complaint):
-    issues= Issue.objects.filter(student=complaint.user)
-    return render (complaint, "view_ssues.html",{"issues": issues})
-
-@login_required
-def check_issue_status(complaint, issue_id):
-    issue = get_object_or_404(Issue, id=issue_id, student=complaint.user)
-    return JsonResponse({"status":issue.status})
-
-@login_required
-def msg_lecturer(complaint, lecturer_id):
-    if complaint.method == "POST":
-        content = complaint.POST.get("content")
-        lecturer = get_object_or_404(CustomUser, id=lecturer_id, role="lecturer")
-
-        Message.objects.create(
-            sender=complaint.user,
-            receiver=lecturer,
-            content=content
-        )
-        messages.success(complaint, "Message sent successfully!")
-
-    return render(complaint, "msg_lecturer.html",{"lecturer_id":lecturer_id})
-
-#Lecturer Views
-@login_required
-def view_assigned_issues(complaint):
-    issues = Issue.objects.filter(lecturer=complaint.user)
-    return render(complaint, "lecturer_issues.html", {"issues": issues})
-
-@login_required
-def update_issue_status(complaint, issue_id):
-    issue = get_object_or_404(Issue, id=issue_id, lecturer=complaint.user)
-
-    if complaint.method =="POST":
-        new_status =complaint.POST.get("status")
-        issue.status = new_status
-        issue.save()
-        messages.success(complaint, "Issue status updated!")
-
-    return redirect ("view_assigned_issues")
-
-@login_required
-def receive_messages(complaint):
-    messages_received = Message.objects.filter(receiver=complaint.user)
-    return render(complaint, "lecturer_messages.html", {"messages":messages_received})
-
-#Admin Views
-@login_required
-def admin_dashboard(complaint):
-    total_issues = Issue.objects.count()
-    total_students = CustomUser.objects.filter(role="student").count()
-    lecturers = CustomUser.objects.filter(role="lecturer")
-
-    lecturer_progress={
-        lecturer.username: Issue.objects.filter(lecturer=lecturer).count()
-        for lecturer in lecturers
-    }
-    return render (complaint, "admin_dashboard.html",{
-        "total_issues": total_issues,
-        "total_students": total_students,
-        "lecturer_progress": lecturer_progress
-    })
-=======
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
-from .models import Student, Administrator
-from .serializer import (
-    LoginSerializer,
-    StudentSerializer,
-    AdministratorSerializer
+from .models import CustomUser, Student, Lecturer, Administrator, Issue, Notification, Status, LoginHistory, UserRole
+from .serializers import (
+    CustomUserSerializer, StudentSerializer, LecturerSerializer, AdministratorSerializer,
+    IssueSerializer, NotificationSerializer, StatusSerializer, LoginHistorySerializer, UserRoleSerializer
 )
 
+# Traditional Django Views
+@login_required
+def log_issue(request):
+    if request.method == "POST":
+        title = request.POST.get("title")
+        description = request.POST.get("description")
+        lecturer_id = request.POST.get("lecturer_id")
+        lecturer = get_object_or_404(Lecturer, id=lecturer_id)
+
+        issue = Issue.objects.create(
+            student=request.user.student_profile,
+            lecturer=lecturer,
+            title=title,
+            description=description,
+            category=request.POST.get("category"),
+            priority=request.POST.get("priority"),
+            status=Status.objects.get(status_name="Pending")
+        )
+        messages.success(request, "Issue submitted successfully!")
+        return redirect("view_issues")
+
+    lecturers = Lecturer.objects.all()
+    return render(request, "submit_issue.html", {"lecturers": lecturers})
+
+@login_required
+def view_issues(request):
+    issues = Issue.objects.filter(student=request.user.student_profile)
+    return render(request, "view_issues.html", {"issues": issues})
+
+@login_required
+def check_issue_status(request, issue_id):
+    issue = get_object_or_404(Issue, id=issue_id, student=request.user.student_profile)
+    return JsonResponse({"status": issue.status.status_name})
+
+@login_required
+def msg_lecturer(request, lecturer_id):
+    if request.method == "POST":
+        content = request.POST.get("content")
+        lecturer = get_object_or_404(Lecturer, id=lecturer_id)
+
+        Notification.objects.create(
+            issue=Issue.objects.filter(student=request.user.student_profile, lecturer=lecturer).first(),
+            message=content,
+            notification_type="Message"
+        )
+        messages.success(request, "Message sent successfully!")
+    return render(request, "msg_lecturer.html", {"lecturer_id": lecturer_id})
+
+# DRF Viewsets
 class StudentViewSet(viewsets.ModelViewSet):
     queryset = Student.objects.all()
-    serializer_class=StudentSerializer
-    
+    serializer_class = StudentSerializer
+
+class LecturerViewSet(viewsets.ModelViewSet):
+    queryset = Lecturer.objects.all()
+    serializer_class = LecturerSerializer
+
 class AdministratorViewSet(viewsets.ModelViewSet):
     queryset = Administrator.objects.all()
     serializer_class = AdministratorSerializer
 
-class LoginViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
-    serializer_class = LoginSerializer
-    
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+class IssueViewSet(viewsets.ModelViewSet):
+    queryset = Issue.objects.all()
+    serializer_class = IssueSerializer
 
+class NotificationViewSet(viewsets.ModelViewSet):
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
+
+class StatusViewSet(viewsets.ModelViewSet):
+    queryset = Status.objects.all()
+    serializer_class = StatusSerializer
+
+class LoginHistoryViewSet(viewsets.ModelViewSet):
+    queryset = LoginHistory.objects.all()
+    serializer_class = LoginHistorySerializer
+
+class UserRoleViewSet(viewsets.ModelViewSet):
+    queryset = UserRole.objects.all()
+    serializer_class = UserRoleSerializer

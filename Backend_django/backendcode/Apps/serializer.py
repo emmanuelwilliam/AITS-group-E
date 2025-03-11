@@ -1,42 +1,55 @@
-from rest_framework import serializers, exceptions
-from django.contrib.auth import authenticate, login
-from .models import User, Student, Administrator
+from rest_framework import serializers
+from .models import CustomUser, Student, Lecturer, Administrator, Issue, Notification, Status, LoginHistory, UserRole
+
+class CustomUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'username', 'role']
 
 class StudentSerializer(serializers.ModelSerializer):
+    user = CustomUserSerializer()
     class Meta:
-        model=Student
-        fields='__all__'
+        model = Student
+        fields = '__all__'
+
+class LecturerSerializer(serializers.ModelSerializer):
+    user = CustomUserSerializer()
+    class Meta:
+        model = Lecturer
+        fields = '__all__'
 
 class AdministratorSerializer(serializers.ModelSerializer):
+    user = CustomUserSerializer()
     class Meta:
-        model=Administrator
-        fields= '__all__'
-        
-class LoginSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(max_length=100)
-    password = serializers.CharField(max_length=128)
-    
-    def validate(self, data):
-        username = data.get('username', None)
-        password = data.get('password', None)
-        
-        if username is None:
-            raise exceptions.ValidationError("Username is required")
-        if password is None:
-            raise exceptions.ValidationError("Password is required")
-        
-        user = authenticate(username=username, password=password)
-        if user is None:
-            exceptions.AuthenticationFailed('Invalid credentials')
-            
-        login(self.context.get('request', user))
-        
-        return {
-            'id': user.pk,
-            'username': user.username,
-            'email': user.email,
-        }
-        
+        model = Administrator
+        fields = '__all__'
+
+class IssueSerializer(serializers.ModelSerializer):
+    student = StudentSerializer(read_only=True)
+    lecturer = LecturerSerializer(read_only=True)
+    status = serializers.StringRelatedField()
     class Meta:
-        model = User
-        fields = ['id', 'username', 'email', 'password']
+        model = Issue
+        fields = '__all__'
+
+class NotificationSerializer(serializers.ModelSerializer):
+    issue = IssueSerializer(read_only=True)
+    class Meta:
+        model = Notification
+        fields = '__all__'
+
+class StatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Status
+        fields = '__all__'
+
+class LoginHistorySerializer(serializers.ModelSerializer):
+    user = CustomUserSerializer(read_only=True)
+    class Meta:
+        model = LoginHistory
+        fields = '__all__'
+
+class UserRoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserRole
+        fields = '__all__'
