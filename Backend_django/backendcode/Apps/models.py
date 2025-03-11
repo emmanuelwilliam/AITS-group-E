@@ -25,7 +25,7 @@ class Lecturer(models.Model):
     course_units = models.ManytoManyField("CourseUnit",related_name="lecturers")
 
     def __str__(self):
-        return f"{self.user.get_full_name()} - {self.position else 'Lecturer'}"
+        return f"{self.user.get_full_name()} - {self.position if self.position else 'Lecturer'}"
 
 class CourseUnit(models.Model):
     course_code = models.CharField(max_length=8, unique=True)
