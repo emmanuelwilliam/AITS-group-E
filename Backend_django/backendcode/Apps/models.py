@@ -16,11 +16,11 @@ class Student(models.Model):
 class Lecturer(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='lecturer_profile')
     employee_id = models.CharField(max_length=50)
-    ###
+    """
     Having a position here seems weird but we are trying 
     to distinguish between assistant lecturers, junior lecturers , senior lecturers 
     thus the position prompt
-    ### 
+    """
     position = models.CharField(max_length=100)
     course_units = models.ManytoManyField("CourseUnit",related_name="lecturers")
 
