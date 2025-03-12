@@ -1,13 +1,23 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+class UserRole(models.Model):
+    ROLE_CHOICES=[
+        ('student','Student'),
+        ('lecturer','Lecturer'),
+        ('admin','Administrator'),
+    ]
+    role_name = models.CharField(max_length=50,unique=True, choices=ROLE_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.role_name_display()
+    
 class CustomUser(AbstractUser):
-    ROLES = (
-        ('student', 'Student'),
-        ('lecturer', 'Lecturer'),
-        ('admin', 'Administrator'),
-    )
-    role = models.CharField(max_length=10, choices=ROLES)
+    role = models.ForeignKey(UserRole,on_delete=models.SET_NULL,null=True,related_name='users')
+
+    def __str__(self):
+        return f"{self.username}-{self.role.get_role_name_diplay() if self.role else 'No role'"
 
 class Student(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='student_profile')
@@ -73,7 +83,3 @@ class LoginHistory(models.Model):
     login_time = models.DateTimeField(auto_now_add=True)
     session_time = models.DurationField()
 
-class UserRole(models.Model):
-    role_name = models.CharField(max_length=50)
-    description = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
