@@ -32,7 +32,7 @@ class Lecturer(models.Model):
     thus the position prompt
     """
     position = models.CharField(max_length=100)
-    course_units = models.ManytoManyField("CourseUnit",related_name="lecturers")
+    course_units = models.ManyToManyField("CourseUnit",related_name="lecturers")
 
     def __str__(self):
         return f"{self.user.get_full_name()} - {self.position if self.position else 'Lecturer'}"
