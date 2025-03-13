@@ -11,11 +11,11 @@ class UserRole(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.role_name_display()
+        return self.get_role_name_display()
     
 class CustomUser(AbstractUser):
     role = models.ForeignKey(UserRole,on_delete=models.SET_NULL,null=True,related_name='users')
-
+ 
     def __str__(self):
         return f"{self.username}-{self.role.get_role_name_diplay() if self.role else 'No role'}"
 
@@ -32,7 +32,7 @@ class Lecturer(models.Model):
     thus the position prompt
     """
     position = models.CharField(max_length=100)
-    course_units = models.ManytoManyField("CourseUnit",related_name="lecturers")
+    course_units = models.ManyToManyField("CourseUnit",related_name="lecturers")
 
     def __str__(self):
         return f"{self.user.get_full_name()} - {self.position if self.position else 'Lecturer'}"
