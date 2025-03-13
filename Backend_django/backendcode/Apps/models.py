@@ -15,9 +15,9 @@ class UserRole(models.Model):
     
 class CustomUser(AbstractUser):
     role = models.ForeignKey(UserRole,on_delete=models.SET_NULL,null=True,related_name='users')
-
+ 
     def __str__(self):
-        return f"{self.username}-{self.role.get_role_name_diplay() if self.role else 'No role'"
+        return f"{self.username}-{self.role.get_role_name_diplay() if self.role else 'No role'}"
 
 class Student(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='student_profile')
