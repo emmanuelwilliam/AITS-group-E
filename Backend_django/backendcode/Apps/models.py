@@ -11,7 +11,7 @@ class UserRole(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.role_name_display()
+        return self.get_role_name_display()
     
 class CustomUser(AbstractUser):
     role = models.ForeignKey(UserRole,on_delete=models.SET_NULL,null=True,related_name='users')
