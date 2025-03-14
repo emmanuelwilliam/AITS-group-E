@@ -1,8 +1,8 @@
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
-from .models import CustomUser, Student, Lecturer, Administrator, Issue, Notification, Status, LoginHistory, UserRole
-from .serializers import (
-    CustomUserSerializer, StudentSerializer, LecturerSerializer, AdministratorSerializer,
+from .models import User, Student, Lecturer, Administrator, Issue, Notification, Status, LoginHistory, UserRole
+from .serializer import (
+    UserSerializer, StudentSerializer, LecturerSerializer, AdministratorSerializer,
     IssueSerializer, NotificationSerializer, StatusSerializer, LoginHistorySerializer, UserRoleSerializer
 )
 

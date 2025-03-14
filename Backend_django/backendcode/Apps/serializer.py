@@ -1,25 +1,25 @@
 from rest_framework import serializers
-from .models import CustomUser, Student, Lecturer, Administrator, Issue, Notification, Status, LoginHistory, UserRole
+from .models import User, Student, Lecturer, Administrator, Issue, Notification, Status, LoginHistory, UserRole
 
-class CustomUserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CustomUser
+        model = User
         fields = ['id', 'username', 'role']
 
 class StudentSerializer(serializers.ModelSerializer):
-    user = CustomUserSerializer()
+    user = UserSerializer()
     class Meta:
         model = Student
         fields = '__all__'
 
 class LecturerSerializer(serializers.ModelSerializer):
-    user = CustomUserSerializer()
+    user = UserSerializer()
     class Meta:
         model = Lecturer
         fields = '__all__'
 
 class AdministratorSerializer(serializers.ModelSerializer):
-    user = CustomUserSerializer()
+    user = UserSerializer()
     class Meta:
         model = Administrator
         fields = '__all__'
@@ -44,7 +44,7 @@ class StatusSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class LoginHistorySerializer(serializers.ModelSerializer):
-    user = CustomUserSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
     class Meta:
         model = LoginHistory
         fields = '__all__'

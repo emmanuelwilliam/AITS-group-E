@@ -13,18 +13,18 @@ class UserRole(models.Model):
     def __str__(self):
         return self.get_role_name_display()
     
-class CustomUser(AbstractUser):
+class User(AbstractUser):
     role = models.ForeignKey(UserRole,on_delete=models.SET_NULL,null=True,related_name='users')
  
     def __str__(self):
         return f"{self.username}-{self.role.get_role_name_diplay() if self.role else 'No role'}"
 
 class Student(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='student_profile')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile')
     college = models.CharField(max_length=100)
 
 class Lecturer(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='lecturer_profile')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='lecturer_profile')
     employee_id = models.CharField(max_length=50)
     """
     Having a position here seems weird but we are trying 
@@ -45,7 +45,7 @@ class CourseUnit(models.Model):
         return f"{self.course_code}-{self.course_name}"
     
 class Administrator(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='admin_profile')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='admin_profile')
     contact_email = models.EmailField()
 
 class Issue(models.Model):
@@ -78,7 +78,7 @@ class Status(models.Model):
     last_update = models.DateTimeField(auto_now=True)
 
 class LoginHistory(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='login_history')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='login_history')
     ip_address = models.GenericIPAddressField()
     login_time = models.DateTimeField(auto_now_add=True)
     session_time = models.DurationField()

@@ -8,7 +8,7 @@ from .views import (
     IssueViewSet,
     NotificationViewSet,
     StatusViewSet,
-    UserRoleViewSet
+    UserRoleViewSet,
 )
 
 #DefaultRouter is a feacture in Django REST Framework that automatically generates URL patterns for your API ViewSets
