@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'Apps',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -49,8 +50,20 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
+CORS_ALLOW_ALL_ORIGINS = True
+'''
+The above code is only realiable for a production environment
+and it poses high risk as it allows access from any domain posing 
+high security problems to the system
 
+After setting up the project fully, the code will as follows
+CORS_ALLOWED_ORIGINS=[
+'https://frontend-domain.com',
+'https://anyother-domain.com',
+]
+'''
 ROOT_URLCONF = 'backendcode.urls'
 
 TEMPLATES = [
