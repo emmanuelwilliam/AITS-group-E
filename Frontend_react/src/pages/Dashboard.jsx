@@ -5,14 +5,19 @@ import TopBar from "../components/TopBar";
 import Notifications from "../components/Notifications";
 import IssueReporting from "../components/IssueReporting";
 import IssueTracking from "../components/IssueTracking";
-import "../styles/index.css";
+import "../styles/dashboard.css";
 
 const Dashboard = () => {
   const [activeComponent, setActiveComponent] = useState("notifications");
   const location = useLocation();
-  const { studentName, studentNumber } = location.state || {
-    studentName: "Alex Chen",
+  const { firstName, lastName, studentNumber, registrationNumber, webmail, college, course } = location.state || {
+    firstName: "Alex",
+    lastName: "Chen",
     studentNumber: "2400711336",
+    registrationNumber: "123456",
+    webmail: "alex.chen@students.mak.ac.ug",
+    college: "College of Computing",
+    course: "Computer Science",
   }; // Fallback for testing
 
   const renderComponent = () => {
@@ -30,7 +35,15 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard">
-      <TopBar studentName={studentName} studentNumber={studentNumber} />
+      <TopBar
+        firstName={firstName}
+        lastName={lastName}
+        studentNumber={studentNumber}
+        registrationNumber={registrationNumber}
+        webmail={webmail}
+        college={college}
+        course={course}
+      />
       <Sidebar setActiveComponent={setActiveComponent} />
       <div className="main-content">
         <div className="content">{renderComponent()}</div>

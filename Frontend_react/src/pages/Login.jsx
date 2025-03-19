@@ -4,16 +4,36 @@ import "../styles/login.css";
 import MakerereLogo from "../assets/Makerere Logo.png";
 
 const Login = () => {
-  const [studentNumber, setStudentNumber] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (studentNumber && password) {
-      // Simulate fetching student name based on student number
-      const studentName = "Alex Chen"; // Replace with actual data
-      navigate("/dashboard", { state: { studentName, studentNumber } }); // Pass credentials to Dashboard
+
+    if (email && password) {
+      // Simulate login logic
+      try {
+        const response = await fetch("/api/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Redirect to dashboard with user data
+          navigate("/dashboard", { state: data });
+        } else {
+          alert(data.message || "Invalid email or password.");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("An error occurred. Please try again.");
+      }
     } else {
       alert("Please enter valid credentials.");
     }
@@ -26,10 +46,10 @@ const Login = () => {
         <h2>Welcome to the MAK Academic Issue Tracking System</h2>
         <form onSubmit={handleSubmit}>
           <input
-            type="text"
-            placeholder="Student Number"
-            value={studentNumber}
-            onChange={(e) => setStudentNumber(e.target.value)}
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
           <input
             type="password"
@@ -46,7 +66,7 @@ const Login = () => {
           <button type="submit">Log In</button>
         </form>
         <p className="register-link">
-          New member here? <a href="/register">Register Now</a>
+          New member here? <button onClick={() => navigate("/register")}>Create Account</button>
         </p>
       </div>
     </div>

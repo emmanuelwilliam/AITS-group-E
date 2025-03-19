@@ -8,10 +8,25 @@ const IssueReporting = () => {
   const [semester, setSemester] = useState("");
   const [courseName, setCourseName] = useState("");
   const [courseCode, setCourseCode] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!title || !description || !yearOfStudy || !semester || !courseName || !courseCode) {
+      setError("Please fill in all fields.");
+      return;
+    }
+
+    // Simulate submitting the issue
     alert(`Issue Submitted: ${title}`);
+    setTitle("");
+    setDescription("");
+    setYearOfStudy("");
+    setSemester("");
+    setCourseName("");
+    setCourseCode("");
+    setError("");
   };
 
   return (
@@ -59,6 +74,7 @@ const IssueReporting = () => {
           value={courseCode}
           onChange={(e) => setCourseCode(e.target.value)}
         />
+        {error && <p className="error">{error}</p>}
         <button type="submit">Submit</button>
       </form>
     </div>
