@@ -24,8 +24,17 @@
 .sidebar-menu li {
   margin: 20px 0;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Space between icon and text */
 }
 
 .sidebar-menu li:hover {
   color: #1abc9c;
+}
+
+.sidebar-icon {
+  width: 24px; /* Adjust icon size */
+  height: 24px; /* Adjust icon size */
+  border-radius: 4px; /* Optional: Add rounded corners to icons */
 }

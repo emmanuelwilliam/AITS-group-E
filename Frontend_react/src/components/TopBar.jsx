@@ -24,7 +24,7 @@ const TopBar = ({ firstName, lastName, studentNumber, registrationNumber, webmai
         <div className="profile-section">
           <button className="profile-button" onClick={toggleProfile}>
             Profile
-            <span className="badge">3</span> {/* Example badge for notifications */}
+            <span className="badge">*</span> {/* Example badge for notifications */}
           </button>
           {showProfile && (
             <div className="profile-dropdown">
