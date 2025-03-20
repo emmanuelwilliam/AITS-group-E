@@ -25,7 +25,7 @@ const Home = () => {
     }, 5000); // Change image every 5 seconds
 
     return () => clearInterval(interval);
-  }, [images]);
+  }, []); // Empty dependency array prevents unnecessary re-renders
 
   // Handle login role selection
   const handleLoginClick = (role) => {
@@ -35,43 +35,46 @@ const Home = () => {
   return (
     <div
       className="home-container"
-      style={{ backgroundImage: `url(${backgroundImage})` }}
+      style={{
+        backgroundImage: `url(${backgroundImage})`,
+        transition: "background-image 1s ease-in-out", // Smooth transition effect
+      }}
     >
       {/* Logo and Institution Name */}
       <div className="logo-container">
-        <img src={MakerereLogo} alt="Makerere Logo" className="logo" />
+        <img src={MakerereLogo} alt="Makerere University Logo" className="logo" />
         <h1 className="institution-name">MAKERERE UNIVERSITY</h1>
       </div>
 
       {/* Navigation Bar */}
       <nav className="navbar">
         <ul>
-          <li>Home</li>
-          <li>Contact</li>
-          <li>About</li>
-          <li>Colleges</li>
+          <li><a href="/">Home</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/about">About</a></li>
+          <li><a href="/colleges">Colleges</a></li>
         </ul>
       </nav>
 
       {/* Search Bar */}
       <div className="search-bar">
-        <input type="text" placeholder="What are you looking for?" />
+        <input type="text" placeholder="What are you looking for?" aria-label="Search" />
       </div>
 
       {/* Login Options */}
       <div className="login-options">
         <h2>Login as:</h2>
         <div className="icons">
-          <div className="icon" onClick={() => handleLoginClick("student")}>
-            <img src={StudentIcon} alt="Student" />
+          <div className="icon" onClick={() => handleLoginClick("student")} role="button" tabIndex="0">
+            <img src={StudentIcon} alt="Login as Student" />
             <button>Student</button>
           </div>
-          <div className="icon" onClick={() => handleLoginClick("lecturer")}>
-            <img src={LecturerIcon} alt="Lecturer" />
+          <div className="icon" onClick={() => handleLoginClick("lecturer")} role="button" tabIndex="0">
+            <img src={LecturerIcon} alt="Login as Lecturer" />
             <button>Lecturer</button>
           </div>
-          <div className="icon" onClick={() => handleLoginClick("admin")}>
-            <img src={ARIcon} alt="Academic Registrar" />
+          <div className="icon" onClick={() => handleLoginClick("admin")} role="button" tabIndex="0">
+            <img src={ARIcon} alt="Login as Academic Registrar" />
             <button>Academic Registrar</button>
           </div>
         </div>
