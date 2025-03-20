@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/login.css";
-import MakerereLogo from "../assets/Makerere Logo.png";
+import MakerereLogo from "../assets/Makerere Logo.png"; // Import the logo
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"; // Import FontAwesomeIcon
+import { faEnvelope, faLock, faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons"; // Import required icons
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -42,21 +45,32 @@ const Login = () => {
   return (
     <div className="login-container">
       <div className="login-box">
-        <img src={MakerereLogo} alt="Makerere Logo" className="logo" />
+        <img src={MakerereLogo} alt="Makerere Logo" className="logo" /> {/* Add the logo */}
         <h2>Welcome to the MAK Academic Issue Tracking System</h2>
         <form onSubmit={handleSubmit}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          <div className="input-container">
+            <FontAwesomeIcon icon={faEnvelope} className="input-icon" /> {/* Email icon */}
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div className="input-container">
+            <FontAwesomeIcon icon={faLock} className="input-icon" /> {/* Password icon */}
+            <input
+              type={showPassword ? "text" : "password"} // Toggle password visibility
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <FontAwesomeIcon
+              icon={showPassword ? faEyeSlash : faEye} // Toggle password visibility icon
+              className="password-toggle-icon"
+              onClick={() => setShowPassword(!showPassword)} // Toggle password visibility
+            />
+          </div>
           <div className="remember-forgot">
             <label>
               <input type="checkbox" /> Remember me
@@ -66,7 +80,8 @@ const Login = () => {
           <button type="submit">Log In</button>
         </form>
         <p className="register-link">
-          New member here? <button onClick={() => navigate("/register")}>Create Account</button>
+          New member here?{" "}
+          <button onClick={() => navigate("/register")}>Create Account</button>
         </p>
       </div>
     </div>
