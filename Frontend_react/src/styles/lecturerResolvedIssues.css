@@ -1,0 +1,30 @@
+.resolved-issues {
+    padding: 20px;
+  }
+  
+  .resolved-issues h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #2c3e50;
+  }
+  
+  .resolved-issues table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .resolved-issues th,
+  .resolved-issues td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .resolved-issues th {
+    background-color: #2c3e50;
+    color: white;
+  }
+  
+  .resolved-issues tr:hover {
+    background-color: #f9f9f9;
+  }

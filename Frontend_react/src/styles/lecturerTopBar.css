@@ -1,0 +1,74 @@
+.lecturer-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #2c3e50;
+    color: white;
+    padding: 10px 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .logo-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .logo-section .logo {
+    width: 40px;
+    height: auto;
+  }
+  
+  .logo-section h1 {
+    font-size: 20px;
+    margin: 0;
+  }
+  
+  .search-section {
+    display: flex;
+    align-items: center;
+    background-color: white;
+    border-radius: 5px;
+    padding: 5px 10px;
+  }
+  
+  .search-section input {
+    border: none;
+    outline: none;
+    font-size: 14px;
+    width: 200px;
+  }
+  
+  .search-section .search-icon {
+    color: #2c3e50;
+    cursor: pointer;
+  }
+  
+  .profile-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .profile-section .profile-icon {
+    font-size: 20px;
+  }
+  
+  .profile-section span {
+    font-size: 16px;
+  }
+  
+  .profile-section .logout-button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .profile-section .logout-button:hover {
+    color: #1abc9c;
+  }
