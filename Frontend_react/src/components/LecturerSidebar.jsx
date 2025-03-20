@@ -1,15 +1,16 @@
 import React from "react";
-import "../styles/lecturerDashboard.css";
+import "../styles/lecturerSidebar.css";
 
 const LecturerSidebar = () => {
   return (
     <div className="lecturer-sidebar">
-      <h2>Lecturer Menu</h2>
-      <ul>
-        <li>Assigned Issues</li>
-        <li>Resolved Issues</li>
-        <li>Profile</li>
-        <li>Logout</li>
+      <div className="sidebar-logo">AITS</div>
+      <ul className="sidebar-menu">
+        <li>Notifications</li>
+        <li>Issue List</li>
+        <li>Resolve Issues</li>
+        <li>About</li>
+        <li>Contact</li>
       </ul>
     </div>
   );
