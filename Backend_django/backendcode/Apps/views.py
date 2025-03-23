@@ -1,3 +1,4 @@
+from rest_framework.decorators import api_view 
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from .models import User, Student, Lecturer, Administrator, Issue, Notification, Status, LoginHistory, UserRole
@@ -38,3 +39,12 @@ class LoginHistoryViewSet(viewsets.ModelViewSet):
 class UserRoleViewSet(viewsets.ModelViewSet):
     queryset = UserRole.objects.all()
     serializer_class = UserRoleSerializer
+    
+@api_view(['GET'])
+def filter_issues(request):
+    status = request.GET.get('status',None)
+    issues_qs = Issue.objects.all()
+    if status:
+        issues_qs = issues_qs.filter(status=status)
+    serializer = IssueSerializer(issues_qs, many=True)
+    return Response(serializer.data)
