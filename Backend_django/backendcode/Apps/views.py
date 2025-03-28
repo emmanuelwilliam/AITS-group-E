@@ -14,7 +14,7 @@ class StudentViewSet(viewsets.ModelViewSet):
     serializer_class = StudentSerializer
 
 class LecturerViewSet(viewsets.ModelViewSet):
-    queryset = Lecturer.objects.all()
+    queryset = Lecturer.objects.select_related('student','lecturer').all()
     serializer_class = LecturerSerializer
 
 class AdministratorViewSet(viewsets.ModelViewSet):
