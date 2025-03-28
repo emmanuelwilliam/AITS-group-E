@@ -38,31 +38,40 @@ class AdministratorForm(forms.ModelForm):
 
 #form for Issue model
 class IssueForm(forms.ModelForm):
-    class Meta:
-      model = Issue
-      fields = [
-        'student',
-        'lecturer',
-        'title',
-        'description',
-        'category',
-        'reported_date',
-        'priority',
-        'status',
-      ]
-      
-    def clean_reported_date(self):
-      reported_date = self.https://github.com/StromGrail/Simple-Issue-Tracker---Flask-Python/tree/master/issuetrackercleaned_data.get('reported_date')
-      if reported_date and reported_date > timezone.now():
-          raise ValidationError('Reported date is not current')
-      return reported_date
-      
-    def clean_title(self):
-      title = self.cleaned_data.get('title').strip()
-      prohibited_words = ['stupid','liar','advertisement','fake']
-      if any(word in title.lower() for word in prohibited_words):
-          raise ValidationError('Title contains prohibited words.')
-      return title
+  reported_date = forms.DateField(
+      widget = forms.DateInput(attrs={'type':'date' , 'class': 'form-control'}),
+      required = True
+  )
+  description = forms.CharField(
+      widget = forms.Textarea(attrs={'rows': 4, 'class':'form-control'}),
+      required = True
+  )
+  
+  class Meta:
+    model = Issue
+    fields = [
+      'student',
+      'lecturer',
+      'title',
+      'description',
+      'category',
+      'reported_date',
+      'priority',
+      'status',
+    ]
+    
+  def clean_reported_date(self):
+    reported_date = self.cleaned_data.get('reported_date')
+    if reported_date and reported_date > timezone.now().date():
+        raise ValidationError('Reported date is not current')
+    return reported_date
+    
+  def clean_title(self):
+    title = self.cleaned_data.get('title').strip()
+    prohibited_words = ['stupid','liar','advertisement','fake']
+    if any(word in title.lower() for word in prohibited_words):
+        raise ValidationError('Title contains prohibited words.')
+    return title
 
 #form for Notification model
 class NotificationForm(forms.ModelForm):
