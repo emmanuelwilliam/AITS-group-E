@@ -1,6 +1,7 @@
 from rest_framework.decorators import api_view 
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from .models import User, Student, Lecturer, Administrator, Issue, Notification, Status, LoginHistory, UserRole
 from .serializer import (
     UserSerializer, StudentSerializer, LecturerSerializer, AdministratorSerializer,
@@ -23,7 +24,8 @@ class AdministratorViewSet(viewsets.ModelViewSet):
 class IssueViewSet(viewsets.ModelViewSet):
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
-
+    permission_classes = [IsAuthenticated]
+    
 class NotificationViewSet(viewsets.ModelViewSet):
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
