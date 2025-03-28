@@ -52,7 +52,7 @@ class IssueForm(forms.ModelForm):
       ]
       
     def clean_reported_date(self):
-      reported_date = cleaned_data.get('reported_date')
+      reported_date = self.cleaned_data.get('reported_date')
       if reported_date and reported_date > timezone.now():
           raise ValidationError('Reported date is not current')
       return reported_date
