@@ -169,6 +169,7 @@ from .forms import(
     StudentForm, LecturerForm, AdministratorForm, IssueForm,
     NotificationForm, StatusForm, CourseUnitForm
 )
+from rest_framework.views import exception_handler
 
 #view for listing all issues
 def issue_list(request):
@@ -176,13 +177,16 @@ def issue_list(request):
     return render(request, 'issues/issue_list.html', {'issues':issues})
 
 def create_issue(request):
-    if request.method == "POST":
-        form = IssueForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('issue_list')
-    else:
-        form = IssueForm()
+    try:
+        if request.method == "POST":
+            form = IssueForm(request.POST)
+            if form.is_valid():
+                form.save()
+                return redirect('issue_list')
+        else:
+            form = IssueForm()
+    except Exception as e:
+        messages.error(request, f"An error occured: {str(e)}")
     return render(request, 'issues/issue_form.html',{'form': form})
     
 #View for updating an existing issue
@@ -237,3 +241,10 @@ def delete_student(request, student_id):
         student.delete()
         return redirect('student_list')
     return render(request, 'students/student_confirm_delete.html', {'student':student})
+
+#view for API error handling
+def custom_exception_handler(exc, context):
+    response = exception_handler(exc, context)
+    if response is not None:
+        response.data['status_code'] = response.status_code
+    return response
