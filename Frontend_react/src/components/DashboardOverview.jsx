@@ -1,5 +1,5 @@
 import React from "react";
-import "../styles/dashboard.css";
+import "../styles/dashboardOverview.css";
 
 const DashboardOverview = () => {
   // Sample data - replace with real data from your backend

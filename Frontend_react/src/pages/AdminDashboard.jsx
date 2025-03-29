@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import React from "react";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import AdminSidebar from "../components/AdminSidebar";
 import AdminTopBar from "../components/AdminTopBar";
 import DashboardOverview from "../components/DashboardOverview";
@@ -8,10 +8,9 @@ import StudentActivity from "../components/StudentActivity";
 import CollegeStatistics from "../components/CollegeStatistics";
 import AdminIssueResolveForm from "../components/AdminIssueResolveForm";
 import "../styles/adminDashboard.css";
-import logo from "../assets/logo.png";
+import logo from "../assets/Makerere Logo.png"; // Exact filename with space
 
 const AdminDashboard = () => {
-  const [activeComponent, setActiveComponent] = useState("dashboard");
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -22,19 +21,7 @@ const AdminDashboard = () => {
   };
 
   const handleLogout = () => {
-    // Clear any admin session data if needed
     navigate("/login");
-  };
-
-  const renderComponent = () => {
-    switch (activeComponent) {
-      case "dashboard": return <DashboardOverview />;
-      case "complaints": return <ComplaintsReport />;
-      case "activity": return <StudentActivity />;
-      case "colleges": return <CollegeStatistics />;
-      case "resolve-issue": return <AdminIssueResolveForm />;
-      default: return <DashboardOverview />;
-    }
   };
 
   return (
@@ -49,12 +36,16 @@ const AdminDashboard = () => {
         onLogout={handleLogout}
       />
       <div className="dashboard-container">
-        <AdminSidebar 
-          setActiveComponent={setActiveComponent}
-          activeComponent={activeComponent}
-        />
+        <AdminSidebar />
         <main className="main-content">
-          {renderComponent()}
+          <Routes>
+            <Route path="dashboard" element={<DashboardOverview />} />
+            <Route path="complaints" element={<ComplaintsReport />} />
+            <Route path="activity" element={<StudentActivity />} />
+            <Route path="colleges" element={<CollegeStatistics />} />
+            <Route path="resolve-issue" element={<AdminIssueResolveForm />} />
+            <Route path="*" element={<DashboardOverview />} />
+          </Routes>
         </main>
       </div>
     </div>
