@@ -25,6 +25,10 @@ class IssueViewSet(viewsets.ModelViewSet):
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
     permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['status', 'priority', 'lecturer']
+    search_fields = ['title', 'description']
+    ordering_fields = ['reported_date', 'priority']
     
 class NotificationViewSet(viewsets.ModelViewSet):
     queryset = Notification.objects.all()
@@ -119,6 +123,7 @@ from .serializer import (
     UserSerializer, StudentSerializer, LecturerSerializer, AdministratorSerializer,
     IssueSerializer, NotificationSerializer, StatusSerializer, LoginHistorySerializer, UserRoleSerializer
 )
+from django_filters.rest_framework import DjangoFilterBackend
 
 # DRF Viewsets
 class StudentViewSet(viewsets.ModelViewSet):
