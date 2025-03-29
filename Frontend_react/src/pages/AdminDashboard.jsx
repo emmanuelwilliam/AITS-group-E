@@ -1,49 +1,61 @@
 import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
-import Sidebar from "../components/Sidebar";
-import TopBar from "../components/TopBar";
-import Notifications from "../components/Notifications";
-import UserManagement from "../components/UserManagement";
-import SystemSettings from "../components/SystemSettings";
-import Reports from "../components/Reports";
-import "../styles/dashboard.css";
+import { useLocation, useNavigate } from "react-router-dom";
+import AdminSidebar from "../components/AdminSidebar";
+import AdminTopBar from "../components/AdminTopBar";
+import DashboardOverview from "../components/DashboardOverview";
+import ComplaintsReport from "../components/ComplaintsReport";
+import StudentActivity from "../components/StudentActivity";
+import CollegeStatistics from "../components/CollegeStatistics";
+import AdminIssueResolveForm from "../components/AdminIssueResolveForm";
+import "../styles/adminDashboard.css";
+import logo from "../assets/logo.png";
 
 const AdminDashboard = () => {
-  const [activeComponent, setActiveComponent] = useState("notifications");
+  const [activeComponent, setActiveComponent] = useState("dashboard");
   const location = useLocation();
-  const { firstName, lastName, email, role } = location.state || {
+  const navigate = useNavigate();
+  
+  const { firstName, lastName, email } = location.state || {
     firstName: "Admin",
     lastName: "User",
     email: "admin@mak.ac.ug",
-    role: "Administrator",
-  }; // Fallback for testing
+  };
+
+  const handleLogout = () => {
+    // Clear any admin session data if needed
+    navigate("/login");
+  };
 
   const renderComponent = () => {
     switch (activeComponent) {
-      case "notifications":
-        return <Notifications />;
-      case "userManagement":
-        return <UserManagement />;
-      case "systemSettings":
-        return <SystemSettings />;
-      case "reports":
-        return <Reports />;
-      default:
-        return <Notifications />;
+      case "dashboard": return <DashboardOverview />;
+      case "complaints": return <ComplaintsReport />;
+      case "activity": return <StudentActivity />;
+      case "colleges": return <CollegeStatistics />;
+      case "resolve-issue": return <AdminIssueResolveForm />;
+      default: return <DashboardOverview />;
     }
   };
 
   return (
-    <div className="dashboard">
-      <TopBar
+    <div className="admin-dashboard">
+      <AdminTopBar 
         firstName={firstName}
         lastName={lastName}
         email={email}
-        role={role}
+        role="Administrator"
+        institutionName="Makerere University"
+        logo={logo}
+        onLogout={handleLogout}
       />
-      <Sidebar setActiveComponent={setActiveComponent} role="admin" />
-      <div className="main-content">
-        <div className="content">{renderComponent()}</div>
+      <div className="dashboard-container">
+        <AdminSidebar 
+          setActiveComponent={setActiveComponent}
+          activeComponent={activeComponent}
+        />
+        <main className="main-content">
+          {renderComponent()}
+        </main>
       </div>
     </div>
   );
