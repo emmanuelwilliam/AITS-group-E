@@ -29,7 +29,7 @@ const App = () => {
           <Route path="resolve-issue" element={<AdminIssueResolveForm />} />
         </Route>
         <Route path="/register" element={<Register />} />
-        <Route path="/verify" element={<Verification />} />
+        <Route path="/verification" element={<Verification />} />
         <Route path="*" element={<Home />} />
       </Routes>
     </Router>
