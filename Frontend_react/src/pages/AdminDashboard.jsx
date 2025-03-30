@@ -1,14 +1,9 @@
-import React from "react";
-import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import React, { useState } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import AdminSidebar from "../components/AdminSidebar";
 import AdminTopBar from "../components/AdminTopBar";
-import DashboardOverview from "../components/DashboardOverview";
-import ComplaintsReport from "../components/ComplaintsReport";
-import StudentActivity from "../components/StudentActivity";
-import CollegeStatistics from "../components/CollegeStatistics";
-import AdminIssueResolveForm from "../components/AdminIssueResolveForm";
 import "../styles/adminDashboard.css";
-import logo from "../assets/Makerere Logo.png"; // Exact filename with space
+import logo from "../assets/Makerere Logo.png";
 
 const AdminDashboard = () => {
   const location = useLocation();
@@ -38,14 +33,7 @@ const AdminDashboard = () => {
       <div className="dashboard-container">
         <AdminSidebar />
         <main className="main-content">
-          <Routes>
-            <Route path="dashboard" element={<DashboardOverview />} />
-            <Route path="complaints" element={<ComplaintsReport />} />
-            <Route path="activity" element={<StudentActivity />} />
-            <Route path="colleges" element={<CollegeStatistics />} />
-            <Route path="resolve-issue" element={<AdminIssueResolveForm />} />
-            <Route path="*" element={<DashboardOverview />} />
-          </Routes>
+          <Outlet />
         </main>
       </div>
     </div>

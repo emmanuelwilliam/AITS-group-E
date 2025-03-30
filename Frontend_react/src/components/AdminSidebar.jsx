@@ -4,7 +4,6 @@ import "../styles/adminSidebar.css";
 
 const AdminSidebar = () => {
   const navigate = useNavigate();
-  const location = useLocation();
 
   const menuItems = [
     { id: "dashboard", label: "Dashboard", path: "dashboard" },
@@ -14,17 +13,12 @@ const AdminSidebar = () => {
     { id: "resolve-issue", label: "Resolve Issues", path: "resolve-issue" }
   ];
 
-  const isActive = (path) => {
-    return location.pathname.endsWith(path);
-  };
-
   return (
     <div className="admin-sidebar">
       <ul>
         {menuItems.map((item) => (
           <li
             key={item.id}
-            className={isActive(item.path) ? "active" : ""}
             onClick={() => navigate(item.path)}
           >
             {item.label}
