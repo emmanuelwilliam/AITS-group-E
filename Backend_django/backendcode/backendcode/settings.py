@@ -45,13 +45,14 @@ INSTALLED_APPS = [
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
+    'DEFAULT_AUTHENTICATION_CLASSES':[
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    ],
+    'DEFAULT_PAGINATION_CLASS': [
+        'rest_framework.pagination.PageNumberPagination'],
     'PAGE_SIZE': 10,
-    'EXCEPTION_HANDLER': 'myapp.utils.custom_exception_handler'
-    'DEFAULT_FILTER_BACKENDS': [
+    'EXCEPTION_HANDLER': 'myapp.utils.custom_exception_handler',
+    'DEFAULT_FILTER_BACKENDS':[
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.SearchFilter',
         'res_framework.filters.OrderingFilter',
