@@ -24,6 +24,12 @@ class LecturerForm(forms.ModelForm):
         'position',
         'course_units',
       ]
+  def clean_employee_id(self):
+        """Validate employee ID format"""
+        employee_id = self.cleaned_data['employee_id'].upper()
+        if not employee_id.startswith('LEC'):
+            raise ValidationError('Employee ID must start with LEC')
+        return employee_id     
 
 #form for Admin model
 class AdministratorForm(forms.ModelForm):
