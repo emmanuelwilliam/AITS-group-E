@@ -97,6 +97,13 @@ class NotificationForm(forms.ModelForm):
         'notification_type',
         'created_at',
       ]
+ def clean_message(self):
+        """Validate notification message length"""
+        message = self.cleaned_data['message'].strip()
+        if len(message) < 10:
+            raise ValidationError('Notification message must be at least 10 characters long')
+        return message
+     
         
 #form for Status
 class StatusForm(forms.ModelForm):
