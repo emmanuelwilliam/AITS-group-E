@@ -37,12 +37,6 @@ class LecturerForm(forms.ModelForm):
             raise ValidationError('Employee ID must start with LEC')
         return employee_id     
 
- def clean_employee_id(self):
-        """ Validate employee ID format"""
-        employee_id = self.cleaned_data['employee_id'].upper()
-        if not employee_id.startswith('LEC'):
-            raise ValidationError('Employee ID must start with LEC')
-        return employee_id
 #form for Admin model
 class AdministratorForm(forms.ModelForm):
     contact_email = forms.EmailField(validators=[EmailValidator()])
@@ -53,6 +47,13 @@ class AdministratorForm(forms.ModelForm):
         'user',
         'contact_email',
       ]
+      
+  def clean_contact_email(self):
+        """Ensure admin email follows Makerere format"""
+        email = self.cleaned_data['contact_email'].lower()
+        if not email.endswith('@adm.mak.ac.ug'):
+            raise ValidationError('Administrator email must be from Makerere admin domain')
+        return email    
 
 #form for Issue model
 class IssueForm(forms.ModelForm):
