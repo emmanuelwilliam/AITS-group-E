@@ -1,12 +1,16 @@
-import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import LecturerDashboard from "./pages/LecturerDashboard"; // Ensure this import is correct
+import LecturerDashboard from "./pages/LecturerDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import Register from "./pages/Register";
 import Verification from "./pages/Verification";
 import Home from "./pages/Home";
+import DashboardOverview from "./components/DashboardOverview";
+import ComplaintsReport from "./components/ComplaintsReport";
+import StudentActivity from "./components/StudentActivity";
+import CollegeStatistics from "./components/CollegeStatistics";
+import AdminIssueResolveForm from "./components/AdminIssueResolveForm";
 
 const App = () => {
   return (
@@ -15,11 +19,18 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/lecturer-dashboard" element={<LecturerDashboard />} /> {/* Ensure this route exists */}
-        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/lecturer-dashboard" element={<LecturerDashboard />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />}>
+          <Route index element={<DashboardOverview />} />
+          <Route path="dashboard" element={<DashboardOverview />} />
+          <Route path="complaints" element={<ComplaintsReport />} />
+          <Route path="activity" element={<StudentActivity />} />
+          <Route path="colleges" element={<CollegeStatistics />} />
+          <Route path="resolve-issue" element={<AdminIssueResolveForm />} />
+        </Route>
         <Route path="/register" element={<Register />} />
-        <Route path="/verify" element={<Verification />} />
-        <Route path="*" element={<Home />} /> {/* Fallback to Home if route doesn't exist */}
+        <Route path="/verification" element={<Verification />} />
+        <Route path="*" element={<Home />} />
       </Routes>
     </Router>
   );

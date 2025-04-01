@@ -24,6 +24,12 @@ class LecturerForm(forms.ModelForm):
         'position',
         'course_units',
       ]
+  def clean_employee_id(self):
+        """Validate employee ID format"""
+        employee_id = self.cleaned_data['employee_id'].upper()
+        if not employee_id.startswith('LEC'):
+            raise ValidationError('Employee ID must start with LEC')
+        return employee_id     
 
 #form for Admin model
 class AdministratorForm(forms.ModelForm):
@@ -38,6 +44,7 @@ class AdministratorForm(forms.ModelForm):
 
 #form for Issue model
 class IssueForm(forms.ModelForm):
+<<<<<<< HEAD
     class Meta:
       model = Issue
       fields = [
@@ -63,6 +70,49 @@ class IssueForm(forms.ModelForm):
       if any(word in title.lower() for word in prohibited_words):
           raise ValidationError('Title contains prohibited words.')
       return title
+=======
+  reported_date = forms.DateField(
+      widget = forms.DateInput(attrs={'type':'date' , 'class': 'form-control'}),
+      required = True
+  )
+  description = forms.CharField(
+      widget = forms.Textarea(attrs={'rows': 4, 'class':'form-control'}),
+      required = True
+  )
+  
+  class Meta:
+    model = Issue
+    fields = [
+      'student',
+      'lecturer',
+      'title',
+      'description',
+      'category',
+      'reported_date',
+      'priority',
+      'status',
+    ]
+    
+  def clean_reported_date(self):
+    reported_date = self.cleaned_data.get('reported_date')
+    if reported_date and reported_date > timezone.now().date():
+        raise ValidationError('Reported date is not current')
+    return reported_date
+    
+  def clean_title(self):
+    title = self.cleaned_data.get('title').strip()
+    prohibited_words = ['stupid','liar','advertisement','fake']
+    if any(word in title.lower() for word in prohibited_words):
+        raise ValidationError('Title contains prohibited words.')
+    return title
+  
+  def clean_description(self):
+        """Validate issue description"""
+        description = self.cleaned_data.get('description').strip()
+        if len(description) < 20:
+            raise ValidationError('Description must be at least 20 characters long')
+        return description  
+>>>>>>> a57248fe0130783fc02d5cb5ac7ac75cc9c456c2
 
 #form for Notification model
 class NotificationForm(forms.ModelForm):
@@ -75,6 +125,13 @@ class NotificationForm(forms.ModelForm):
         'notification_type',
         'created_at',
       ]
+ def clean_message(self):
+        """Validate notification message length"""
+        message = self.cleaned_data['message'].strip()
+        if len(message) < 10:
+            raise ValidationError('Notification message must be at least 10 characters long')
+        return message
+     
         
 #form for Status
 class StatusForm(forms.ModelForm):

@@ -1,6 +1,11 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBell, faList, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
+import { 
+  faBell, 
+  faList, 
+  faCheckCircle,
+  faCommentDots // Add this icon for resolve issues
+} from "@fortawesome/free-solid-svg-icons";
 import "../styles/lecturerSidebar.css";
 
 const LecturerSidebar = ({ setActiveComponent }) => {
@@ -15,6 +20,10 @@ const LecturerSidebar = ({ setActiveComponent }) => {
         <li onClick={() => setActiveComponent("issueList")}>
           <FontAwesomeIcon icon={faList} className="sidebar-icon" />
           Issue List
+        </li>
+        <li onClick={() => setActiveComponent("resolveIssues")}>
+          <FontAwesomeIcon icon={faCommentDots} className="sidebar-icon" />
+          Resolve Issues
         </li>
         <li onClick={() => setActiveComponent("resolvedIssues")}>
           <FontAwesomeIcon icon={faCheckCircle} className="sidebar-icon" />

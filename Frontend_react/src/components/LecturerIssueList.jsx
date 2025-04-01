@@ -1,35 +1,39 @@
 import React from "react";
 import "../styles/lecturerIssueList.css";
 
-const LecturerIssueList = () => {
+const LecturerIssueList = ({ onSelectIssue }) => {
+  // Sample issues data
   const issues = [
-    { id: 1, sn: "SN001", title: "Network Connectivity Issue", student: "Alex Chen", status: "Pending" },
-    { id: 2, sn: "SN002", title: "Assignment Submission Problem", student: "Emma William", status: "In Progress" },
+    {
+      id: 1,
+      title: "Missing Lecture Notes",
+      courseCode: "CSC 101",
+      courseName: "Introduction to Computing",
+      studentName: "John Doe",
+      description: "Lecture notes for week 5 missing"
+    },
+    // Add more sample issues as needed
   ];
 
   return (
-    <div className="issue-list">
-      <h2>Issue List</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>SN</th>
-            <th>Title</th>
-            <th>Student</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {issues.map((issue) => (
-            <tr key={issue.id}>
-              <td>{issue.sn}</td>
-              <td>{issue.title}</td>
-              <td>{issue.student}</td>
-              <td>{issue.status}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="issue-list-container">
+      <h2>Unresolved Issues</h2>
+      <div className="issues-grid">
+        {issues.map(issue => (
+          <div 
+            key={issue.id}
+            className="issue-card"
+            onClick={() => {
+              onSelectIssue(issue); // This should trigger the selection
+              console.log("Issue selected:", issue.title); // For debugging
+            }}
+          >
+            <h3>{issue.title}</h3>
+            <p><strong>Course:</strong> {issue.courseCode}</p>
+            <p><strong>Student:</strong> {issue.studentName}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

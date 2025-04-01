@@ -1,33 +1,61 @@
 .issue-reporting {
-  padding: 20px;
-  background-color: #ecf0f1;
-  border-radius: 8px;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 30px;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .issue-reporting h2 {
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+  text-align: center;
+  color: #2c3e50;
 }
 
 .issue-reporting input,
 .issue-reporting textarea,
 .issue-reporting select {
   width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #bdc3c7;
-  border-radius: 4px;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: border-color 0.3s;
+}
+
+.issue-reporting input:focus,
+.issue-reporting textarea:focus,
+.issue-reporting select:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
+.issue-reporting textarea {
+  min-height: 120px;
+  resize: vertical;
 }
 
 .issue-reporting button {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   background-color: #3498db;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: background-color 0.3s;
 }
 
 .issue-reporting button:hover {
   background-color: #2980b9;
+}
+
+.error {
+  color: #e74c3c;
+  margin-bottom: 15px;
+  text-align: center;
 }

@@ -1,0 +1,130 @@
+.complaints-report {
+    padding: 20px;
+  }
+  
+  .complaints-report h2 {
+    margin-bottom: 25px;
+    color: #2c3e50;
+  }
+  
+  .complaints-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  
+  .btn-primary {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+  }
+  
+  .btn-primary:hover {
+    background-color: #2980b9;
+  }
+  
+  .filter-controls {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .filter-controls select,
+  .filter-controls input {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }
+  
+  .complaints-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+  
+  .complaints-table th,
+  .complaints-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ecf0f1;
+  }
+  
+  .complaints-table th {
+    background-color: #f8f9fa;
+    color: #7f8c8d;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+  }
+  
+  .complaints-table tr:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  
+  .status-badge.pending {
+    background-color: #f39c12;
+    color: white;
+  }
+  
+  .status-badge.in-progress {
+    background-color: #3498db;
+    color: white;
+  }
+  
+  .status-badge.resolved {
+    background-color: #27ae60;
+    color: white;
+  }
+  
+  .priority-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  
+  .priority-badge.high {
+    background-color: #e74c3c;
+    color: white;
+  }
+  
+  .priority-badge.medium {
+    background-color: #f39c12;
+    color: white;
+  }
+  
+  .priority-badge.low {
+    background-color: #27ae60;
+    color: white;
+  }
+  
+  .btn-action {
+    background-color: transparent;
+    border: 1px solid #3498db;
+    color: #3498db;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    margin-right: 5px;
+    transition: all 0.2s;
+  }
+  
+  .btn-action:hover {
+    background-color: #3498db;
+    color: white;
+  }
