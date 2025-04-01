@@ -31,7 +31,6 @@ class Lecturer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='lecturer_profile')
     employee_id = models.CharField(max_length=50, unique=True)
     department = models.CharField(max_length=200)
-    email = models.EmailField(unique=True)
     college = models.CharField(max_length=200)
     position = models.CharField(max_length=100)
     course_units = models.ManyToManyField("CourseUnit", related_name="lecturers")
