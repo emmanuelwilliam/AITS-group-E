@@ -132,6 +132,7 @@ class StatusForm(forms.ModelForm):
         if not status_name.upper().startswith('ISSUE'):
             raise ValidationError('Status must start with ISSUE')
         return status_name
+
 #form for CourseUnit
 class CourseUnitForm(forms.ModelForm):
     class Meta :
@@ -143,7 +144,7 @@ class CourseUnitForm(forms.ModelForm):
       
     def clean_course_code(self):
         course_code = self.cleaned_data['course_code']
-        #Checks whether the course_code is alphanumeric in nature
+      #Checks whether the course_code is alphanumeric in nature
         if not course_code.isalnum():
             raise forms.ValidationError('Course code must not contain any special characters, only numbers and letters')
         #Checks whether the length of the course code is 7
