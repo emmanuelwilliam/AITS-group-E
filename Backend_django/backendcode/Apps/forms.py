@@ -126,7 +126,12 @@ class StatusForm(forms.ModelForm):
         'status_name',
         'last_update',
       ]
-
+  def clean_status_name(self):
+        """Validate status name format"""
+        status_name = self.cleaned_data['status_name'].strip()
+        if not status_name.upper().startswith('ISSUE'):
+            raise ValidationError('Status must start with ISSUE')
+        return status_name
 #form for CourseUnit
 class CourseUnitForm(forms.ModelForm):
     class Meta :
