@@ -78,6 +78,13 @@ class IssueForm(forms.ModelForm):
     if any(word in title.lower() for word in prohibited_words):
         raise ValidationError('Title contains prohibited words.')
     return title
+  
+  def clean_description(self):
+        """Validate issue description"""
+        description = self.cleaned_data.get('description').strip()
+        if len(description) < 20:
+            raise ValidationError('Description must be at least 20 characters long')
+        return description  
 
 #form for Notification model
 class NotificationForm(forms.ModelForm):
