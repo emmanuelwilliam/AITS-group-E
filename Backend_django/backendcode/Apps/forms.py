@@ -1,4 +1,5 @@
 from django import forms
+from django.db import models
 from .models import Issue, Notification, Student, Lecturer, CourseUnit, Administrator, Status
 from django.core.validators import EmailValidator
 from django.utils import timezone
@@ -19,6 +20,8 @@ class LecturerForm(forms.ModelForm):
       model = Lecturer
       fields = [
         'user',
+        'email',
+        'college',
         'department',
         'employee_id',
         'position',
@@ -55,7 +58,6 @@ class IssueForm(forms.ModelForm):
       'title',
       'description',
       'category',
-      'reported_date',
       'priority',
       'status',
     ]
@@ -77,23 +79,18 @@ class IssueForm(forms.ModelForm):
 class NotificationForm(forms.ModelForm):
     class Meta:
       model = Notification
-      fields = [
-        'issue',
-        'message',
-        'is_read',
-        'notification_type',
-        'created_at',
-      ]
+      fields = '__all__' 
+      created_at = models.DateTimeField(auto_now_add=True)
         
 #form for Status
 class StatusForm(forms.ModelForm):
-    class Meta:
-      model = Status
-      fields = [
-        'status_name',
-        'last_update',
-      ]
-
+      last_update = forms.CharField(disabled=True)
+      class Meta:
+        model = Status
+        fields = '__all__'
+        
+        
+        
 #form for CourseUnit
 class CourseUnitForm(forms.ModelForm):
     class Meta :
