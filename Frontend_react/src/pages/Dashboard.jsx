@@ -18,7 +18,7 @@ const Dashboard = () => {
     webmail: "alex.chen@students.mak.ac.ug",
     college: "College of Computing",
     course: "Computer Science",
-  }; // Fallback for testing
+  };
 
   const renderComponent = () => {
     switch (activeComponent) {
