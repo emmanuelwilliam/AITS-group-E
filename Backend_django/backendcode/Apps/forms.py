@@ -12,6 +12,12 @@ class StudentForm(forms.ModelForm):
       'user',
       'college',
     ]
+ def clean_user(self):
+        """Ensure student email follows Makerere format"""
+        user_email = self.cleaned_data['user'].email.lower()
+        if not user_email.endswith('@mak.ac.ug'):
+            raise ValidationError('Student email must be from Makerere University (@mak.ac.ug)')
+        return self.cleaned_data['user']
 
 #form for lecturer model
 class LecturerForm(forms.ModelForm):
@@ -25,6 +31,12 @@ class LecturerForm(forms.ModelForm):
         'course_units',
       ]
 
+ def clean_employee_id(self):
+        """ Validate employee ID format"""
+        employee_id = self.cleaned_data['employee_id'].upper()
+        if not employee_id.startswith('LEC'):
+            raise ValidationError('Employee ID must start with LEC')
+        return employee_id
 #form for Admin model
 class AdministratorForm(forms.ModelForm):
     contact_email = forms.EmailField(validators=[EmailValidator()])
