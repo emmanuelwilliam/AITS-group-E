@@ -1,4 +1,5 @@
 from django import forms
+from django.db import models
 from .models import Issue, Notification, Student, Lecturer, CourseUnit, Administrator, Status
 from django.core.validators import EmailValidator
 from django.utils import timezone
@@ -12,7 +13,7 @@ class StudentForm(forms.ModelForm):
       'user',
       'college',
     ]
- def clean_user(self):
+  def clean_user(self):
         """Ensure student email follows Makerere format"""
         user_email = self.cleaned_data['user'].email.lower()
         if not user_email.endswith('@mak.ac.ug'):
@@ -25,12 +26,14 @@ class LecturerForm(forms.ModelForm):
       model = Lecturer
       fields = [
         'user',
+        'email',
+        'college',
         'department',
         'employee_id',
         'position',
         'course_units',
       ]
-  def clean_employee_id(self):
+    def clean_employee_id(self):
         """Validate employee ID format"""
         employee_id = self.cleaned_data['employee_id'].upper()
         if not employee_id.startswith('LEC'):
@@ -48,7 +51,7 @@ class AdministratorForm(forms.ModelForm):
         'contact_email',
       ]
       
-  def clean_contact_email(self):
+    def clean_contact_email(self):
         """Ensure admin email follows Makerere format"""
         email = self.cleaned_data['contact_email'].lower()
         if not email.endswith('@adm.mak.ac.ug'):
@@ -74,7 +77,6 @@ class IssueForm(forms.ModelForm):
       'title',
       'description',
       'category',
-      'reported_date',
       'priority',
       'status',
     ]
@@ -103,14 +105,10 @@ class IssueForm(forms.ModelForm):
 class NotificationForm(forms.ModelForm):
     class Meta:
       model = Notification
-      fields = [
-        'issue',
-        'message',
-        'is_read',
-        'notification_type',
-        'created_at',
-      ]
- def clean_message(self):
+      fields = '__all__' 
+      created_at = models.DateTimeField(auto_now_add=True)
+     
+    def clean_message(self):
         """Validate notification message length"""
         message = self.cleaned_data['message'].strip()
         if len(message) < 10:
@@ -120,19 +118,19 @@ class NotificationForm(forms.ModelForm):
         
 #form for Status
 class StatusForm(forms.ModelForm):
-    class Meta:
-      model = Status
-      fields = [
-        'status_name',
-        'last_update',
-      ]
-  def clean_status_name(self):
+      last_update = forms.CharField(disabled=True)
+      class Meta:
+        model = Status
+        fields = '__all__'
+      
+      def clean_status_name(self):
         """Validate status name format"""
         status_name = self.cleaned_data['status_name'].strip()
         if not status_name.upper().startswith('ISSUE'):
             raise ValidationError('Status must start with ISSUE')
         return status_name
-
+        
+        
 #form for CourseUnit
 class CourseUnitForm(forms.ModelForm):
     class Meta :

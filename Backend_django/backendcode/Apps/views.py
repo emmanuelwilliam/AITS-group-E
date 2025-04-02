@@ -11,6 +11,7 @@ from .serializer import (
 from .filters import IssueFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import exception_handler
+<<<<<<< HEAD
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.mail import send_mail
 from django.conf import settings
@@ -70,6 +71,8 @@ def user_login(request):
             'user': UserSerializer(user).data
         })
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+=======
+>>>>>>> 1da528b0ac35c3b31e24708d03d424f7999c74ff
 
 # DRF Viewsets
 class StudentViewSet(viewsets.ModelViewSet):
