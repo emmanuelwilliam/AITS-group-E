@@ -111,7 +111,14 @@ class StatusViewSet(viewsets.ModelViewSet):
 class LoginHistoryViewSet(viewsets.ModelViewSet):
     queryset = LoginHistory.objects.all()
     serializer_class = LoginHistorySerializer
+    pagination_class = PageNumberPagination
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+            user = self.request.user
+            if user.is_staff:
+                return LoginHistory.objects.all()
+            return LoginHistory.objects.filter(user=user)
 
 class UserRoleViewSet(viewsets.ModelViewSet):
     queryset = UserRole.objects.all()
