@@ -1,109 +1,104 @@
 .register-container {
   display: flex;
   justify-content: center;
-  align-items: flex-start; /* Changed from center to prevent vertical centering */
+  align-items: center;
   min-height: 100vh;
   padding: 20px;
-  background-color: #f0f2f5;
+  background-color: #f5f7fa;
 }
 
 .register-box {
   background: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 800px;
   padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-  width: 90%;
-  max-width: 1000px; /* Increased max width */
 }
 
 .register-box h2 {
   text-align: center;
-  margin-bottom: 25px;
-  color: #333;
+  margin-bottom: 30px;
+  color: #2c3e50;
+  font-size: 28px;
 }
 
 .error-message {
   color: #e74c3c;
+  background-color: #fadbd8;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 20px;
   text-align: center;
-  margin-bottom: 20px;
 }
 
-.register-form {
-  width: 100%;
-}
-
-.form-columns {
+form {
   display: flex;
-  gap: 30px;
-  margin-bottom: 20px;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.form-column {
-  flex: 1;
-  min-width: 0; /* Prevent flex items from overflowing */
+.form-row {
+  display: flex;
+  gap: 20px;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .form-group label {
-  display: block;
   margin-bottom: 8px;
-  font-weight: 500;
-  color: #555;
+  font-weight: 600;
+  color: #34495e;
 }
 
 .form-group input {
-  width: 100%;
-  padding: 12px;
+  padding: 12px 15px;
   border: 1px solid #ddd;
   border-radius: 6px;
-  font-size: 14px;
+  font-size: 16px;
   transition: border-color 0.3s;
 }
 
 .form-group input:focus {
   outline: none;
   border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
 
-.field-error {
+.error {
   color: #e74c3c;
-  font-size: 12px;
+  font-size: 14px;
   margin-top: 5px;
-  display: block;
 }
 
-.form-actions {
-  text-align: center;
-  margin-top: 20px;
-}
-
-.form-actions button {
-  padding: 12px 30px;
+.submit-btn {
   background-color: #3498db;
   color: white;
   border: none;
+  padding: 14px;
   border-radius: 6px;
   font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
   transition: background-color 0.3s;
+  margin-top: 10px;
 }
 
-.form-actions button:hover {
+.submit-btn:hover {
   background-color: #2980b9;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
-  .form-columns {
+  .form-row {
     flex-direction: column;
     gap: 15px;
   }
   
   .register-box {
-    width: 95%;
     padding: 20px;
   }
 }

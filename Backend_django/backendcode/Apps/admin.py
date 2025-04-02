@@ -26,9 +26,6 @@ class CommonAdmin(admin.ModelAdmin):
     # Search functionality
     search_fields = ['id']
     
-    # Date hierarchy
-    date_hierarchy = 'created_at'  # Assuming you have a created_at field
-    
     # Actions dropdown
     actions_selection_counter = True
     
@@ -39,7 +36,12 @@ class CommonAdmin(admin.ModelAdmin):
         """Optimize queryset by selecting related fields"""
         qs = super().get_queryset(request)
         return qs.select_related()
-
+        
+    def get_date_hierachy(self):
+        if hasattr(self.model, 'created_at') and isinstance(self.model._meta.get_field('created_at'), Field):
+            return 'created_at'
+        return None
+    
 # Model-specific admin classes
 class StudentAdmin(CommonAdmin):
     list_display = ('id', 'full_name', 'email', 'status', 'view_details')

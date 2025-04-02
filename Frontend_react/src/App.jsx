@@ -3,7 +3,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import LecturerDashboard from "./pages/LecturerDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
-import Register from "./pages/Register";
+import RegisterRouter from "./pages/RegisterRouter";
 import Verification from "./pages/Verification";
 import Home from "./pages/Home";
 import DashboardOverview from "./components/DashboardOverview";
@@ -28,7 +28,7 @@ const App = () => {
           <Route path="colleges" element={<CollegeStatistics />} />
           <Route path="resolve-issue" element={<AdminIssueResolveForm />} />
         </Route>
-        <Route path="/register" element={<Register />} />
+        <Route path="/register" element={<RegisterRouter />} />
         <Route path="/verification" element={<Verification />} />
         <Route path="*" element={<Home />} />
       </Routes>
