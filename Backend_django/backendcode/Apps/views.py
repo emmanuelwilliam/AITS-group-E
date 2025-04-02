@@ -5,23 +5,87 @@ from rest_framework.permissions import IsAuthenticated
 from .models import User, Student, Lecturer, Administrator, Issue, Notification, Status, LoginHistory, UserRole
 from .serializer import (
     UserSerializer, StudentSerializer, LecturerSerializer, AdministratorSerializer,
-    IssueSerializer, NotificationSerializer, StatusSerializer, LoginHistorySerializer, UserRoleSerializer
+    IssueSerializer, NotificationSerializer, StatusSerializer, LoginHistorySerializer, 
+    UserRoleSerializer ,UserRegistrationSerializer, VerifyEmailSerializer, LoginSerializer
 )
 from .filters import IssueFilter
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.views import exception_handler
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.core.mail import send_mail
+from django.conf import settings
+from django.utils import timezone
+import uuid
+
+# Authentication Views
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def register_user(request):
+    serializer = UserRegistrationSerializer(data=request.data)
+    if serializer.is_valid():
+        user = serializer.save()
+        
+        # Send verification email
+        verification_link = f"{settings.FRONTEND_URL}/verify-email/{user.verification_token}/"
+        send_mail(
+            'Verify your email',
+            f'Click this link to verify your email: {verification_link}',
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+        )
+        
+        return Response({'message': 'User registered successfully. Please check your email for verification.'}, 
+                      status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def verify_email(request):
+    serializer = VerifyEmailSerializer(data=request.data)
+    if serializer.is_valid():
+        token = serializer.validated_data['token']
+        try:
+            user = User.objects.get(verification_token=token)
+            if user.verification_token_expires < timezone.now():
+                return Response({'error': 'Verification token expired'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            user.is_verified = True
+            user.save()
+            return Response({'message': 'Email verified successfully'})
+        except User.DoesNotExist:
+            return Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def user_login(request):
+    serializer = LoginSerializer(data=request.data)
+    if serializer.is_valid():
+        user = serializer.validated_data
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'user': UserSerializer(user).data
+        })
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # DRF Viewsets
 class StudentViewSet(viewsets.ModelViewSet):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
+    permission_classes = [IsAuthenticated]
 
 class LecturerViewSet(viewsets.ModelViewSet):
     queryset = Lecturer.objects.select_related('student','lecturer').all()
     serializer_class = LecturerSerializer
+    permission_classes = [IsAuthenticated]
 
 class AdministratorViewSet(viewsets.ModelViewSet):
     queryset = Administrator.objects.all()
     serializer_class = AdministratorSerializer
+    permission_classes = [IsAuthenticated]
 
 class IssueViewSet(viewsets.ModelViewSet):
     queryset = Issue.objects.all()
@@ -35,20 +99,25 @@ class IssueViewSet(viewsets.ModelViewSet):
 class NotificationViewSet(viewsets.ModelViewSet):
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
+    permission_classes = [IsAuthenticated]
 
 class StatusViewSet(viewsets.ModelViewSet):
     queryset = Status.objects.all()
     serializer_class = StatusSerializer
+    permission_classes = [IsAuthenticated]
 
 class LoginHistoryViewSet(viewsets.ModelViewSet):
     queryset = LoginHistory.objects.all()
     serializer_class = LoginHistorySerializer
+    permission_classes = [IsAuthenticated]
 
 class UserRoleViewSet(viewsets.ModelViewSet):
     queryset = UserRole.objects.all()
     serializer_class = UserRoleSerializer
-    
+    permission_classes = [IsAuthenticated]
+
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def filter_issues(request):
     status = request.GET.get('status',None)
     issues_qs = Issue.objects.all()
