@@ -34,6 +34,7 @@ class Lecturer(models.Model):
     college = models.CharField(max_length=200)
     position = models.CharField(max_length=100)
     course_units = models.ManyToManyField("CourseUnit", related_name="lecturers")
+    email = models.EmailField(unique=True)
 
     def __str__(self):
         return f"{self.user.get_full_name()} - {self.position if self.position else 'Lecturer'}"
