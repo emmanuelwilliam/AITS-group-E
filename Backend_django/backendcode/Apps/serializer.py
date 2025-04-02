@@ -53,3 +53,12 @@ class UserRoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserRole
         fields = '__all__'
+
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id','username','email','password']
+        extra_kwargs = {'password': {'write_only': True}}
+
+class VerifyEmailSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField()

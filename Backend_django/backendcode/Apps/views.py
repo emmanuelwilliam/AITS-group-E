@@ -24,6 +24,7 @@ from .forms import (
     StudentForm, LecturerForm, AdministratorForm, IssueForm,
     NotificationForm, StatusForm, CourseUnitForm
 )
+from django.contrib.auth.hashers import make_password
 
 # Authentication Views
 @api_view(['POST'])
@@ -133,6 +134,22 @@ class UserRoleViewSet(viewsets.ModelViewSet):
     serializer_class = UserRoleSerializer
     permission_classes = [IsAuthenticated]
 
+class UserRegistrationView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserRegistrationSerializer
+
+    def create(self, request,*args,**kwargs):
+        data = request.data.copy()
+        if 'password' in data:
+            data['password'] = make_password(data['password'])
+
+        serializer = self.get_serializer(data=data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({"message": "User registered successfully", "user": serializer.data}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+ 
+    
 # Template Views
 def issue_list(request):
     issues = Issue.objects.select_related('student', 'lecturer', 'status').all()
