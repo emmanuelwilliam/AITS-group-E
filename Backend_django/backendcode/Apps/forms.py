@@ -60,7 +60,6 @@ class AdministratorForm(forms.ModelForm):
 
 #form for Issue model
 class IssueForm(forms.ModelForm):
-<<<<<<< HEAD
     class Meta:
       model = Issue
       fields = [
@@ -73,20 +72,6 @@ class IssueForm(forms.ModelForm):
         'priority',
         'status',
       ]
-      
-    def clean_reported_date(self):
-      reported_date = self.cleaned_data.get('reported_date')
-      if reported_date and reported_date > timezone.now():
-          raise ValidationError('Reported date is not current')
-      return reported_date
-      
-    def clean_title(self):
-      title = self.cleaned_data.get('title').strip()
-      prohibited_words = ['stupid','liar','advertisement','fake']
-      if any(word in title.lower() for word in prohibited_words):
-          raise ValidationError('Title contains prohibited words.')
-      return title
-=======
   reported_date = forms.DateField(
       widget = forms.DateInput(attrs={'type':'date' , 'class': 'form-control'}),
       required = True
@@ -94,20 +79,7 @@ class IssueForm(forms.ModelForm):
   description = forms.CharField(
       widget = forms.Textarea(attrs={'rows': 4, 'class':'form-control'}),
       required = True
-  )
-  
-  class Meta:
-    model = Issue
-    fields = [
-      'student',
-      'lecturer',
-      'title',
-      'description',
-      'category',
-      'priority',
-      'status',
-    ]
-    
+  )    
   def clean_reported_date(self):
     reported_date = self.cleaned_data.get('reported_date')
     if reported_date and reported_date > timezone.now().date():
@@ -127,7 +99,6 @@ class IssueForm(forms.ModelForm):
         if len(description) < 20:
             raise ValidationError('Description must be at least 20 characters long')
         return description  
->>>>>>> a57248fe0130783fc02d5cb5ac7ac75cc9c456c2
 
 #form for Notification model
 class NotificationForm(forms.ModelForm):
