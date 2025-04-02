@@ -2,118 +2,165 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh; /* Full viewport height */
-  background-image: url("../assets/Makerere Logo.png"); /* Set background image */
-  background-size: cover; /* Ensure the image covers the entire container */
-  background-position: center; /* Center the image */
-  background-repeat: no-repeat; /* Prevent the image from repeating */
-  background-attachment: fixed; /* Ensure the background stays fixed while scrolling */
+  min-height: 100vh;
+  background-color: #f5f7fa;
+  padding: 20px;
 }
 
 .login-box {
-  background: rgba(255, 255, 255, 0.9); /* Slightly transparent white background */
-  padding: 20px; /* Adjusted padding */
-  border-radius: 15px; /* Rounded corners */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-  width: 320px; /* Adjusted width for better fit */
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 450px;
+  padding: 40px;
   text-align: center;
 }
 
 .login-box .logo {
-  width: 100px; /* Adjust logo size */
-  height: auto; /* Maintain aspect ratio */
-  margin-bottom: 15px; /* Space between logo and heading */
+  width: 100px;
+  height: auto;
+  margin-bottom: 20px;
 }
 
 .login-box h2 {
+  color: #2c3e50;
+  margin-bottom: 10px;
+  font-size: 24px;
+}
+
+.role-info {
+  color: #7f8c8d;
+  margin-bottom: 25px;
+  font-size: 16px;
+}
+
+.error-message {
+  color: #e74c3c;
+  background-color: #fadbd8;
+  padding: 12px;
+  border-radius: 5px;
   margin-bottom: 20px;
-  font-size: 20px; /* Adjusted font size */
-  color: #333; /* Darker text color */
+  text-align: center;
+}
+
+.input-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #34495e;
 }
 
 .input-container {
   position: relative;
-  margin: 10px 0; /* Adjusted margin */
+}
+
+.input-container .input-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #7f8c8d;
 }
 
 .input-container input {
-  width: 90%;
-  padding: 10px 10px 10px 40px; /* Adjusted padding */
-  border: 1px solid #ccc;
-  border-radius: 8px; /* Rounded corners for input fields */
-  font-size: 14px; /* Adjusted font size */
-  outline: none; /* Remove default outline */
+  width: 100%;
+  padding: 12px 15px 12px 45px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: border-color 0.3s;
 }
 
 .input-container input:focus {
-  border-color: #007bff; /* Highlight input field on focus */
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add a subtle glow effect */
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
 
-.input-icon {
+.password-toggle {
   position: absolute;
-  left: 12px;
+  right: 15px;
   top: 50%;
   transform: translateY(-50%);
-  color: #777; /* Icon color */
-  font-size: 16px; /* Adjusted icon size */
-}
-
-.password-toggle-icon {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #777; /* Icon color */
+  color: #7f8c8d;
   cursor: pointer;
-  font-size: 16px; /* Adjusted icon size */
 }
 
-.login-box button {
-  width: 100%;
-  padding: 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 8px; /* Rounded corners for the button */
-  cursor: pointer;
-  font-size: 16px; /* Adjusted font size */
-  transition: background-color 0.3s ease; /* Smooth hover effect */
-}
-
-.login-box button:hover {
-  background-color: #0056b3; /* Darker blue on hover */
-}
-
-.login-box .register-link button {
-  background: none;
-  border: none;
-  color: #007bff;
-  cursor: pointer;
-  text-decoration: underline;
-  font-size: 14px; /* Adjusted font size */
-}
-
-.remember-forgot {
+.options {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 10px 0; /* Adjusted margin */
+  margin-bottom: 20px;
 }
 
-.remember-forgot label {
+.remember-me {
   display: flex;
   align-items: center;
-  font-size: 14px; /* Adjusted font size */
-  color: #555; /* Darker text color */
+  gap: 8px;
+  color: #34495e;
+  cursor: pointer;
 }
 
-.remember-forgot a {
-  color: #007bff;
+.forgot-password {
+  color: #3498db;
   text-decoration: none;
-  font-size: 14px; /* Adjusted font size */
+  font-size: 14px;
 }
 
-.remember-forgot a:hover {
+.forgot-password:hover {
   text-decoration: underline;
+}
+
+.login-btn {
+  width: 100%;
+  padding: 14px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.login-btn:hover {
+  background-color: #2980b9;
+}
+
+.register-link {
+  margin-top: 25px;
+  color: #7f8c8d;
+  font-size: 15px;
+}
+
+.register-btn {
+  background: none;
+  border: none;
+  color: #3498db;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.register-btn:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .login-box {
+    padding: 30px 20px;
+  }
+  
+  .options {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
 }
