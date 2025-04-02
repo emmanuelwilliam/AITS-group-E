@@ -1,7 +1,17 @@
-from rest_framework.decorators import api_view 
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework import viewsets, mixins, status, filters
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.views import exception_handler
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.core.mail import send_mail
+from django.conf import settings
+from django.utils import timezone
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import authenticate
+import uuid
+
 from .models import User, Student, Lecturer, Administrator, Issue, Notification, Status, LoginHistory, UserRole
 from .serializer import (
     UserSerializer, StudentSerializer, LecturerSerializer, AdministratorSerializer,
@@ -10,12 +20,10 @@ from .serializer import (
 )
 from .filters import IssueFilter
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.views import exception_handler
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.core.mail import send_mail
-from django.conf import settings
-from django.utils import timezone
-import uuid
+from .forms import (
+    StudentForm, LecturerForm, AdministratorForm, IssueForm,
+    NotificationForm, StatusForm, CourseUnitForm
+)
 
 # Authentication Views
 @api_view(['POST'])
@@ -75,31 +83,31 @@ def user_login(request):
 
 # DRF Viewsets
 class StudentViewSet(viewsets.ModelViewSet):
-    queryset = Student.objects.all()
+    queryset = Student.objects.select_related('user').all()
     serializer_class = StudentSerializer
     permission_classes = [IsAuthenticated]
 
 class LecturerViewSet(viewsets.ModelViewSet):
-    queryset = Lecturer.objects.select_related('student', 'lecturer').all()
+    queryset = Lecturer.objects.select_related('user').all()
     serializer_class = LecturerSerializer
     permission_classes = [IsAuthenticated]
 
 class AdministratorViewSet(viewsets.ModelViewSet):
-    queryset = Administrator.objects.all()
+    queryset = Administrator.objects.select_related('user').all()
     serializer_class = AdministratorSerializer
     permission_classes = [IsAuthenticated]
 
 class IssueViewSet(viewsets.ModelViewSet):
-    queryset = Issue.objects.all()
+    queryset = Issue.objects.select_related('student', 'lecturer', 'status').all()
     serializer_class = IssueSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['status', 'priority', 'lecturer']
+    filterset_class = IssueFilter
     search_fields = ['title', 'description']
     ordering_fields = ['reported_date', 'priority']
-    
+
 class NotificationViewSet(viewsets.ModelViewSet):
-    queryset = Notification.objects.all()
+    queryset = Notification.objects.select_related('issue').all()
     serializer_class = NotificationSerializer
     permission_classes = [IsAuthenticated]
 
@@ -109,42 +117,25 @@ class StatusViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
 class LoginHistoryViewSet(viewsets.ModelViewSet):
-    queryset = LoginHistory.objects.all()
+    queryset = LoginHistory.objects.select_related('user').all()
     serializer_class = LoginHistorySerializer
     pagination_class = PageNumberPagination
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-            user = self.request.user
-            if user.is_staff:
-                return LoginHistory.objects.all()
-            return LoginHistory.objects.filter(user=user)
+        user = self.request.user
+        if user.is_staff:
+            return LoginHistory.objects.all()
+        return LoginHistory.objects.filter(user=user)
 
 class UserRoleViewSet(viewsets.ModelViewSet):
     queryset = UserRole.objects.all()
     serializer_class = UserRoleSerializer
     permission_classes = [IsAuthenticated]
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def filter_issues(request):
-    status = request.GET.get('status', None)
-    issues_qs = Issue.objects.all()
-    if status:
-        issues_qs = issues_qs.filter(status=status)
-    serializer = IssueSerializer(issues_qs, many=True)
-    return Response(serializer.data)
-
 # Template Views
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Issue, Student, Lecturer, CourseUnit, Administrator, Notification, Status
-from .forms import (
-    StudentForm, LecturerForm, AdministratorForm, IssueForm,
-    NotificationForm, StatusForm, CourseUnitForm
-)
-
 def issue_list(request):
-    issues = Issue.objects.all()
+    issues = Issue.objects.select_related('student', 'lecturer', 'status').all()
     return render(request, 'issues/issue_list.html', {'issues': issues})
 
 def create_issue(request):
@@ -156,7 +147,7 @@ def create_issue(request):
     else:
         form = IssueForm()
     return render(request, 'issues/issue_form.html', {'form': form})
-    
+
 def update_issue(request, issue_id):
     issue = get_object_or_404(Issue, id=issue_id)
     if request.method == "POST":
@@ -176,7 +167,7 @@ def delete_issue(request, issue_id):
     return render(request, 'issues/issue_confirm_delete.html', {'issue': issue})
 
 def student_list(request):
-    students = Student.objects.all()
+    students = Student.objects.select_related('user').all()
     return render(request, 'students/student_list.html', {'students': students})
 
 def update_student(request, student_id):
@@ -189,6 +180,16 @@ def update_student(request, student_id):
     else:
         form = StudentForm(instance=student)
     return render(request, 'students/student_form.html', {'form': form})
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def filter_issues(request):
+    status = request.GET.get('status', None)
+    issues_qs = Issue.objects.all()
+    if status:
+        issues_qs = issues_qs.filter(status=status)
+    serializer = IssueSerializer(issues_qs, many=True)
+    return Response(serializer.data)
 
 def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
