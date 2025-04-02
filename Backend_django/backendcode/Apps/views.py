@@ -9,6 +9,7 @@ from .serializer import (
 )
 from .filters import IssueFilter
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.views import exception_handler
 
 # DRF Viewsets
 class StudentViewSet(viewsets.ModelViewSet):
