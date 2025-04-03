@@ -104,10 +104,20 @@ WSGI_APPLICATION = 'backendcode.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'AITdatabase',         # Database name (from pgAdmin)
+        'USER': 'postgres',          # PostgreSQL username
+        'PASSWORD': 'postgres',    # PostgreSQL password
+        'HOST': 'localhost',           # PostgreSQL server (default: localhost)
+        'PORT': '5432',               # Default PostgreSQL port
     }
 }
 
