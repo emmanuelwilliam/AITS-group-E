@@ -1,4 +1,5 @@
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework import generics
 from rest_framework import viewsets, mixins, status, filters
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -16,7 +17,7 @@ from .models import User, Student, Lecturer, Administrator, Issue, Notification,
 from .serializer import (
     UserSerializer, StudentSerializer, LecturerSerializer, AdministratorSerializer,
     IssueSerializer, NotificationSerializer, StatusSerializer, LoginHistorySerializer, 
-    UserRoleSerializer, UserRegistrationSerializer, VerifyEmailSerializer, LoginSerializer
+    UserRoleSerializer, UserRegistrationSerializer, VerifyEmailSerializer,LoginSerializer,
 )
 from .filters import IssueFilter
 from django_filters.rest_framework import DjangoFilterBackend

@@ -72,15 +72,19 @@ class IssueForm(forms.ModelForm):
         'priority',
         'status',
       ]
+      widgets = {
+            'description': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
+        }
 
-    reported_date = forms.DateField(
-        widget = forms.DateInput(attrs={'type':'date' , 'class': 'form-control'}),
-        required = True
-    )
-    description = forms.CharField(
-        widget = forms.Textarea(attrs={'rows': 4, 'class':'form-control'}),
-        required = True
-    )    
+
+  #   reported_date = forms.DateField(
+  #       widget = forms.DateInput(attrs={'type':'date' , 'class': 'form-control'}),
+        
+  #  )
+  #   # description = forms.CharField(
+  #   #     widget = forms.Textarea(attrs={'rows': 4, 'class':'form-control'}),
+  #   #     required = True
+  #   # )    
     def clean_reported_date(self):
       reported_date = self.cleaned_data.get('reported_date')
       if reported_date and reported_date > timezone.now().date():

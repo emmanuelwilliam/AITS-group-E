@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import User, Student, Lecturer, Administrator, Issue, Notification, Status, LoginHistory, UserRole
+from django.contrib.auth.hashers import make_password
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -48,6 +49,29 @@ class LoginHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = LoginHistory
         fields = '__all__'
+        
+class VerifyEmailSerializer(serializers.Serializer):
+    token = serializers.CharField()
+        
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        email = data.get('email')
+        password = data.get('password')
+        
+        try:
+            user = User.objects.get(email=email)
+            if not user.check_password(password):
+                raise serializers.ValidationError("Incorrect password")
+            if not user.is_verified:
+                raise serializers.ValidationError("Email not verified")
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User with this email does not exist")
+        
+        data['user'] = user
+        return data
 
 class UserRoleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -59,3 +83,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         model = User
         fields = ['username', 'email', 'password']
         extra_kwargs = {'password': {'write_only': True}}
+        def create(self, validated_data):
+            validated_data['password'] = make_password(validated_data['password'])
+            return super().create(validated_data)
