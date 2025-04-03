@@ -154,3 +154,13 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "Apps.User"
+
+#Enable/disable email verification
+EMAIL_VERIFICATION = True
+
+#Frontend verification endpoint
+FRONTEND_URL = 'http://localhost:5173/'
+
+#Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+DEFAULT_FROM_EMAIL = 'noreply@yourdomain.com'

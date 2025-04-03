@@ -15,15 +15,15 @@ from .views import (
 #DefaultRouter is a feacture in Django REST Framework that automatically generates URL patterns for your API ViewSets
 #Create a router object
 router = DefaultRouter()
-router.register(r'student',StudentViewSet)
-router.register(r'administrator',AdministratorViewSet)
+router.register(r'Student',StudentViewSet)
+router.register(r'Administrator',AdministratorViewSet)
 router.register(r'Lecturer',LecturerViewSet)
 router.register(r'Issue',IssueViewSet)
 router.register(r'Notification',NotificationViewSet)
 router.register(r'Status',StatusViewSet)
 router.register(r'LoginHistory',LoginHistoryViewSet)
 router.register(r'UserRole',UserRoleViewSet)
-router.register(r'UserRole',UserRegistrationView)
+router.register(r'register',UserRegistrationView, basename='register')
 
 
 

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import User, Student, Lecturer, Administrator, Issue, Notification, Status, LoginHistory, UserRole
-
+from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth import authenticate
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -59,6 +60,28 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id','username','email','password']
         extra_kwargs = {'password': {'write_only': True}}
-
+    
+    def validate_password(self, value):
+        validate_password(value)
+        return value
+    
 class VerifyEmailSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
+
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        username = data.get('username')
+        password = data.get('password')
+
+        if username and password:
+            user = authenticate(username=username, password=password)
+            if user:
+                if not user.is_active:
+                    raise serializers.ValidationError("User account is disabled")
+                return user
+            raise serializers.ValidationError("Unable to log in with the provided information.")
+        raise serializers.ValidationError("Must include 'username' and 'password'.")
+    

@@ -1,9 +1,10 @@
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework import viewsets, mixins, status, filters
+from rest_framework import viewsets, generics,mixins, status, filters
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.views import exception_handler
+from rest_framework.throttling import AnonRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.mail import send_mail
 from django.conf import settings
@@ -26,10 +27,20 @@ from .forms import (
 )
 from django.contrib.auth.hashers import make_password
 
+
 # Authentication Views
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_user(request):
+    """
+    Registers a new user
+    Expected POST data:
+    {
+        "username":"string",
+        "email":"string",
+        "password":"string"
+    }
+    """
     serializer = UserRegistrationSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()
@@ -82,6 +93,35 @@ def user_login(request):
         })
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def user_login(request):
+    """
+    Authenticates a user and returns JWT tokens
+    Expected POST data:
+    {
+        "username":"string",
+        "password":"string"
+    }
+    """
+    serializer = LoginSerializer(data=request.data)
+
+    if serializer.is_valid():
+    #Gets the user from serializer validation
+        user = serializer.validated_data
+    #Generate JWT tokens
+        refresh = RefreshToken.for_user(user)
+        access_token = refresh.access_token
+    #Record login time
+        user.last_login = timezone.now()
+        user.save()
+
+        return Response({
+            'refresh': str(refresh),
+            'access': str(access_token),
+            'user': UserSerializer(user).data
+        })
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 # DRF Viewsets
 class StudentViewSet(viewsets.ModelViewSet):
     queryset = Student.objects.select_related('user').all()
@@ -135,21 +175,74 @@ class UserRoleViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
 class UserRegistrationView(generics.CreateAPIView):
+    """
+    API endpoint for user registration.
+
+    Handles:
+    - User creation
+    - Password hashing
+    - Email verification (optional)
+    - Response formatting
+    """
     queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
+    permission_classes = []#Allow any to register
+    throttle_classes = [AnonRateThrottle] #5 requests/hour by default
 
     def create(self, request,*args,**kwargs):
+        """
+        Custom create method to handle:
+        1.Password hashing
+        2.Email verification setup
+        3.Custom response format
+        """
         data = request.data.copy()
         if 'password' in data:
             data['password'] = make_password(data['password'])
+        #Set default role if not provided(ie 'student')
+        if 'role' not in data:
+            data['role'] = UserRole.objects.get(role_name='student').id
 
         serializer = self.get_serializer(data=data)
+
         if serializer.is_valid():
             user = serializer.save()
-            return Response({"message": "User registered successfully", "user": serializer.data}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
- 
-    
+        #Send verification email(optional)
+            self._send_verification_email(user)
+
+            return Response(
+                {
+                    "status":"success",
+                    "message":"User registered successfully",
+                    "data": {
+                        "user":serializer.data,
+                        "next_steps": "Check your email for verification" if settings.EMAIL_VERIFICATION else None
+                    }
+                },
+                status=status.HTTP_201_CREATED
+            )
+            return Response(
+                {
+                    "status":"error",
+                    "errors": serializer.errors
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+    def _send_verification_email(self, user):
+        """
+        Helper method to send verification email
+        """
+        if settings.EMAIL_VERIFICATION and user.email:
+            verification_link = f"{settings.FRONTEND_URL}/verify-email/{user.verification_token}/"
+            send_mail(
+                'Verify your email',
+                f'Click this link to verify your email:{verification_link}',
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+            )
+
 # Template Views
 def issue_list(request):
     issues = Issue.objects.select_related('student', 'lecturer', 'status').all()

@@ -68,7 +68,6 @@ class IssueForm(forms.ModelForm):
         'title',
         'description',
         'category',
-        'reported_date',
         'priority',
         'status',
       ]
