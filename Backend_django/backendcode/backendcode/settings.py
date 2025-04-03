@@ -38,25 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'rest_framework_simplejwt',
     'Apps',
     'corsheaders',
-    'django_filters',
 ]
-
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES':(
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-    'DEFAULT_PAGINATION_CLASS':'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
-    # 'EXCEPTION_HANDLER': 'myapp.utils.custom_exception_handler',
-    'DEFAULT_FILTER_BACKENDS':[
-        'django_filters.rest_framework.DjangoFilterBackend',
-        'rest_framework.filters.SearchFilter',
-        'rest_framework.filters.OrderingFilter',
-    ]
-}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -104,20 +88,10 @@ WSGI_APPLICATION = 'backendcode.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'AITdatabase',         # Database name (from pgAdmin)
-        'USER': 'postgres',          # PostgreSQL username
-        'PASSWORD': 'postgres',    # PostgreSQL password
-        'HOST': 'localhost',           # PostgreSQL server (default: localhost)
-        'PORT': '5432',               # Default PostgreSQL port
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -164,13 +138,3 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "Apps.User"
-
-#Enable/disable email verification
-EMAIL_VERIFICATION = True
-
-#Frontend verification endpoint
-FRONTEND_URL = 'http://localhost:5173/'
-
-#Email settings
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-DEFAULT_FROM_EMAIL = 'noreply@yourdomain.com'
