@@ -56,7 +56,7 @@ class Issue(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     category = models.CharField(max_length=100)
-    reported_date = models.DateTimeField(auto_now_add=True)
+    reported_date = models.DateTimeField(auto_now_add=False)
     priority = models.CharField(max_length=50)
     status = models.ForeignKey('Status', on_delete=models.SET_NULL, null=True)
 

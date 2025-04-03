@@ -60,7 +60,8 @@ class AdministratorForm(forms.ModelForm):
 
 #form for Issue model
 class IssueForm(forms.ModelForm):
-    class Meta:
+  reported_date = forms.CharField(disabled=True)
+  class Meta:
       model = Issue
       fields = [
         'student',
@@ -85,20 +86,20 @@ class IssueForm(forms.ModelForm):
   #   #     widget = forms.Textarea(attrs={'rows': 4, 'class':'form-control'}),
   #   #     required = True
   #   # )    
-    def clean_reported_date(self):
-      reported_date = self.cleaned_data.get('reported_date')
-      if reported_date and reported_date > timezone.now().date():
+      def clean_reported_date(self):
+        reported_date = self.cleaned_data.get('reported_date')
+        if reported_date and reported_date > timezone.now().date():
           raise ValidationError('Reported date is not current')
-      return reported_date
+        return reported_date
       
-    def clean_title(self):
+  def clean_title(self):
       title = self.cleaned_data.get('title').strip()
       prohibited_words = ['stupid','liar','advertisement','fake']
       if any(word in title.lower() for word in prohibited_words):
           raise ValidationError('Title contains prohibited words.')
       return title
     
-    def clean_description(self):
+  def clean_description(self):
           """Validate issue description"""
           description = self.cleaned_data.get('description').strip()
           if len(description) < 20:

@@ -30,7 +30,7 @@ from django.contrib.auth.hashers import make_password
 # Authentication Views
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def register_user(request):
+def login_user(request):
     serializer = UserRegistrationSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()
@@ -46,7 +46,7 @@ def register_user(request):
         )
         
         return Response({
-            'message': 'User registered successfully. Please check your email for verification.',
+            'message': 'User logined successfully. Please check your email for verification.',
             'user': UserSerializer(user).data
         }, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -117,9 +117,9 @@ class StatusViewSet(viewsets.ModelViewSet):
     queryset = Status.objects.all()
     serializer_class = StatusSerializer
     permission_classes = [IsAuthenticated]
-
-class LoginHistoryViewSet(viewsets.ModelViewSet):
-    queryset = LoginHistory.objects.select_related('user').all()
+    
+class LoginHistoryViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = LoginHistory.objects.all() 
     serializer_class = LoginHistorySerializer
     pagination_class = PageNumberPagination
     permission_classes = [IsAuthenticated]
@@ -127,19 +127,32 @@ class LoginHistoryViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.is_staff:
-            return LoginHistory.objects.all()
+            return LoginHistory.objects.select_related('user').all()
         return LoginHistory.objects.filter(user=user)
+
+# class LoginHistoryViewSet(ViewSet ):
+#     queryset = LoginHistory.objects.select_related('user').all()
+#     serializer_class = LoginHistorySerializer
+#     pagination_class = PageNumberPagination
+#     permission_classes = [IsAuthenticated]
+
+#     def get_queryset(self):
+#         user = self.request.user
+#         if user.is_staff:
+#             return LoginHistory.objects.all()
+#         return LoginHistory.objects.filter(user=user)
 
 class UserRoleViewSet(viewsets.ModelViewSet):
     queryset = UserRole.objects.all()
     serializer_class = UserRoleSerializer
     permission_classes = [IsAuthenticated]
-
-class UserRegistrationView(generics.CreateAPIView):
+    
+class UserRegistrationViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
     queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
+    permission_classes = [AllowAny]
 
-    def create(self, request,*args,**kwargs):
+    def create(self, request, *args, **kwargs):
         data = request.data.copy()
         if 'password' in data:
             data['password'] = make_password(data['password'])
@@ -147,8 +160,26 @@ class UserRegistrationView(generics.CreateAPIView):
         serializer = self.get_serializer(data=data)
         if serializer.is_valid():
             user = serializer.save()
-            return Response({"message": "User registered successfully", "user": serializer.data}, status=status.HTTP_201_CREATED)
+            return Response({
+                "message": "User logined successfully", 
+                "user": serializer.data
+            }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# class UserRegistrationViewSet(generics.CreateAPIView):
+#     queryset = User.objects.all()
+#     serializer_class = UserRegistrationSerializer
+
+#     def create(self, request,*args,**kwargs):
+#         data = request.data.copy()
+#         if 'password' in data:
+#             data['password'] = make_password(data['password'])
+
+#         serializer = self.get_serializer(data=data)
+#         if serializer.is_valid():
+#             user = serializer.save()
+#             return Response({"message": "User logined successfully", "user": serializer.data}, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
  
     
 # Template Views
@@ -214,3 +245,23 @@ def custom_exception_handler(exc, context):
     if response is not None:
         response.data['status_code'] = response.status_code
     return response
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def user_logout(request):
+    try:
+        refresh_token = request.data.get('refresh_token')
+        token = RefreshToken(refresh_token)
+        token.blacklist()
+        
+        # Update login history with session duration
+        login_entry = LoginHistory.objects.filter(
+            user=request.user
+        ).order_by('-login_time').first()
+        if login_entry:
+            login_entry.session_time = timezone.now() - login_entry.login_time
+            login_entry.save()
+            
+        return Response({"message": "Successfully logged out"}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
