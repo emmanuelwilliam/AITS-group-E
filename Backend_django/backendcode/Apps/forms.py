@@ -105,7 +105,7 @@ class NotificationForm(forms.ModelForm):
     class Meta:
       model = Notification
       fields = '__all__' 
-      created_at = models.DateTimeField(auto_now_add=True)
+      
      
     def clean_message(self):
         """Validate notification message length"""
