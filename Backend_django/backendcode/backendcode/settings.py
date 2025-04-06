@@ -9,8 +9,9 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+from datetime import timedelta 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,6 +41,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'Apps',
     'corsheaders',
+    'django_filters',
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -52,7 +55,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 ]
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  
+    "http://127.0.0.1:3000",
+    "https://GROUP_E-url.onrender.com",
+]
 '''
 The above code is only realiable for a production environment
 and it poses high risk as it allows access from any domain posing 
@@ -88,12 +95,24 @@ WSGI_APPLICATION = 'backendcode.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'AITdatabase',         # Database name (from pgAdmin)
+        'USER': 'postgres',          # PostgreSQL username
+        'PASSWORD': 'postgres',    # PostgreSQL password
+        'HOST': 'localhost',           # PostgreSQL server (default: localhost)
+        'PORT': '5432',               # Default PostgreSQL port
     }
 }
+
 
 
 # Password validation
