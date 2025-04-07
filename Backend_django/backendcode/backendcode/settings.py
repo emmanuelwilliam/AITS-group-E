@@ -40,9 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'Apps',
-    'corsheaders',
-    'django_filters',
-    'rest_framework_simplejwt',
+    'corsheaders',#pip install django-cors-headers
+    'django_filters',#pip install django-filter
+    'rest_framework_simplejwt',#pip install djangorestframework-simplejwt
 ]
 
 MIDDLEWARE = [

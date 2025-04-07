@@ -17,6 +17,7 @@ class UserRole(models.Model):
         return self.get_role_name_display()
 
 class User(AbstractUser):
+    name = models.CharField(max_length=150, blank=True)
     role = models.ForeignKey(UserRole, on_delete=models.SET_NULL, null=True, related_name='users')
     email = models.EmailField(unique=True)
     last_login = models.DateTimeField(null=True, blank=True)
