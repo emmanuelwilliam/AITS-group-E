@@ -56,7 +56,7 @@ class CourseUnit(models.Model):
 
 class Issue(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='issues_raised')
-    lecturer = models.ForeignKey(Lecturer, on_delete=models.CASCADE, related_name='issues_assigned')
+    assigned_to = models.ForeignKey(Lecturer, on_delete=models.CASCADE, related_name='issues_assigned')
     title = models.CharField(max_length=255)
     description = models.TextField()
     category = models.CharField(max_length=100)
