@@ -12,6 +12,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import exception_handler
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
+from django.shortcuts import get_object_or_404
 
 # DRF Viewsets
 class StudentViewSet(viewsets.ModelViewSet):
@@ -27,7 +28,7 @@ class AdministratorViewSet(viewsets.ModelViewSet):
     serializer_class = AdministratorSerializer
 
 class IssueViewSet(viewsets.ModelViewSet):
-    queryset = Issue.objects.all()
+    queryset = Issue.objects.select_related('lecturer').prefetch_related('notifications').all()
     serializer_class = IssueSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -112,7 +113,7 @@ def get_user_role(request):
             return Response(serializer.data)
         except UserRole.DoesNotExist:
             return Response({"error":"User role no found"}, status=status.HTTP_404_NOT_FOUND)
-        return Response({"error":"Unauthorized"},status=status.HTTP_401_UNAUTHORIZED)
+    return Response({"error":"Unauthorized"},status=status.HTTP_401_UNAUTHORIZED)
     
 @api_view(['POST'])
 def reset_password(request):
@@ -125,65 +126,54 @@ def reset_password(request):
         return Response({"message": "Password updated successfully"}, status=status.HTTP_200_OK)
     except User.DoesNotExist:
         return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)   
-#For the forms
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Issue, Student, Lecturer, CourseUnit, Administrator, Notification, Status
-from .forms import(
-    StudentForm, LecturerForm, AdministratorForm, IssueForm,
-    NotificationForm, StatusForm, CourseUnitForm
-)
 
-#view for listing all issues
+@api_view(['GET'])
 def issue_list(request):
     issues = Issue.objects.all()
-    return render(request, 'issues/issue_list.html', {'issues':issues})
+    serializer = IssueSerializer(issues, many=True)
+    return Response(serializer.data)
 
+@api_view(['POST'])
 def create_issue(request):
-    if request.method == "POST":
-        form = IssueForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('issue_list')
-    else:
-        form = IssueForm()
-    return render(request, 'issues/issue_form.html',{'form': form})
-    
+    serializer = IssueSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=201)
+    return Response(serializer.errors, status=400)
+  
 #View for updating an existing issue
+@api_view(['PUT'])
 def update_issue(request, issue_id):
     issue = get_object_or_404(Issue, id=issue_id)
-    if request.method == "POST":
-        form = IssueForm(request.POST, instance=issue)
-        if form.is_valid():
-            form.save()
-            return redirect('issue_list')
-    else:
-        form = IssueForm(instance=issue)
-        return render(request, 'issues/issue_form.html', {'form': form})
+    serializer = IssueSerializer(issue, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=400)       
 
 #View for deleting an issue
+@api_view(['DELETE'])
 def delete_issue(request, issue_id):
     issue = get_object_or_404(Issue, id=issue_id)
-    if request.method == "POST":
-        issue.delete()
-        return redirect('issue_list')
-    return render(request, 'issues/issue_confirm_delete.html', {'issue': issue})
+    issue.delete()
+    return Response({"message":"Issue deleted successfully"}, status=204)
 
 #View for listing all students
+@api_view(['GET'])
 def student_list(request):
     students = Student.objects.all()
-    return render(request, 'students/student_list.html',{'students': students})
+    serializer = StudentSerializer(students, many=True)
+    return Response(serializer.data)
 
 #View for updating student details
+@api_view(['PUT'])
 def update_student(request, student_id):
     student = get_object_or_404(Student, id=student_id)
-    if request.method == "POST":
-        form = StudentForm(request.POST, instance=student)
-        if form.is_valid():
-            form.save()
-            return redirect('student_list')
-    else:
-        form = StudentForm(instance=student)
-    return render(request, 'students/student_form.html', {'form': form})
+    serializer = StudentSerializer(student, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=400)
 
 #view for API error handling
 def custom_exception_handler(exc, context):
