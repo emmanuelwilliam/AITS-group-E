@@ -25,17 +25,18 @@ class AdministratorSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class IssueSerializer(serializers.ModelSerializer):
-   
+    student = StudentSerializer(read_only=True)
+    lecturer = LecturerSerializer(read_only=True)
+    status = serializers.StringRelatedField()
+
+    def validate_priority(self, value):
+        if value not in ['low', 'medium', 'high']:
+            raise serializers.ValidationErrors("Invalid priority value.")
+        return value
+    
     class Meta:
         model = Issue
         fields = '__all__'
-        
-        def create(self, validated_data):
-        # Example: Get lecturer from student's course
-            student = validated_data.get('student')
-            if student and student.course:
-                validated_data['lecturer'] = student.course.lecturer
-            return super().create(validated_data)
 
 class NotificationSerializer(serializers.ModelSerializer):
     issue = IssueSerializer(read_only=True)
