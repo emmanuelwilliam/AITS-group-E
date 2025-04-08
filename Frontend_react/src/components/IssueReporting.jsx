@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from '../context/AuthContext';
 import { createIssue } from "../api/issueService";
 import "../styles/issueReporting.css";
 

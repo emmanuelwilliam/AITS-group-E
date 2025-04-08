@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../context/AuthContext';
 import { getStudentIssues } from '../api/issueService';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
