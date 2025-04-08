@@ -90,3 +90,7 @@ dist/            # Nuxt.js output
 .vscode-test/     # VS Code extension testing
 **/.vitepress/dist/ # Vitepress build
 **/.vitepress/cache/ # Vitepress cache
+
+# Frontend dependencies
+node_modules/
+.vite/
