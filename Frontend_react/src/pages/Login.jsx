@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from './hooks/useAuth';
-import { login } from './api/authService';
+import { useAuth } from '../hooks/useAuth';
+import { login } from '../api/authService';
 import '../styles/login.css';
 import MakerereLogo from '../assets/Makerere Logo.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
