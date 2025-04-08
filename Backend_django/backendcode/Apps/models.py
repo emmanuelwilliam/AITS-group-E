@@ -55,14 +55,55 @@ class CourseUnit(models.Model):
         return f"{self.course_code}-{self.course_name}"
 
 class Issue(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='issues_raised')
-    assigned_to = models.ForeignKey(Lecturer, on_delete=models.CASCADE, related_name='issues_assigned')
+    PRIORITY_CHOICES = [
+        ('Low', 'Low'),
+        ('Medium', 'Medium'),
+        ('High', 'High'),
+        ('Urgent', 'Urgent'),
+    ]
+    
+    CATEGORY_CHOICES = [
+        ('Academic', 'Academic'),
+        ('Discipline', 'Discipline'),
+        ('Financial', 'Financial'),
+        ('Other', 'Other'),
+    ]
+    
+    SEMESTER_CHOICES = [
+        ('1', 'First Semester'),
+        ('2', 'Second Semester'),
+        ('3', 'Third Semester'),
+    ]
+
+    YEAR_OF_STUDY_CHOICES = [
+        ('1', 'First Year'),
+        ('2', 'Second Year'),
+        ('3', 'Third Year'),
+        ('4', 'Fourth Year'),
+    ]
+
+    # Required fields from the form
     title = models.CharField(max_length=255)
     description = models.TextField()
-    category = models.CharField(max_length=100)
+    college = models.CharField(max_length=100)
+    program = models.CharField(max_length=100)
+    year_of_study = models.CharField(max_length=1, choices=YEAR_OF_STUDY_CHOICES)
+    semester = models.CharField(max_length=1, choices=SEMESTER_CHOICES)
+    course_unit = models.CharField(max_length=100)
+    course_code = models.CharField(max_length=20)
+    # System fields
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='issues_raised')
+    assigned_to = models.CharField(max_length=100, null=True, blank=True)
+    category = models.CharField(max_length=100, choices=CATEGORY_CHOICES, default='Academic')
     reported_date = models.DateTimeField(auto_now_add=True)
-    priority = models.CharField(max_length=50)
-    status = models.ForeignKey('Status', on_delete=models.SET_NULL, null=True)
+    priority = models.CharField(max_length=50, choices=PRIORITY_CHOICES, default='Medium')
+    status = models.ForeignKey('Status', on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.title} - {self.student}"
+
+    class Meta:
+        ordering = ['-reported_date']
 
 class Notification(models.Model):
     NOTIFICATION_TYPES = (

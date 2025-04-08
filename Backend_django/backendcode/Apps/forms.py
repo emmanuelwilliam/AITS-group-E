@@ -64,7 +64,7 @@ class IssueForm(forms.ModelForm):
       model = Issue
       fields = [
         'student',
-        'lecturer',
+        'assigned_to',
         'title',
         'description',
         'category',
