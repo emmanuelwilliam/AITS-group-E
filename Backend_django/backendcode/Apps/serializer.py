@@ -22,8 +22,7 @@ class AdministratorSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     class Meta:
         model = Administrator
-        fields = '__all__'
-        
+        fields = '__all__'        
 
 class IssueSerializer(serializers.ModelSerializer):
     student = StudentSerializer(read_only=True)
