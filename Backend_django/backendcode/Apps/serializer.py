@@ -3,7 +3,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
-from .models import User, Student, Lecturer, Administrator, Issue, Notification, Status, LoginHistory, UserRole
+from .models import User, Student, Lecturer, Administrator, Issue, Notification, Status, LoginHistory, UserRole, PasswordResetToken
 
 # Authentication Serializers
 class LoginSerializer(serializers.Serializer):

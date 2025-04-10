@@ -10,7 +10,7 @@ from .serializer import (
 from .filters import IssueFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import exception_handler
-from django.contrib.auth.models import User
+from .models import User
 from django.contrib.auth.hashers import make_password
 from django.shortcuts import get_object_or_404
 
@@ -54,54 +54,72 @@ class UserRoleViewSet(viewsets.ModelViewSet):
     
 @api_view(['GET'])
 def filter_issues(request):
-    status = request.GET.get('status',None)
-    issues_qs = Issue.objects.all()
-    if status:
-        issues_qs = issues_qs.filter(status=status)
-    serializer = IssueSerializer(issues_qs, many=True)
-    return Response(serializer.data)
+    try:
+        status_param = request.GET.get('status', None)
+        issues_qs = Issue.objects.all()
+        if status_param:
+            issues_qs = issues_qs.filter(status=status_param)
+        serializer = IssueSerializer(issues_qs, many=True)
+        return Response(serializer.data)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 def get_notifications(request):
-    user = request.user
-    if user.is_authenticated:
-        notifications = Notification.objects.filter(user=user)
-        serializer = NotificationSerializer(notifications, many=True)
-        return Response(serializer.data)
-    return Response({"error":"Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
+    try:
+        user = request.user
+        if user.is_authenticated:
+            notifications = Notification.objects.filter(user=user)
+            serializer = NotificationSerializer(notifications, many=True)
+            return Response(serializer.data)
+        return Response({"error":"Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 def register_student(request):
-    serializer = StudentSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        serializer = StudentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 def register_lecturer(request):
-    serializer = LecturerSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response (serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        serializer = LecturerSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 def register_administrator(request):
-    serializer = AdministratorSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response (serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        serializer = AdministratorSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 def get_login_history(request):
-    user = request.user
-    if user.is_authenticated:
-        login_history = LoginHistory.objects.filter(user=user)
-        serializer = LoginHistorySerializer(login_history, many=True)
-        return Response(serializer.data)
-    return Response({"error": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
+    try:
+        user = request.user
+        if user.is_authenticated:
+            login_history = LoginHistory.objects.filter(user=user)
+            serializer = LoginHistorySerializer(login_history, many=True)
+            return Response(serializer.data)
+        return Response({"error": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 def get_user_role(request):
@@ -176,8 +194,31 @@ def update_student(request, student_id):
     return Response(serializer.errors, status=400)
 
 #view for API error handling
-def custom_exception_handler(exc, context):
-    response = exception_handler(exc, context)
-    if response is not None:
-        response.data['status_code'] = response.status_code
-    return response
+@api_view(['POST'])
+def login_view(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+    
+    if not username or not password:
+        return Response({'error': 'Please provide both username and password'},
+                      status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return Response({'error': 'Invalid credentials'}, 
+                      status=status.HTTP_401_UNAUTHORIZED)
+    
+    if user.check_password(password):
+        # Create login history entry
+        LoginHistory.objects.create(user=user)
+        
+        # Return success response
+        return Response({
+            'message': 'Login successful',
+            'user_id': user.id,
+            'username': user.username
+        }, status=status.HTTP_200_OK)
+    else:
+        return Response({'error': 'Invalid credentials'}, 
+                      status=status.HTTP_401_UNAUTHORIZED)
