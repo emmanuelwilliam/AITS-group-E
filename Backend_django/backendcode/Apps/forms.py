@@ -149,20 +149,20 @@ class CourseUnitForm(forms.ModelForm):
 
     def clean_course_code(self):
         course_code = self.cleaned_data['course_code']
-        # Checks whether the course_code is alphanumeric in nature
+        # This Checks whether the course_code is alphanumeric in nature
         if not course_code.isalnum():
             raise forms.ValidationError('Course code must not contain any special characters, only numbers and letters')
-        # Checks whether the length of the course code is 7
+        # This Checks whether the length of the course code is 7
         if len(course_code) != 7:
             raise forms.ValidationError('The code must have exactly 7 characters')
-        # Checks for spaces in the course code
+        # This Checks for spaces in the course code
         if ' ' in course_code:
             raise forms.ValidationError('The course code must not contain any spaces')
         return course_code
 
     def clean_course_name(self):
         course_name = self.cleaned_data['course_name'].strip()
-        # Checks if the course name contains only spaces and letters
+        # This checks if the course name contains only spaces and letters
         if not all(char.isalpha() or char.isspace() for char in course_name):
             raise forms.ValidationError("Course name must have only letters and spaces")
         return course_name
