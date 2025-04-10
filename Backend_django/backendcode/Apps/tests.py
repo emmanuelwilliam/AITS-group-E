@@ -46,6 +46,7 @@ class AcademicIssueTests(TestCase):
         response = self.client.get(reverse('issue-list'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'issues/issue_list.html')
+         self.assertContains(response, 'Test Issue') 
 
     def test_issue_detail_view(self):
         """Test that issue detail view returns 200"""
