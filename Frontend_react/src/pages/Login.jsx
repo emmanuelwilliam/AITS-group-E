@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { login } from "../api/authService";
 import "../styles/login.css";
 import MakerereLogo from "../assets/Makerere Logo.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -11,41 +13,41 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { login: authLogin } = useAuth();
   const role = location.state?.role || "student";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
     if (!email || !password) {
       setError("Please enter both email and password");
+      setIsLoading(false);
       return;
     }
 
     try {
-      const response = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, role })
+      // Use the authService login function instead of direct fetch
+      const { token, refresh, user } = await login({ 
+        username: email,  // Django typically uses 'username' field
+        password,
+        role 
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed");
-      }
-
-      // Store token based on remember me choice
-      if (rememberMe) {
-        localStorage.setItem("authToken", data.token);
-      } else {
-        sessionStorage.setItem("authToken", data.token);
-      }
+      // Use the auth context to handle login
+      authLogin({
+        token,
+        refresh,
+        user,
+        rememberMe
+      });
 
       // Redirect based on role
-      switch (role.toLowerCase()) {
+      switch (user.role?.toLowerCase()) {
         case "student":
           navigate("/dashboard");
           break;
@@ -59,8 +61,13 @@ const Login = () => {
           navigate("/dashboard");
       }
     } catch (err) {
-      setError(err.message || "An error occurred. Please try again.");
       console.error("Login error:", err);
+      setError(
+        err.response?.data?.detail || 
+        "Invalid credentials. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -75,16 +82,17 @@ const Login = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="input-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">Email/Username</label>
             <div className="input-container">
               <FontAwesomeIcon icon={faEnvelope} className="input-icon" />
               <input
                 id="email"
-                type="email"
-                placeholder="Enter your email"
+                type="text"  // Changed to text to allow both email and username
+                placeholder="Enter your email or username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoComplete="username"
               />
             </div>
           </div>
@@ -100,6 +108,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete="current-password"
               />
               <FontAwesomeIcon
                 icon={showPassword ? faEyeSlash : faEye}
@@ -127,8 +136,12 @@ const Login = () => {
             </button>
           </div>
 
-          <button type="submit" className="login-btn">
-            Log In
+          <button 
+            type="submit" 
+            className="login-btn"
+            disabled={isLoading}
+          >
+            {isLoading ? "Logging in..." : "Log In"}
           </button>
         </form>
 
