@@ -27,6 +27,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 #DefaultRouter is a feacture in Django REST Framework that automatically generates URL patterns for your API ViewSets
 #Create a router object
 router = DefaultRouter()
+# register all viewsets with the router
 router.register(r'student',StudentViewSet)
 router.register(r'administrator',AdministratorViewSet)
 router.register(r'lecturer',LecturerViewSet)
