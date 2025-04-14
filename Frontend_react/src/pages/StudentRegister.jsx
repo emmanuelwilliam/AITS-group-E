@@ -1,35 +1,39 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { registerStudent } from '../api/authService';
-import '../styles/register.css';
+import React, { useState } from 'react'; // React and useState hook
+import { useNavigate } from 'react-router-dom'; // Hook for programmatic navigation
+import { registerStudent } from '../api/authService'; // API service to register students
+import '../styles/register.css'; // CSS styling for the registration page
 
+// Student registration component
 const StudentRegister = () => {
+  // State to manage form input values
   const [formData, setFormData] = useState({
-    username: '', // Added username field to match Django User model
+    username: '', // Required for Django User model
     firstName: '',
     lastName: '',
     studentNumber: '',
     registrationNumber: '',
-    email: '', // Changed from webmail to email to match your User model
+    email: '', // Matching Django's expected field
     college: '',
     course: '',
     password: '',
     confirmPassword: ''
   });
 
+  // Error messages for fields or the whole form
   const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false); // Tracks submission state
+  const navigate = useNavigate(); // Navigation function
 
+  // Update form state and clear error on input change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
 
+  // Validate inputs before submission
   const validateForm = () => {
     const newErrors = {};
     if (!formData.username) newErrors.username = "Username is required";
@@ -48,14 +52,15 @@ const StudentRegister = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Submit handler for form
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent page reload
     if (!validateForm()) return;
 
     setIsSubmitting(true);
-    
+
     try {
-      // Prepare data in the format your backend expects
+      // Structure payload for backend compatibility
       const studentData = {
         user: {
           username: formData.username,
@@ -63,53 +68,60 @@ const StudentRegister = () => {
           last_name: formData.lastName,
           email: formData.email,
           password: formData.password,
-          role: 'student' // This should match your UserRole choices
+          role: 'student' // Match your backend's user role field
         },
         college: formData.college,
-        email: formData.email, // Duplicated to match your Student model
+        email: formData.email,
         student_number: formData.studentNumber,
         registration_number: formData.registrationNumber,
         course: formData.course
       };
 
+      // Call API to register student
       await registerStudent(studentData);
+
+      // Navigate to verification screen on success
       navigate('/verify', { state: { email: formData.email, role: 'student' } });
     } catch (err) {
       console.error('Registration error:', err);
+      // Handle general error
       setErrors({
         form: err.response?.data?.message || 
-             err.message || 
-             'Registration failed. Please try again.'
+              err.message || 
+              'Registration failed. Please try again.'
       });
-      
-      // Handle field-specific errors from backend
+
+      // Extract and display field-specific errors from backend if any
       if (err.response?.data) {
         const backendErrors = err.response.data;
         const fieldErrors = {};
-        
-        // Map backend errors to form fields
+
         for (const key in backendErrors) {
           if (key in formData) {
             fieldErrors[key] = backendErrors[key].join(' ');
           }
         }
-        
+
         if (Object.keys(fieldErrors).length > 0) {
           setErrors(prev => ({ ...prev, ...fieldErrors }));
         }
       }
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false); // End submitting state
     }
   };
 
+  // Render the registration form
   return (
     <div className="register-container">
       <div className="register-box">
         <h2>Student Registration</h2>
+
+        {/* General form error message */}
         {errors.form && <div className="error-message">{errors.form}</div>}
         
         <form onSubmit={handleSubmit}>
+          {/* Username */}
           <div className="form-row">
             <div className="form-group">
               <label>Username</label>
@@ -124,6 +136,7 @@ const StudentRegister = () => {
             </div>
           </div>
 
+          {/* First & Last Name */}
           <div className="form-row">
             <div className="form-group">
               <label>First Name</label>
@@ -149,6 +162,7 @@ const StudentRegister = () => {
             </div>
           </div>
 
+          {/* Student & Registration Number */}
           <div className="form-row">
             <div className="form-group">
               <label>Student Number</label>
@@ -174,6 +188,7 @@ const StudentRegister = () => {
             </div>
           </div>
 
+          {/* Email */}
           <div className="form-group">
             <label>Email</label>
             <input
@@ -186,6 +201,7 @@ const StudentRegister = () => {
             {errors.email && <span className="error">{errors.email}</span>}
           </div>
 
+          {/* College & Course */}
           <div className="form-row">
             <div className="form-group">
               <label>College</label>
@@ -211,6 +227,7 @@ const StudentRegister = () => {
             </div>
           </div>
 
+          {/* Password & Confirm Password */}
           <div className="form-row">
             <div className="form-group">
               <label>Password</label>
@@ -236,6 +253,7 @@ const StudentRegister = () => {
             </div>
           </div>
 
+          {/* Submit button */}
           <button 
             type="submit" 
             className="submit-btn"
@@ -249,4 +267,4 @@ const StudentRegister = () => {
   );
 };
 
-export default StudentRegister;
+export default StudentRegister; // Export the registration component
