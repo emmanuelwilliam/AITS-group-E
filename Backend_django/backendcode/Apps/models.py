@@ -8,16 +8,21 @@ class UserRole(models.Model):
         ('lecturer','Lecturer'),
         ('admin','Administrator'),
     ]
+    name = models.CharField(max_length=150, blank=True)
     role_name = models.CharField(max_length=50,unique=True, choices=ROLE_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
     verification_token = models.UUIDField(default=uuid.uuid4, editable=False)
     is_verified = models.BooleanField(default=False)
 
+    class Meta:
+        db_table = 'user_roles'
+        verbose_name = 'User Role'
+        verbose_name_plural = 'User Roles'
+
     def __str__(self):
-        return self.get_role_name_display()
+        return self.name
 
 class User(AbstractUser):
-    name = models.CharField(max_length=150, blank=True)
     role = models.ForeignKey(UserRole, on_delete=models.SET_NULL, null=True, related_name='users')
     email = models.EmailField(unique=True)
     last_login = models.DateTimeField(null=True, blank=True)
@@ -29,7 +34,9 @@ class User(AbstractUser):
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile')
     college = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
+    
+    def __str__(self):
+        return f"{self.user.username}-{self.college}"
 
 class Lecturer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='lecturer_profile')
@@ -38,7 +45,7 @@ class Lecturer(models.Model):
     college = models.CharField(max_length=200)
     position = models.CharField(max_length=100)
     course_units = models.ManyToManyField("CourseUnit", related_name="lecturers")
-    email = models.EmailField(unique=True)
+    
 
     def __str__(self):
         return f"{self.user.get_full_name()} - {self.position if self.position else 'Lecturer'}"

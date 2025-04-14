@@ -1,10 +1,11 @@
-from rest_framework.decorators import api_view 
+from rest_framework.decorators import api_view ,permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework import viewsets, mixins, status,filters
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import User, Student, Lecturer, Administrator, Issue, Notification, Status, LoginHistory, UserRole
 from .serializer import (
-    UserSerializer, StudentSerializer, LecturerSerializer, AdministratorSerializer,
+    UserRegistrationSerializer, StudentSerializer, LecturerSerializer, AdministratorSerializer,
     IssueSerializer, NotificationSerializer, StatusSerializer, LoginHistorySerializer, UserRoleSerializer
 )
 from .filters import IssueFilter
@@ -13,6 +14,14 @@ from rest_framework.views import exception_handler
 from .models import User
 from django.contrib.auth.hashers import make_password
 from django.shortcuts import get_object_or_404
+from django.views.generic import TemplateView
+from django.conf import settings
+import os
+from django.http import Http404
+from django.core.exceptions import PermissionDenied
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
 
 # DRF Viewsets
 class StudentViewSet(viewsets.ModelViewSet):
@@ -76,27 +85,122 @@ def get_notifications(request):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['POST'])
+@api_view(['POST', 'GET'])
+@permission_classes([AllowAny])
 def register_student(request):
-    try:
-        serializer = StudentSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    if request.method == 'POST':
+        data = request.data
+        try:
+            # Validate required fields
+            required_fields = ['username', 'email', 'password', 'first_name', 'last_name']
+            for field in required_fields:
+                if not data.get(field):
+                    return Response({
+                        'error': f'Missing required field: {field}',
+                        'required_fields': required_fields
+                    }, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['POST'])
+            # Check if username or email already exists
+            if User.objects.filter(username=data['username']).exists():
+                return Response({
+                    'error': 'Username already exists'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            if User.objects.filter(email=data['email']).exists():
+                return Response({
+                    'error': 'Email already exists'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            # Get the student role
+            student_role = UserRole.objects.get(name='student')
+            
+            # Create user with role object
+            user = User.objects.create_user(
+                username=data['username'],
+                email=data['email'],
+                password=data['password'],
+                first_name=data['first_name'],
+                last_name=data['last_name'],
+                role=student_role
+            )
+            
+            # Generate tokens
+            refresh = RefreshToken.for_user(user)
+            
+            return Response({
+                'success': True,
+                'message': 'Student registered successfully',
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'role': 'student'
+                },
+                'tokens': {
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                }
+            }, status=status.HTTP_201_CREATED)
+            
+        except UserRole.DoesNotExist:
+            return Response({
+                'error': 'Student role not found in the system'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            print(f"Registration error: {str(e)}")  # For server logs
+            return Response({
+                'error': 'Registration failed',
+                'detail': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST', 'GET'])
+@permission_classes([AllowAny])
 def register_lecturer(request):
-    try:
-        serializer = LecturerSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    if request.method == 'POST':
+        data = request.data
+        try:
+            # Get lecturer role
+            lecturer_role = UserRole.objects.get(name='lecturer')
+            
+            # Create user
+            user = User.objects.create_user(
+                username=data['username'],
+                email=data['email'],
+                password=data['password'],
+                first_name=data['first_name'],
+                last_name=data['last_name'],
+                role=lecturer_role
+            )
+            
+            # Generate tokens
+            refresh = RefreshToken.for_user(user)
+            
+            return Response({
+                'success': True,
+                'message': 'Lecturer registered successfully',
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                    'role': 'lecturer'
+                },
+                'tokens': {
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                }
+            }, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            return Response({
+                'error': str(e),
+                'detail': 'Registration failed'
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+    return Response({
+        'message': 'Use POST method to register'
+    }, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 @api_view(['POST'])
 def register_administrator(request):
@@ -222,3 +326,60 @@ def login_view(request):
     else:
         return Response({'error': 'Invalid credentials'}, 
                       status=status.HTTP_401_UNAUTHORIZED)
+
+@api_view(['GET'])
+def serve_home_page(request):
+    try:
+        # Return a response redirecting/routing to the React Home page
+        return Response({
+            'redirect': '/',
+            'status': 'success'
+        }, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({
+            'error': str(e)
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+from django.views.generic import TemplateView
+from django.shortcuts import render
+
+class ReactAppView(TemplateView):
+    template_name = 'index.html'
+
+
+def custom_exception_handler(exc, context):
+    """Handle exceptions and provide better error messages"""
+    response = exception_handler(exc, context)
+    
+    if response is None:
+        if isinstance(exc, Http404):
+            response = Response(
+                {'error': 'Not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        elif isinstance(exc, PermissionDenied):
+            response = Response(
+                {'error': 'Permission denied'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        else:
+            response = Response(
+                {'error': str(exc)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    return response
+
+
+class IndexView(TemplateView):
+    template_name = 'index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Get the main.js file from dist directory
+        dist_dir = settings.FRONTEND_DIR / 'dist' / 'assets' / 'js'
+        if dist_dir.exists():
+            js_files = [f for f in os.listdir(dist_dir) if f.startswith('main.') and f.endswith('.js')]
+            if js_files:
+                context['main_js'] = f'assets/js/{js_files[0]}'
+        return context

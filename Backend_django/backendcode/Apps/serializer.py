@@ -22,39 +22,98 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError("Unable to log in with provided credentials.")
         raise serializers.ValidationError("Must include 'username' and 'password'.")
 
+# Update the UserRegistrationSerializer
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
     confirm_password = serializers.CharField(write_only=True, required=True)
+    college = serializers.CharField(required=True)
+    first_name = serializers.CharField(required=True)
+    last_name = serializers.CharField(required=True)
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'confirm_password', 'role']
+        fields = [
+            'username', 
+            'email', 
+            'password', 
+            'confirm_password',
+            'first_name',
+            'last_name',
+            'college'
+        ]
         extra_kwargs = {
             'password': {'write_only': True},
+            'email': {'required': True}
         }
 
     def validate(self, attrs):
+        # Validate passwords match
         if attrs['password'] != attrs['confirm_password']:
             raise serializers.ValidationError({"password": "Password fields didn't match."})
+        
+        # Validate email is unique
+        if User.objects.filter(email=attrs['email']).exists():
+            raise serializers.ValidationError({"email": "Email already exists"})
+            
+        # Validate username is unique
+        if User.objects.filter(username=attrs['username']).exists():
+            raise serializers.ValidationError({"username": "Username already exists"})
+            
         return attrs
 
     def create(self, validated_data):
-        validated_data.pop('confirm_password')
-        validated_data['password'] = make_password(validated_data['password'])
-        return super().create(validated_data)
+        try:
+            # Remove confirm_password from the data
+            validated_data.pop('confirm_password')
+            college = validated_data.pop('college')
+            
+            # Get or create student role
+            student_role, _ = UserRole.objects.get_or_create(role_name='student')
+            
+            # Create user instance
+            user = User.objects.create(
+                username=validated_data['username'],
+                email=validated_data['email'],
+                first_name=validated_data['first_name'],
+                last_name=validated_data['last_name'],
+                role=student_role
+            )
+            
+            # Set password
+            user.set_password(validated_data['password'])
+            user.save()
+            
+            # Create student profile
+            Student.objects.create(user=user, college=college)
+            
+            return user
+            
+        except Exception as e:
+            raise serializers.ValidationError(f"Error creating user: {str(e)}")
 
 class VerifyEmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
     token = serializers.CharField(max_length=50)  # Changed from 'otp' to 'token' to match your views
 
+class UserRoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserRole
+        fields = ['id', 'name']
+        
 # Model Serializers
 class UserSerializer(serializers.ModelSerializer):
-    role = serializers.StringRelatedField()
+    role = UserRoleSerializer(read_only=True)
+    role_name = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'role', 'is_active', 'date_joined', 'is_verified']
-        read_only_fields = ['is_verified']
+        fields = ['id', 'username', 'email', 'role', 'role_name', 'first_name', 'last_name']
+    
+    def create(self, validated_data):
+        role_name = validated_data.pop('role_name')
+        role = UserRole.objects.get(name=role_name)
+        user = User.objects.create(**validated_data, role=role)
+        return user
 
 class StudentSerializer(serializers.ModelSerializer):
     user = UserSerializer()
@@ -79,6 +138,18 @@ class AdministratorSerializer(serializers.ModelSerializer):
         model = Administrator
         fields = '__all__'
         depth = 1
+
+    def create(self, validated_data):
+        # Create a new student and hash the password
+        student = Student.objects.create(
+            username=validated_data['username'],
+            email=validated_data['email'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name']
+        )
+        student.set_password(validated_data['password'])
+        student.save()
+        return student
 
 class StatusSerializer(serializers.ModelSerializer):
     class Meta:
@@ -110,11 +181,6 @@ class LoginHistorySerializer(serializers.ModelSerializer):
         model = LoginHistory
         fields = '__all__'
         read_only_fields = ['login_time']
-
-class UserRoleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserRole
-        fields = '__all__'
 
 # Password Reset Serializers
 class PasswordResetSerializer(serializers.Serializer):
