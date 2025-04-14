@@ -1,8 +1,10 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import "../styles/register.css";
+import React, { useState } from "react"; // React and useState hook
+import { useNavigate } from "react-router-dom"; // Hook to navigate programmatically
+import "../styles/register.css"; // CSS for registration styling
 
+// Component for lecturer registration form
 const LecturerRegister = () => {
+  // State to track form input values
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -12,14 +14,19 @@ const LecturerRegister = () => {
     password: "",
     confirmPassword: ""
   });
-  const [errors, setErrors] = useState({});
-  const navigate = useNavigate();
 
+  // State to track form validation errors
+  const [errors, setErrors] = useState({});
+
+  const navigate = useNavigate(); // Hook to redirect after registration
+
+  // Update formData when an input field changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // Function to validate the form fields
   const validateForm = () => {
     const newErrors = {};
     if (!formData.firstName) newErrors.firstName = "First name is required";
@@ -35,35 +42,43 @@ const LecturerRegister = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Submit form and handle registration logic
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-    
+    e.preventDefault(); // Prevent default form submit behavior
+    if (!validateForm()) return; // Stop if form is invalid
+
     try {
+      // Send registration data to backend
       const response = await fetch("/api/register/lecturer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, role: "lecturer" })
+        body: JSON.stringify({ ...formData, role: "lecturer" }) // Include role in request
       });
-      
-      const data = await response.json();
+
+      const data = await response.json(); // Parse response
+
       if (response.ok) {
+        // Redirect to verification page if successful
         navigate("/verify", { state: { email: formData.webmail, role: "lecturer" } });
       } else {
+        // Show error message from response
         setErrors({ form: data.message || "Registration failed" });
       }
     } catch (error) {
-      console.error("Error:", error);
-      setErrors({ form: "An error occurred. Please try again." });
+      console.error("Error:", error); // Log unexpected error
+      setErrors({ form: "An error occurred. Please try again." }); // Show generic error message
     }
   };
 
+  // JSX for the registration form layout
   return (
     <div className="register-container">
       <div className="register-box">
         <h2>Lecturer Registration</h2>
+        {/* Show form-level error if any */}
         {errors.form && <div className="error-message">{errors.form}</div>}
         <form onSubmit={handleSubmit}>
+          {/* First and Last Name */}
           <div className="form-row">
             <div className="form-group">
               <label>First Name</label>
@@ -87,6 +102,7 @@ const LecturerRegister = () => {
             </div>
           </div>
 
+          {/* Webmail input */}
           <div className="form-group">
             <label>Webmail</label>
             <input
@@ -98,6 +114,7 @@ const LecturerRegister = () => {
             {errors.webmail && <span className="error">{errors.webmail}</span>}
           </div>
 
+          {/* Contact and Department */}
           <div className="form-row">
             <div className="form-group">
               <label>Contact</label>
@@ -121,6 +138,7 @@ const LecturerRegister = () => {
             </div>
           </div>
 
+          {/* Password and Confirm Password */}
           <div className="form-row">
             <div className="form-group">
               <label>Password</label>
@@ -144,6 +162,7 @@ const LecturerRegister = () => {
             </div>
           </div>
 
+          {/* Submit button */}
           <button type="submit" className="submit-btn">Register</button>
         </form>
       </div>
@@ -151,4 +170,4 @@ const LecturerRegister = () => {
   );
 };
 
-export default LecturerRegister;
+export default LecturerRegister; // Export component
