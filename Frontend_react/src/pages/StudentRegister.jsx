@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { registerStudent } from '../services/authService';  
 import '../styles/register.css';
 
+// Student registration component
 const StudentRegister = () => {
+  // State to manage form input values
   const [formData, setFormData] = useState({
     username: '',
     first_name: '',  // Changed from firstName to match backend
@@ -14,10 +16,12 @@ const StudentRegister = () => {
     confirm_password: ''  // Changed from confirmPassword to match backend
   });
 
+  // Error messages for fields or the whole form
   const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false); // Tracks submission state
+  const navigate = useNavigate(); // Navigation function
 
+  // Update form state and clear error on input change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -26,6 +30,7 @@ const StudentRegister = () => {
     }
   };
 
+  // Validate inputs before submission
   const validateForm = () => {
     const newErrors = {};
 
@@ -140,9 +145,12 @@ try {
     <div className="register-container">
       <div className="register-box">
         <h2>Student Registration</h2>
+
+        {/* General form error message */}
         {errors.form && <div className="error-message">{errors.form}</div>}
         
         <form onSubmit={handleSubmit}>
+          {/* Username */}
           <div className="form-row">
             <div className="form-group">
               <label>Username</label>
@@ -157,6 +165,7 @@ try {
             </div>
           </div>
 
+          {/* First & Last Name */}
           <div className="form-row">
             <div className="form-group">
               <label>First Name</label>
@@ -182,6 +191,7 @@ try {
             </div>
           </div>
 
+          {/* Email */}
           <div className="form-group">
             <label>Email</label>
             <input
@@ -206,6 +216,7 @@ try {
             {errors.college && <span className="error">{errors.college}</span>}
           </div>
 
+          {/* Password & Confirm Password */}
           <div className="form-row">
             <div className="form-group">
               <label>Password</label>
@@ -231,6 +242,7 @@ try {
             </div>
           </div>
 
+          {/* Submit button */}
           <button 
             type="submit" 
             className="submit-btn"
@@ -244,4 +256,4 @@ try {
   );
 };
 
-export default StudentRegister;
+export default StudentRegister; // Export the registration component
