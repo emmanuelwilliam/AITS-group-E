@@ -1,60 +1,69 @@
+/* Verification Container */
 .verification-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background-color: #18cf83;
-  color: white;
-  text-align: center;
-  padding: 20px;
+  display: flex; /* Uses Flexbox layout */
+  flex-direction: column; /* Arranges content in a column */
+  align-items: center; /* Horizontally centers items */
+  justify-content: center; /* Vertically centers items */
+  height: 100vh; /* Full height of the viewport */
+  background-color: #18cf83; /* Green background */
+  color: white; /* White text */
+  text-align: center; /* Centers text */
+  padding: 20px; /* Adds padding around the container */
 }
 
+/* Heading Style */
 .verification-container h2 {
-  margin-bottom: 15px;
-  font-size: 24px;
+  margin-bottom: 15px; /* Space below the heading */
+  font-size: 24px; /* Font size for the heading */
 }
 
+/* Paragraph Style */
 .verification-container p {
-  margin-bottom: 30px;
-  font-size: 16px;
+  margin-bottom: 30px; /* Space below the paragraph */
+  font-size: 16px; /* Font size for the paragraph */
 }
 
+/* Input Field Style */
 .verification-container input {
-  width: 200px;
-  padding: 12px;
-  margin-bottom: 20px;
-  border: 2px solid #bdc3c7;
-  border-radius: 6px;
-  font-size: 18px;
-  text-align: center;
+  width: 200px; /* Fixed width for the input */
+  padding: 12px; /* Padding inside the input */
+  margin-bottom: 20px; /* Space below the input */
+  border: 2px solid #bdc3c7; /* Light border color */
+  border-radius: 6px; /* Rounded corners for the input */
+  font-size: 18px; /* Font size for the input */
+  text-align: center; /* Centers the input text */
 }
 
+/* Button Style */
 .verification-container button {
-  padding: 12px 30px;
-  background-color: #449dad;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s;
+  padding: 12px 30px; /* Padding inside the button */
+  background-color: #449dad; /* Initial blue color for the button */
+  color: white; /* White text */
+  border: none; /* No border */
+  border-radius: 6px; /* Rounded corners for the button */
+  cursor: pointer; /* Pointer cursor to indicate it's clickable */
+  font-size: 16px; /* Font size for the button */
+  transition: background-color 0.3s; /* Smooth transition for hover effect */
 }
 
+/* Button Hover Effect */
 .verification-container button:hover {
-  background-color: #34a512;
+  background-color: #34a512; /* Changes to a green color on hover */
 }
 
+/* Back Link Style */
 .back-link {
-  margin-top: 30px;
+  margin-top: 30px; /* Space above the link */
 }
 
+/* Back Link Styling */
 .back-link a {
-  color: white;
-  text-decoration: none;
-  font-size: 14px;
+  color: white; /* White color for the link */
+  text-decoration: none; /* Removes underline */
+  font-size: 14px; /* Font size for the link */
 }
 
+/* Back Link Hover Effect */
 .back-link a:hover {
-  text-decoration: underline;
+  text-decoration: underline; /* Underlines the link when hovered */
 }
