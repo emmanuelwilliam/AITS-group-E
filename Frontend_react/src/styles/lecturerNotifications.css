@@ -1,22 +1,26 @@
+/* Wrapper for the entire notifications section */
 .notifications {
-    padding: 20px;
-  }
-  
-  .notifications h2 {
-    margin-bottom: 20px;
-    font-size: 24px;
-    color: #2c3e50;
-  }
-  
-  .notifications ul {
-    list-style: none;
-    padding: 0;
-  }
-  
-  .notifications li {
-    background-color: #f9f9f9;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
+  padding: 20px; /* Adds padding inside the notifications container */
+}
+
+/* Heading for the notifications section */
+.notifications h2 {
+  margin-bottom: 20px; /* Adds space below the heading */
+  font-size: 24px; /* Sets the font size for the heading */
+  color: #2c3e50; /* Dark blue-gray color for the heading */
+}
+
+/* Style for the notifications list */
+.notifications ul {
+  list-style: none; /* Removes the default bullet points from the list */
+  padding: 0; /* Removes any default padding from the list */
+}
+
+/* Style for each notification item */
+.notifications li {
+  background-color: #f9f9f9; /* Light gray background for each notification */
+  padding: 10px; /* Adds padding inside each notification item */
+  margin-bottom: 10px; /* Adds space below each notification item */
+  border-radius: 5px; /* Rounds the corners of the notification item */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Adds a subtle shadow around each notification item */
+}
