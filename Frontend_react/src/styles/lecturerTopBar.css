@@ -1,90 +1,101 @@
 /* Fixed Top Navigation Bar */
 .lecturer-top-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #2c3e50;
-  color: white;
-  padding: 15px 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  height: 70px;
-  box-sizing: border-box;
+  position: fixed; /* Keeps the top bar fixed at the top of the screen */
+  top: 0; /* Aligns the top of the top bar with the top of the screen */
+  left: 0; /* Aligns the left side of the top bar with the left side of the screen */
+  right: 0; /* Aligns the right side of the top bar with the right side of the screen */
+  z-index: 1000; /* Ensures the top bar stays above other content */
+  display: flex; /* Uses flexbox for alignment of items inside the top bar */
+  justify-content: space-between; /* Distributes space between logo, search, and profile sections */
+  align-items: center; /* Vertically centers the items in the top bar */
+  background-color: #2c3e50; /* Sets the background color of the top bar */
+  color: white; /* Sets the text color to white */
+  padding: 15px 20px; /* Adds padding around the contents inside the top bar */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Adds shadow for depth */
+  height: 70px; /* Sets the height of the top bar */
+  box-sizing: border-box; /* Ensures padding is included in the total height and width calculation */
 }
 
+/* Logo Section */
 .logo-section {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display: flex; /* Uses flexbox for horizontal alignment of the logo and text */
+  align-items: center; /* Vertically aligns logo and text */
+  gap: 12px; /* Adds spacing between the logo and the text */
 }
 
+/* Logo image styling */
 .logo-section .logo {
-  width: 42px;
-  height: 42px;
-  object-fit: contain;
+  width: 42px; /* Sets the width of the logo */
+  height: 42px; /* Sets the height of the logo */
+  object-fit: contain; /* Ensures the logo fits within the box without distortion */
 }
 
+/* Logo Text styling */
 .logo-section h1 {
-  font-size: 1.25rem;
-  margin: 0;
-  font-weight: 600;
+  font-size: 1.25rem; /* Sets the font size of the logo text */
+  margin: 0; /* Removes margin around the logo text */
+  font-weight: 600; /* Makes the logo text bold */
 }
 
+/* Search Section */
 .search-section {
-  display: flex;
-  align-items: center;
-  background-color: white;
-  border-radius: 6px;
-  padding: 6px 12px;
-  width: 240px;
+  display: flex; /* Uses flexbox for alignment of the input field and icon */
+  align-items: center; /* Vertically aligns the input field and icon */
+  background-color: white; /* Sets the background color of the search bar */
+  border-radius: 6px; /* Rounds the corners of the search bar */
+  padding: 6px 12px; /* Adds padding inside the search bar */
+  width: 240px; /* Sets a fixed width for the search bar */
 }
 
+/* Search Input Field styling */
 .search-section input {
-  border: none;
-  outline: none;
-  font-size: 0.9rem;
-  width: 100%;
-  padding: 4px;
+  border: none; /* Removes the border from the input field */
+  outline: none; /* Removes the outline around the input field when focused */
+  font-size: 0.9rem; /* Sets the font size of the input field */
+  width: 100%; /* Makes the input field take up the entire width of the search section */
+  padding: 4px; /* Adds padding inside the input field */
 }
 
+/* Search Icon styling */
 .search-section .search-icon {
-  color: #2c3e50;
-  cursor: pointer;
-  font-size: 1rem;
+  color: #2c3e50; /* Sets the search icon color to match the top bar */
+  cursor: pointer; /* Changes the cursor to a pointer when hovering over the icon */
+  font-size: 1rem; /* Sets the font size of the search icon */
 }
 
+/* Profile Section */
 .profile-section {
-  display: flex;
-  align-items: center;
-  gap: 18px;
+  display: flex; /* Uses flexbox for horizontal alignment of the profile icon and logout button */
+  align-items: center; /* Vertically aligns the profile icon and text */
+  gap: 18px; /* Adds spacing between the profile icon, username, and logout button */
 }
 
+/* Profile Icon styling */
 .profile-section .profile-icon {
-  font-size: 1.3rem;
-  color: #ecf0f1;
+  font-size: 1.3rem; /* Sets the font size of the profile icon */
+  color: #ecf0f1; /* Sets the color of the profile icon to a light shade */
 }
 
+/* Profile Text (username) styling */
 .profile-section span {
-  font-size: 0.95rem;
-  font-weight: 500;
+  font-size: 0.95rem; /* Sets the font size of the username */
+  font-weight: 500; /* Makes the username text semi-bold */
 }
 
+/* Logout Button styling */
 .profile-section .logout-button {
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: color 0.2s;
+  background: none; /* Removes the background from the button */
+  border: none; /* Removes the border from the button */
+  color: white; /* Sets the text color of the button to white */
+  cursor: pointer; /* Changes the cursor to a pointer when hovering over the button */
+  font-size: 0.9rem; /* Sets the font size of the logout button text */
+  display: flex; /* Uses flexbox to align the button icon and text horizontally */
+  align-items: center; /* Vertically aligns the icon and text */
+  gap: 6px; /* Adds spacing between the icon and the text */
+  transition: color 0.2s; /* Adds a smooth transition for the color change on hover */
 }
 
+/* Hover effect on the logout button */
 .profile-section .logout-button:hover {
-  color: #1abc9c;
+  color: #1abc9c; /* Changes the button text color to teal on hover */
 }
