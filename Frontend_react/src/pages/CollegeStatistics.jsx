@@ -17,4 +17,4 @@ const CollegeStatistics = () => {
   );
 };
 
-export default CollegeStatistics;
+export default CollegeStatistics;// Export CollegeStatistics component
