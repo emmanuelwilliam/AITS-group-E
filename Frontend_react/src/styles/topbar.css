@@ -1,139 +1,155 @@
+/* Top Bar */
 .top-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background-color: #2c3e50;
-  color: white;
-  padding: 10px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 1000;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: fixed; /* Keeps the top bar fixed at the top of the screen */
+  top: 0; /* Aligns the top bar to the top */
+  left: 0; /* Aligns the top bar to the left */
+  right: 0; /* Aligns the top bar to the right */
+  background-color: #2c3e50; /* Dark blue background */
+  color: white; /* White text */
+  padding: 10px 20px; /* Padding around the content */
+  display: flex; /* Uses Flexbox to layout the content */
+  justify-content: space-between; /* Space between elements in the top bar */
+  align-items: center; /* Vertically aligns the content */
+  z-index: 1000; /* Ensures the top bar stays on top of other elements */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow below the top bar */
 }
 
+/* Container for the content inside the top bar */
 .top-bar-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  gap: 20px;
+  display: flex; /* Uses Flexbox */
+  justify-content: space-between; /* Space between logo, heading, and other elements */
+  align-items: center; /* Vertically centers the items */
+  width: 100%; /* Full width of the parent container */
+  max-width: 1200px; /* Sets a max width for larger screens */
+  margin: 0 auto; /* Centers the content horizontally */
+  gap: 20px; /* Space between the logo, heading, and other content */
 }
 
+/* Logo Styling */
 .logo {
-  height: 40px;
-  margin-right: 20px;
+  height: 40px; /* Sets the height of the logo */
+  margin-right: 20px; /* Adds space on the right of the logo */
 }
 
+/* Top Bar Heading */
 .top-bar h1 {
-  margin: 0;
-  font-size: 24px;
-  flex: 1;
+  margin: 0; /* Removes default margin */
+  font-size: 24px; /* Font size for the heading */
+  flex: 1; /* Ensures the heading takes available space */
 }
 
-/* Search Box Styles */
+/* Search Box */
 .search-box {
-  flex: 1;
-  max-width: 400px;
-  margin: 0 20px;
+  flex: 1; /* Allows the search box to take available space */
+  max-width: 400px; /* Limits the maximum width of the search box */
+  margin: 0 20px; /* Adds margin on both sides */
 }
 
+/* Search Box Form */
 .search-box form {
-  display: flex;
-  position: relative;
+  display: flex; /* Uses Flexbox layout for the search form */
+  position: relative; /* Positions the search icon within the input */
 }
 
+/* Search Box Input */
 .search-box input {
-  width: 100%;
-  padding: 8px 15px 8px 35px;
-  border: none;
-  border-radius: 20px;
-  background-color: #34495e;
-  color: white;
-  font-size: 14px;
+  width: 100%; /* Takes full width of the container */
+  padding: 8px 15px 8px 35px; /* Adds padding inside the input with extra space for the icon */
+  border: none; /* Removes default border */
+  border-radius: 20px; /* Rounded corners for the search input */
+  background-color: #34495e; /* Dark background color for the input */
+  color: white; /* White text inside the input */
+  font-size: 14px; /* Font size for the input text */
 }
 
+/* Placeholder Text Style */
 .search-box input::placeholder {
-  color: #bdc3c7;
+  color: #bdc3c7; /* Light color for placeholder text */
 }
 
+/* Focused State of the Search Input */
 .search-box input:focus {
-  outline: none;
-  background-color: white;
-  color: #2c3e50;
+  outline: none; /* Removes the focus outline */
+  background-color: white; /* Changes background to white when focused */
+  color: #2c3e50; /* Dark text color when focused */
 }
 
+/* Search Icon Button */
 .search-box button {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: transparent;
-  border: none;
-  color: #bdc3c7;
-  cursor: pointer;
-  padding: 0;
+  position: absolute; /* Positions the button inside the input */
+  left: 10px; /* Aligns the button to the left inside the input */
+  top: 50%; /* Vertically centers the button */
+  transform: translateY(-50%); /* Adjusts for exact vertical centering */
+  background: transparent; /* No background color */
+  border: none; /* Removes border */
+  color: #bdc3c7; /* Light color for the icon */
+  cursor: pointer; /* Indicates the button is clickable */
+  padding: 0; /* Removes padding from the button */
 }
 
+/* Search Icon Size */
 .search-icon {
-  font-size: 16px;
+  font-size: 16px; /* Icon size */
 }
 
-/* Existing Profile Section Styles */
+/* Profile Section */
 .profile-section {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  position: relative; /* For positioning the dropdown relative to the profile section */
+  display: flex; /* Uses Flexbox for layout */
+  align-items: center; /* Vertically centers the profile section content */
+  gap: 10px; /* Adds space between the profile button and other elements */
 }
 
+/* Profile Button and Logout Button */
 .profile-button,
 .logout-button {
-  background-color: #34495e;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  background-color: #34495e; /* Dark background for buttons */
+  color: white; /* White text */
+  border: none; /* Removes the border */
+  padding: 8px 16px; /* Adds padding inside the button */
+  border-radius: 4px; /* Rounded corners */
+  cursor: pointer; /* Indicates buttons are clickable */
+  display: flex; /* Uses Flexbox for button content */
+  align-items: center; /* Vertically centers the icon and text */
+  gap: 8px; /* Adds space between the icon and text */
 }
 
+/* Hover Effect for Profile and Logout Buttons */
 .profile-button:hover,
 .logout-button:hover {
-  background-color: #1abc9c;
+  background-color: #1abc9c; /* Lighter color on hover */
 }
 
+/* Notification Badge */
 .badge {
-  background-color: #e74c3c;
-  color: white;
-  padding: 2px 6px;
-  border-radius: 50%;
-  font-size: 12px;
+  background-color: #e74c3c; /* Red background for the badge */
+  color: white; /* White text inside the badge */
+  padding: 2px 6px; /* Padding inside the badge */
+  border-radius: 50%; /* Circular shape for the badge */
+  font-size: 12px; /* Small font size */
 }
 
+/* Profile Dropdown Menu */
 .profile-dropdown {
-  position: absolute;
-  top: 40px;
-  right: 0;
-  background-color: white;
-  color: #333;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  width: 300px;
+  position: absolute; /* Positions the dropdown menu */
+  top: 40px; /* Places the dropdown just below the profile button */
+  right: 0; /* Aligns the dropdown to the right */
+  background-color: white; /* White background for the dropdown */
+  color: #333; /* Dark text for readability */
+  padding: 20px; /* Padding inside the dropdown */
+  border-radius: 8px; /* Rounded corners for the dropdown */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Adds a subtle shadow around the dropdown */
+  z-index: 1000; /* Ensures the dropdown is on top of other elements */
+  width: 300px; /* Sets the width of the dropdown */
 }
 
+/* Profile Dropdown Header */
 .profile-dropdown h2 {
-  margin-top: 0;
-  font-size: 18px;
+  margin-top: 0; /* Removes the top margin */
+  font-size: 18px; /* Sets the font size for the dropdown header */
 }
 
+/* Profile Dropdown Paragraphs */
 .profile-dropdown p {
-  margin: 8px 0;
+  margin: 8px 0; /* Adds margin between paragraphs */
 }
