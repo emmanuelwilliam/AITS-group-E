@@ -23,6 +23,7 @@ class UserRole(models.Model):
         return self.name
 
 class User(AbstractUser):
+    #should we have name for the user?
     role = models.ForeignKey(UserRole, on_delete=models.SET_NULL, null=True, related_name='users')
     email = models.EmailField(unique=True)
     last_login = models.DateTimeField(null=True, blank=True)
