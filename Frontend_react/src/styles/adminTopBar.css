@@ -1,62 +1,72 @@
 .admin-top-bar {
+  /* Top bar layout: horizontal flexbox, space between sides */
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 30px;
-  background-color: #2c3e50;
-  color: white;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 15px 30px; /* Balanced padding for visual breathing room */
+  background-color: #2c3e50; /* Dark background for header */
+  color: white; /* White text for contrast */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle bottom shadow for elevation */
 }
 
 .institution-info {
+  /* Left section: logo and institution name */
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 15px; /* Space between logo and name */
 }
 
 .logo {
+  /* Logo size styling */
   height: 40px;
-  width: auto;
+  width: auto; /* Maintain aspect ratio */
 }
 
 .institution-name {
+  /* Styling for the name of the institution */
   font-size: 1.2rem;
-  font-weight: 600;
+  font-weight: 600; /* Semi-bold for prominence */
 }
 
 .user-info {
+  /* Right section: user details and logout button */
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 20px; /* Space between user details and button */
 }
 
 .user-details {
+  /* Vertical layout for user name and meta info */
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-end; /* Right-align text elements */
 }
 
 .user-name {
+  /* Username styling */
   font-weight: 600;
   font-size: 0.95rem;
 }
 
 .user-meta {
+  /* Lighter, smaller text for metadata (e.g. role, time, etc.) */
   font-size: 0.8rem;
-  opacity: 0.8;
+  opacity: 0.8; /* Slightly transparent for visual hierarchy */
 }
 
 .logout-btn {
-  background-color: #e74c3c;
+  /* Styling for logout button */
+  background-color: #e74c3c; /* Bright red for alert action */
   color: white;
   border: none;
   padding: 8px 15px;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.85rem;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s; /* Smooth hover transition */
 }
 
 .logout-btn:hover {
+  /* Slightly darker red on hover */
   background-color: #c0392b;
 }
