@@ -122,4 +122,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard; // Export the component
+export default Dashboard; // Export the Dashboard component
