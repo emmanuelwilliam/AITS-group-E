@@ -1,70 +1,81 @@
 .admin-form-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-  }
-  
-  .admin-form-container h2 {
-    margin-top: 0;
-    color: #2c3e50;
-    margin-bottom: 25px;
-  }
-  
-  .form-group {
-    margin-bottom: 20px;
-  }
-  
-  .form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
-    color: #2c3e50;
-  }
-  
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 0.95rem;
-  }
-  
-  .form-group textarea {
-    min-height: 100px;
-    resize: vertical;
-  }
-  
-  .form-row {
-    display: flex;
-    gap: 20px;
-  }
-  
-  .form-row .form-group {
-    flex: 1;
-  }
-  
-  .form-actions {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 30px;
-  }
-  
-  .submit-btn {
-    background-color: #27ae60;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.95rem;
-    transition: background-color 0.2s;
-  }
-  
-  .submit-btn:hover {
-    background-color: #219653;
-  }
+  /* Container for admin form: centered with a max width, padding, and styled background */
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Soft shadow for depth */
+}
+
+.admin-form-container h2 {
+  /* Header styling within the form container */
+  margin-top: 0;
+  color: #2c3e50; /* Dark slate color for good contrast */
+  margin-bottom: 25px;
+}
+
+.form-group {
+  /* Spacing between form input blocks */
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  /* Label styling: block display and spacing from input */
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500; /* Medium weight for better readability */
+  color: #2c3e50; /* Consistent with heading */
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  /* Common styling for all input elements */
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd; /* Light border for subtle framing */
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+.form-group textarea {
+  /* Specific tweaks for textarea */
+  min-height: 100px; /* Ensures decent default height */
+  resize: vertical; /* Allow vertical resizing only */
+}
+
+.form-row {
+  /* Flex container for grouping form elements in a row */
+  display: flex;
+  gap: 20px; /* Spacing between grouped inputs */
+}
+
+.form-row .form-group {
+  /* Each form-group in a row shares equal width */
+  flex: 1;
+}
+
+.form-actions {
+  /* Container for form buttons */
+  display: flex;
+  justify-content: flex-end; /* Aligns buttons to the right */
+  margin-top: 30px;
+}
+
+.submit-btn {
+  /* Primary submit button styling */
+  background-color: #27ae60; /* Vibrant green */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background-color 0.2s; /* Smooth hover transition */
+}
+
+.submit-btn:hover {
+  /* Darker green on hover for visual feedback */
+  background-color: #219653;
+}
