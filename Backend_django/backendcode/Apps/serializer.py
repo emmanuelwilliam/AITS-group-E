@@ -56,8 +56,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"email": "Email already exists"})
             
         # Validate username is unique
-        if User.objects.filter(username=attrs['username']).exists():
-            raise serializers.ValidationError({"username": "Username already exists"})
+        #if User.objects.filter(username=attrs['username']).exists():
+        #    raise serializers.ValidationError({"username": "Username already exists"})
             
         return attrs
 
