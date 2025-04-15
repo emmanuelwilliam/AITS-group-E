@@ -1,166 +1,190 @@
+/* Login Container */
 .login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #f5f7fa;
-  padding: 20px;
+  display: flex; /* Uses flexbox to center the login box */
+  justify-content: center; /* Horizontally centers the login box */
+  align-items: center; /* Vertically centers the login box */
+  min-height: 100vh; /* Ensures the container takes up the full height of the viewport */
+  background-color: #f5f7fa; /* Sets a light gray background color for the page */
+  padding: 20px; /* Adds padding around the login container */
 }
 
+/* Login Box */
 .login-box {
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 450px;
-  padding: 40px;
-  text-align: center;
+  background: white; /* White background for the login box */
+  border-radius: 10px; /* Rounded corners for the login box */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Adds a subtle shadow to the box */
+  width: 100%; /* Makes the login box take up 100% of the available width */
+  max-width: 450px; /* Sets a maximum width for the login box */
+  padding: 40px; /* Adds padding inside the login box */
+  text-align: center; /* Centers the text inside the login box */
 }
 
+/* Logo Styling */
 .login-box .logo {
-  width: 100px;
-  height: auto;
-  margin-bottom: 20px;
+  width: 100px; /* Sets the width of the logo */
+  height: auto; /* Maintains the aspect ratio of the logo */
+  margin-bottom: 20px; /* Adds space below the logo */
 }
 
+/* Heading Styling */
 .login-box h2 {
-  color: #2c3e50;
-  margin-bottom: 10px;
-  font-size: 24px;
+  color: #2c3e50; /* Sets the heading color */
+  margin-bottom: 10px; /* Adds space below the heading */
+  font-size: 24px; /* Sets the font size for the heading */
 }
 
+/* Role Info Text Styling */
 .role-info {
-  color: #7f8c8d;
-  margin-bottom: 25px;
-  font-size: 16px;
+  color: #7f8c8d; /* Sets the color for role info text */
+  margin-bottom: 25px; /* Adds space below the role info */
+  font-size: 16px; /* Sets the font size of the role info */
 }
 
+/* Error Message Styling */
 .error-message {
-  color: #e74c3c;
-  background-color: #fadbd8;
-  padding: 12px;
-  border-radius: 5px;
-  margin-bottom: 20px;
-  text-align: center;
+  color: #e74c3c; /* Sets the error message text color */
+  background-color: #fadbd8; /* Sets the background color for the error message */
+  padding: 12px; /* Adds padding inside the error message box */
+  border-radius: 5px; /* Rounds the corners of the error message box */
+  margin-bottom: 20px; /* Adds space below the error message */
+  text-align: center; /* Centers the error message text */
 }
 
+/* Input Group Styling */
 .input-group {
-  margin-bottom: 20px;
-  text-align: left;
+  margin-bottom: 20px; /* Adds space below each input group */
+  text-align: left; /* Aligns labels and inputs to the left */
 }
 
+/* Label Styling for Inputs */
 .input-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: #34495e;
+  display: block; /* Makes the label a block-level element */
+  margin-bottom: 8px; /* Adds space below the label */
+  font-weight: 600; /* Makes the label text bold */
+  color: #34495e; /* Sets the label color */
 }
 
+/* Input Container for Inputs with Icons */
 .input-container {
-  position: relative;
+  position: relative; /* Allows positioning of the icon within the input */
 }
 
+/* Input Icon Styling */
 .input-container .input-icon {
-  position: absolute;
-  left: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #7f8c8d;
+  position: absolute; /* Positions the icon inside the input field */
+  left: 15px; /* Positions the icon 15px from the left */
+  top: 50%; /* Vertically centers the icon */
+  transform: translateY(-50%); /* Adjusts the vertical alignment of the icon */
+  color: #7f8c8d; /* Sets the color of the input icon */
 }
 
+/* Input Field Styling */
 .input-container input {
-  width: 90%;
-  padding: 12px 15px 12px 45px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 16px;
-  transition: border-color 0.3s;
+  width: 90%; /* Makes the input field take up 90% of the container width */
+  padding: 12px 15px 12px 45px; /* Adds padding with space for the icon */
+  border: 1px solid #ddd; /* Sets a light border around the input */
+  border-radius: 6px; /* Rounds the corners of the input */
+  font-size: 16px; /* Sets the font size of the input */
+  transition: border-color 0.3s; /* Smooth transition for border color change */
 }
 
+/* Input Field Focus Styling */
 .input-container input:focus {
-  outline: none;
-  border-color: #3498db;
-  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+  outline: none; /* Removes the outline around the input when focused */
+  border-color: #3498db; /* Changes the border color to blue when focused */
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2); /* Adds a subtle blue glow around the input when focused */
 }
 
+/* Password Toggle Button Styling */
 .password-toggle {
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #7f8c8d;
-  cursor: pointer;
+  position: absolute; /* Positions the password visibility icon inside the input field */
+  right: 15px; /* Positions the icon 15px from the right */
+  top: 50%; /* Vertically centers the icon */
+  transform: translateY(-50%); /* Adjusts the vertical alignment of the icon */
+  color: #7f8c8d; /* Sets the color of the password toggle icon */
+  cursor: pointer; /* Changes the cursor to a pointer when hovering over the icon */
 }
 
+/* Options Section Styling (Remember Me, Forgot Password) */
 .options {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+  display: flex; /* Uses flexbox for layout */
+  justify-content: space-between; /* Distributes space between the items */
+  align-items: center; /* Vertically aligns the items */
+  margin-bottom: 20px; /* Adds space below the options section */
 }
 
+/* Remember Me Checkbox Styling */
 .remember-me {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #34495e;
-  cursor: pointer;
+  display: flex; /* Uses flexbox to align checkbox and label */
+  align-items: center; /* Vertically aligns the checkbox and label */
+  gap: 8px; /* Adds space between the checkbox and label */
+  color: #34495e; /* Sets the color of the remember me text */
+  cursor: pointer; /* Changes the cursor to a pointer when hovering over the text */
 }
 
+/* Forgot Password Link Styling */
 .forgot-password {
-  color: #3498db;
-  text-decoration: none;
-  font-size: 14px;
+  color: #3498db; /* Sets the color of the forgot password link */
+  text-decoration: none; /* Removes the underline from the link */
+  font-size: 14px; /* Sets the font size of the link */
 }
 
+/* Forgot Password Hover Effect */
 .forgot-password:hover {
-  text-decoration: underline;
+  text-decoration: underline; /* Adds an underline to the link on hover */
 }
 
+/* Login Button Styling */
 .login-btn {
-  width: 100%;
-  padding: 14px;
-  background-color: #3498db;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s;
+  width: 100%; /* Makes the login button take up the full width of the container */
+  padding: 14px; /* Adds padding inside the button */
+  background-color: #3498db; /* Sets the background color of the button */
+  color: white; /* Sets the text color to white */
+  border: none; /* Removes the border from the button */
+  border-radius: 6px; /* Rounds the corners of the button */
+  font-size: 16px; /* Sets the font size of the button text */
+  font-weight: 600; /* Makes the button text bold */
+  cursor: pointer; /* Changes the cursor to a pointer when hovering over the button */
+  transition: background-color 0.3s; /* Adds a smooth transition for background color change */
 }
 
+/* Login Button Hover Effect */
 .login-btn:hover {
-  background-color: #2980b9;
+  background-color: #2980b9; /* Changes the background color of the button on hover */
 }
 
+/* Register Link Styling */
 .register-link {
-  margin-top: 25px;
-  color: #7f8c8d;
-  font-size: 15px;
+  margin-top: 25px; /* Adds space above the register link */
+  color: #7f8c8d; /* Sets the color of the register link */
+  font-size: 15px; /* Sets the font size of the register link */
 }
 
+/* Register Button Styling */
 .register-btn {
-  background: none;
-  border: none;
-  color: #3498db;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0;
+  background: none; /* Removes the background from the register button */
+  border: none; /* Removes the border from the button */
+  color: #3498db; /* Sets the text color of the register button */
+  font-weight: 600; /* Makes the button text bold */
+  cursor: pointer; /* Changes the cursor to a pointer when hovering over the button */
+  padding: 0; /* Removes padding from the register button */
 }
 
+/* Register Button Hover Effect */
 .register-btn:hover {
-  text-decoration: underline;
+  text-decoration: underline; /* Underlines the register button text on hover */
 }
 
+/* Media Query for Smaller Screens (Max-width: 480px) */
 @media (max-width: 480px) {
   .login-box {
-    padding: 30px 20px;
+    padding: 30px 20px; /* Reduces the padding for smaller screens */
   }
   
+  /* Stack options vertically on smaller screens */
   .options {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
+    flex-direction: column; /* Changes the layout to column */
+    align-items: flex-start; /* Aligns the items to the start */
+    gap: 15px; /* Adds spacing between the options */
   }
 }
