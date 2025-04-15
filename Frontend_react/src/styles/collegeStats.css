@@ -1,108 +1,124 @@
 .college-statistics {
-    padding: 20px;
-  }
-  
-  .college-statistics h2 {
-    margin-bottom: 25px;
-    color: #2c3e50;
-  }
-  
-  .stats-controls {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
-  
-  .time-filter {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  
-  .time-filter label {
-    font-size: 0.9rem;
-    color: #7f8c8d;
-  }
-  
-  .time-filter select {
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 0.9rem;
-  }
-  
-  .export-options {
-    display: flex;
-    gap: 10px;
-  }
-  
-  .btn-export {
-    background-color: transparent;
-    border: 1px solid #3498db;
-    color: #3498db;
-    padding: 8px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    transition: all 0.2s;
-  }
-  
-  .btn-export:hover {
-    background-color: #3498db;
-    color: white;
-  }
-  
-  .college-stats-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-  }
-  
-  .college-stats-table th,
-  .college-stats-table td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid #ecf0f1;
-  }
-  
-  .college-stats-table th {
-    background-color: #f8f9fa;
-    color: #7f8c8d;
-    font-weight: 600;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-  }
-  
-  .college-stats-table tr:hover {
-    background-color: #f8f9fa;
-  }
-  
-  .charts-section {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-top: 30px;
-  }
-  
-  .chart-container {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-  }
-  
-  .chart-container h3 {
-    margin-top: 0;
-    color: #2c3e50;
-    font-size: 1rem;
-  }
-  
-  .chart-placeholder {
-    height: 250px;
-    background-color: #f8f9fa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #7f8c8d;
-    margin-top: 15px;
-  }
+  /* Main container for the statistics section */
+  padding: 20px;
+}
+
+.college-statistics h2 {
+  /* Section heading */
+  margin-bottom: 25px;
+  color: #2c3e50; /* Dark slate color for strong heading contrast */
+}
+
+.stats-controls {
+  /* Flex container for filter and export controls */
+  display: flex;
+  justify-content: space-between; /* Puts children at opposite ends */
+  margin-bottom: 20px;
+}
+
+.time-filter {
+  /* Container for the time filter label and select */
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Space between label and select input */
+}
+
+.time-filter label {
+  font-size: 0.9rem;
+  color: #7f8c8d; /* Medium gray for secondary text */
+}
+
+.time-filter select {
+  /* Dropdown styling */
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.export-options {
+  /* Container for export buttons */
+  display: flex;
+  gap: 10px; /* Space between buttons */
+}
+
+.btn-export {
+  /* Export button styling: outline style */
+  background-color: transparent;
+  border: 1px solid #3498db;
+  color: #3498db;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s; /* Smooth transition on hover */
+}
+
+.btn-export:hover {
+  /* Inverted colors on hover for emphasis */
+  background-color: #3498db;
+  color: white;
+}
+
+.college-stats-table {
+  /* Table layout styling */
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.college-stats-table th,
+.college-stats-table td {
+  /* Common cell styling */
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ecf0f1; /* Light line for row separation */
+}
+
+.college-stats-table th {
+  /* Header cell styling */
+  background-color: #f8f9fa;
+  color: #7f8c8d;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase; /* Makes headers more distinct */
+}
+
+.college-stats-table tr:hover {
+  /* Row hover effect for readability */
+  background-color: #f8f9fa;
+}
+
+.charts-section {
+  /* Layout for chart containers using CSS Grid */
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two-column layout */
+  gap: 20px; /* Space between charts */
+  margin-top: 30px;
+}
+
+.chart-container {
+  /* Card-style container for each chart */
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Light shadow for depth */
+}
+
+.chart-container h3 {
+  /* Subheading for chart section */
+  margin-top: 0;
+  color: #2c3e50;
+  font-size: 1rem;
+}
+
+.chart-placeholder {
+  /* Temporary placeholder for charts */
+  height: 250px;
+  background-color: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7f8c8d; /* Text color for placeholder message */
+  margin-top: 15px;
+}
