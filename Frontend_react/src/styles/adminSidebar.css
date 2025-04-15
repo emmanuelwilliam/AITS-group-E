@@ -1,37 +1,43 @@
 .admin-sidebar {
+  /* Sidebar container: fixed width, dark background, full height */
   width: 250px;
-  background-color: #34495e;
-  color: white;
-  padding: 20px 0;
-  height: 100%;
+  background-color: #34495e; /* Dark blue-gray tone */
+  color: white; /* Text color for all content inside */
+  padding: 20px 0; /* Vertical padding for top and bottom spacing */
+  height: 100%; /* Fills the height of the parent container */
 }
 
 .admin-sidebar ul {
+  /* Removes default list styles */
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
 .admin-sidebar li {
-  padding: 12px 25px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  font-size: 0.95rem;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  /* Individual sidebar item */
+  padding: 12px 25px; /* Adds spacing around each item */
+  cursor: pointer; /* Cursor indicates interactivity */
+  transition: background-color 0.2s; /* Smooth hover effect */
+  font-size: 0.95rem; /* Slightly smaller than default font size */
+  display: flex; /* Flex layout for icon and label alignment */
+  align-items: center; /* Vertically center content */
+  gap: 10px; /* Space between icon and text */
 }
 
 .admin-sidebar li:hover {
+  /* Hover effect: slightly lightens background */
   background-color: rgba(255, 255, 255, 0.1);
 }
 
 .admin-sidebar li.active {
+  /* Active item: blue background and extra visual cue */
   background-color: #3498db;
-  position: relative;
+  position: relative; /* Needed for ::after positioning */
 }
 
 .admin-sidebar li.active::after {
+  /* White accent bar on the right side of the active item */
   content: '';
   position: absolute;
   right: 0;
