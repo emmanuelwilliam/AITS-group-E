@@ -1,24 +1,26 @@
 .admin-dashboard {
+  /* Sets up a full-screen flex container in column layout */
   display: flex;
   flex-direction: column;
   height: 100vh;
   width: 100vw;
-  background-color: #f5f7fa;
-  overflow: hidden;
+  background-color: #f5f7fa; /* Light gray-blue background for overall dashboard */
+  overflow: hidden; /* Prevents overflow from children */
 }
 
 .dashboard-container {
+  /* Flex container inside admin-dashboard, likely for sidebar and main content */
   display: flex;
-  flex: 1;
-  overflow: hidden;
+  flex: 1; /* Takes up remaining vertical space after any header */
+  overflow: hidden; /* Prevents internal scrolling issues or layout bleed */
 }
 
 .main-content {
-  flex: 1;
-  padding: 20px;
-  overflow-y: auto;
-  background-color: #fff;
-  margin: 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  flex: 1; /* Expands to fill available space */
+  padding: 20px; /* Inner spacing for content */
+  overflow-y: auto; /* Enables vertical scrolling for content overflow */
+  background-color: #fff; /* White background for contrast and readability */
+  margin: 10px; /* Space around the content block */
+  border-radius: 8px; /* Rounded corners for softer visual feel */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* Subtle shadow for elevation */
 }
