@@ -81,4 +81,4 @@ const LecturerDashboard = () => {
   );
 };
 
-export default LecturerDashboard; // Export component for use in app
+export default LecturerDashboard; // Export the LecturerDashboard component for use in app
