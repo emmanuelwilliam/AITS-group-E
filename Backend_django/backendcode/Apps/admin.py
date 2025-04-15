@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
         Student,
-        Lecture,
+        Lecturer,
          Administrator,
          CourseUnit,
          Issue,
@@ -13,7 +13,7 @@ from .models import (
 
 # Register your models here.
 admin.site.register(Student)
-admin.site.register(Lecture)
+admin.site.register(Lecturer)
 admin.site.register(Administrator)
 admin.site.register(CourseUnit)
 admin.site.register(Issue)
