@@ -26,4 +26,4 @@ const AdminIssueResolveForm = () => {
   );
 };
 
-export default AdminIssueResolveForm;
+export default AdminIssueResolveForm;// Export AdminIssueResolveForm component
