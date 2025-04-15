@@ -1,64 +1,75 @@
+/* Wrapper for the entire issue tracking section */
 .issue-tracking {
-  padding: 20px;
-  background-color: #ecf0f1;
-  border-radius: 8px;
+  padding: 20px; /* Adds padding inside the wrapper */
+  background-color: #ecf0f1; /* Light gray background color */
+  border-radius: 8px; /* Rounds the corners of the wrapper */
 }
 
+/* Heading for the issue tracking section */
 .issue-tracking h2 {
-  margin-bottom: 20px;
-  color: #2c3e50;
+  margin-bottom: 20px; /* Adds space below the heading */
+  color: #2c3e50; /* Dark blue-gray color for the heading */
 }
 
+/* List of issues inside the issue tracking section */
 .issues-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+  display: flex; /* Uses flexbox for the list layout */
+  flex-direction: column; /* Stacks the items vertically */
+  gap: 15px; /* Adds space between the items */
 }
 
+/* Card style for each issue */
 .issue-card {
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: white; /* White background for each issue card */
+  padding: 20px; /* Adds padding inside the issue card */
+  border-radius: 8px; /* Rounds the corners of the issue card */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Adds subtle shadow to the card */
 }
 
+/* Header of each issue card */
 .issue-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+  display: flex; /* Uses flexbox for the header layout */
+  justify-content: space-between; /* Space out the content horizontally */
+  align-items: center; /* Aligns items vertically in the center */
+  margin-bottom: 10px; /* Adds space below the header */
 }
 
+/* Title for the issue inside the card */
 .issue-header h3 {
-  margin: 0;
-  color: #2c3e50;
+  margin: 0; /* Removes the default margin */
+  color: #2c3e50; /* Dark blue-gray color for the title */
 }
 
+/* Status label for the issue */
 .status {
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: bold;
-  text-transform: uppercase;
+  padding: 5px 10px; /* Adds padding inside the status label */
+  border-radius: 4px; /* Rounds the corners of the status label */
+  font-size: 14px; /* Sets font size for the status */
+  font-weight: bold; /* Makes the status text bold */
+  text-transform: uppercase; /* Makes the status text uppercase */
 }
 
+/* Status when the issue is "submitted" */
 .status.submitted {
-  background-color: #3498db;
-  color: white;
+  background-color: #3498db; /* Blue background color */
+  color: white; /* White text color */
 }
 
+/* Status when the issue is "pending" */
 .status.pending {
-  background-color: #f1c40f;
-  color: white;
+  background-color: #f1c40f; /* Yellow background color */
+  color: white; /* White text color */
 }
 
+/* Status when the issue is "resolved" */
 .status.resolved {
-  background-color: #2ecc71;
-  color: white;
+  background-color: #2ecc71; /* Green background color */
+  color: white; /* White text color */
 }
 
+/* Footer section of each issue card */
 .issue-footer {
-  margin-top: 10px;
-  font-size: 14px;
-  color: #7f8c8d;
+  margin-top: 10px; /* Adds space above the footer */
+  font-size: 14px; /* Sets font size for the footer text */
+  color: #7f8c8d; /* Light gray color for the footer text */
 }
