@@ -170,4 +170,4 @@ const LecturerRegister = () => {
   );
 };
 
-export default LecturerRegister; // Export component
+export default LecturerRegister; // Export LecturerRegister component
