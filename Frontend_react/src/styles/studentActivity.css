@@ -1,75 +1,89 @@
+/* Student Activity Section */
 .student-activity {
-    padding: 20px;
-  }
-  
-  .student-activity h2 {
-    margin-bottom: 25px;
-    color: #2c3e50;
-  }
-  
-  .activity-filters {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
-  
-  .filter-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  
-  .filter-group label {
-    font-size: 0.9rem;
-    color: #7f8c8d;
-  }
-  
-  .filter-group select {
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    min-width: 150px;
-  }
-  
-  .activity-list {
-    margin-top: 20px;
-  }
-  
-  .activity-item {
-    background-color: white;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    margin-bottom: 10px;
-  }
-  
-  .activity-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 8px;
-  }
-  
-  .student {
-    font-weight: 600;
-    color: #2c3e50;
-  }
-  
-  .time {
-    color: #7f8c8d;
-    font-size: 0.85rem;
-  }
-  
-  .activity-details {
-    display: flex;
-    justify-content: space-between;
-  }
-  
-  .action {
-    color: #3498db;
-  }
-  
-  .course {
-    color: #7f8c8d;
-    font-size: 0.85rem;
-  }
+  padding: 20px; /* Adds padding around the section */
+}
+
+/* Heading in the Student Activity Section */
+.student-activity h2 {
+  margin-bottom: 25px; /* Adds margin below the heading */
+  color: #2c3e50; /* Dark color for the heading */
+}
+
+/* Activity Filters Section */
+.activity-filters {
+  display: flex; /* Uses flexbox for layout */
+  justify-content: space-between; /* Distributes space between filter groups */
+  margin-bottom: 20px; /* Adds space below the filter section */
+}
+
+/* Individual Filter Group */
+.filter-group {
+  display: flex; /* Aligns items in a row */
+  align-items: center; /* Vertically centers the filter group */
+  gap: 10px; /* Adds space between the filter label and select dropdown */
+}
+
+/* Label inside the Filter Group */
+.filter-group label {
+  font-size: 0.9rem; /* Smaller font size for the label */
+  color: #7f8c8d; /* Lighter color for the label */
+}
+
+/* Select Dropdown inside the Filter Group */
+.filter-group select {
+  padding: 8px 12px; /* Adds padding inside the select dropdown */
+  border: 1px solid #ddd; /* Light border color */
+  border-radius: 4px; /* Rounded corners for the dropdown */
+  font-size: 0.9rem; /* Sets the font size inside the dropdown */
+  min-width: 150px; /* Ensures the dropdown has a minimum width */
+}
+
+/* Activity List Section */
+.activity-list {
+  margin-top: 20px; /* Adds space above the activity list */
+}
+
+/* Individual Activity Item */
+.activity-item {
+  background-color: white; /* White background for each activity item */
+  padding: 15px; /* Adds padding inside the activity card */
+  border-radius: 8px; /* Rounded corners for the activity card */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Soft shadow for the card */
+  margin-bottom: 10px; /* Adds space below each activity item */
+}
+
+/* Activity Header */
+.activity-header {
+  display: flex; /* Uses flexbox for layout */
+  justify-content: space-between; /* Distributes space between the student name and time */
+  margin-bottom: 8px; /* Adds space below the header */
+}
+
+/* Student Name Styling */
+.student {
+  font-weight: 600; /* Makes the student name bold */
+  color: #2c3e50; /* Dark color for the student's name */
+}
+
+/* Time Styling */
+.time {
+  color: #7f8c8d; /* Lighter color for the time */
+  font-size: 0.85rem; /* Smaller font size for the time */
+}
+
+/* Activity Details Section */
+.activity-details {
+  display: flex; /* Uses flexbox for layout */
+  justify-content: space-between; /* Distributes space between course and action */
+}
+
+/* Action Text */
+.action {
+  color: #3498db; /* Blue color for the action text */
+}
+
+/* Course Styling */
+.course {
+  color: #7f8c8d; /* Lighter color for the course text */
+  font-size: 0.85rem; /* Smaller font size for the course text */
+}
