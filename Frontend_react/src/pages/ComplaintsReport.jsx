@@ -25,4 +25,4 @@ const ComplaintsReport = () => {
   );
 };
 
-export default ComplaintsReport;
+export default ComplaintsReport;// Export ComplaintsReport component
