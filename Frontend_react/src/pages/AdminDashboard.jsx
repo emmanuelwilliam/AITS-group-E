@@ -43,4 +43,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard; // Export the AdminDashboard component
+export default AdminDashboard; // Export AdminDashboard component
