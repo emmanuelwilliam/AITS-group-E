@@ -47,4 +47,4 @@ const Verification = () => {
   );
 };
 
-export default Verification;
+export default Verification;// Export Verification component
