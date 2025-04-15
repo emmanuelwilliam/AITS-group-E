@@ -18,4 +18,4 @@ const StudentActivity = () => {
   );
 };
 
-export default StudentActivity;
+export default StudentActivity;// Export StudentActivity component
