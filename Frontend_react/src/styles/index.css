@@ -1,17 +1,50 @@
+/* Main dashboard layout wrapper */
 .dashboard {
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* Allows stacking of top bar and main content */
 }
 
+/* Main content area that sits beside the sidebar and under the top bar */
 .main-content {
-  margin-left: 250px; /* Same width as the sidebar */
-  margin-top: 60px; /* Same height as the top bar */
+  margin-left: 250px; /* Offsets sidebar width */
+  margin-top: 60px;    /* Offsets fixed top bar height */
   padding: 20px;
-  width: calc(100% - 250px);
+  width: calc(100% - 250px); /* Keeps content full width minus sidebar */
 }
 
+/* Inner content styling */
 .content {
   background-color: #f5f6fa;
   padding: 20px;
   border-radius: 8px;
+}
+
+/* Media query for responsiveness (for screens smaller than 768px) */
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0; /* Remove the sidebar offset */
+    width: 100%;    /* Full width of the screen */
+  }
+  
+  /* If you have a sidebar, you might want to hide or collapse it in smaller screens */
+  .admin-sidebar {
+    display: none; /* Hides the sidebar on smaller screens */
+  }
+
+  /* Adjust top bar height or layout if needed */
+  .admin-top-bar {
+    padding: 10px 15px;
+    font-size: 14px;
+  }
+  
+  /* Adjust header layout */
+  .header {
+    flex-direction: column; /* Stacks the logo and search bar vertically */
+    padding: 10px;
+  }
+
+  .search-bar input {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
 }
