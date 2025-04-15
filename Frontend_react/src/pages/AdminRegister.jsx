@@ -1,6 +1,6 @@
 import React, { useState } from "react"; // Import React and useState hook
 import { useNavigate } from "react-router-dom"; // Import useNavigate hook from React Router
-import "../styles/register.css"; // Import the CSS styling for the register form
+import "../styles/register.css"; // Import the CSS styling for register form
 
 // Functional component for admin registration
 const AdminRegister = () => {
