@@ -63,6 +63,12 @@ class CourseUnit(models.Model):
         return f"{self.course_code}-{self.course_name}"
 
 class Issue(models.Model):
+    # according to the frontend we have ;
+    #PRIORITY_CHOICES = [
+    #   ('pending', 'pending'),
+    #   ('resolved', 'resolved'),
+    #   ('submitted', 'submitted'),
+    # ]    
     PRIORITY_CHOICES = [
         ('Low', 'Low'),
         ('Medium', 'Medium'),
