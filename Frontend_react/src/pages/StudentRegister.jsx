@@ -256,4 +256,4 @@ try {
   );
 };
 
-export default StudentRegister; // Export the registration component
+export default StudentRegister; // Export the student registration component
