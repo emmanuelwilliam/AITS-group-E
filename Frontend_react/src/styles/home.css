@@ -1,10 +1,11 @@
-/* Updated home.css */
+/* Wrapper ensures full viewport height and column layout */
 .home-wrapper {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
+/* Main background container with overlay and transition for background image */
 .home-container {
   flex: 1;
   min-height: 100vh;
@@ -19,6 +20,7 @@
   background-color: rgba(0, 0, 0, 0.2);
 }
 
+/* Sticky header with frosted glass effect */
 .header {
   width: 100%;
   display: flex;
@@ -34,6 +36,7 @@
   gap: 15px;
 }
 
+/* Layout for top part of header (logo and search) */
 .header-top {
   width: 100%;
   display: flex;
@@ -41,17 +44,20 @@
   align-items: center;
 }
 
+/* Logo container with gap between logo and name */
 .logo-container {
   display: flex;
   align-items: center;
   gap: 15px;
 }
 
+/* Logo image */
 .logo {
   width: 60px;
   height: auto;
 }
 
+/* School/Institution name styling */
 .institution-name {
   font-size: 20px;
   font-weight: bold;
@@ -60,6 +66,7 @@
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
 }
 
+/* Centered search bar container */
 .search-container {
   width: 100%;
   max-width: 800px;
@@ -68,6 +75,7 @@
   margin: 0 auto;
 }
 
+/* Centered and styled search bar */
 .search-bar {
   width: 100%;
   display: flex;
@@ -86,8 +94,9 @@
   color: #333;
 }
 
+/* Content beneath the header, with top padding to offset fixed header */
 .main-content {
-  display: flex; 
+  display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -95,7 +104,7 @@
   padding: 180px 20px 80px;
 }
 
-
+/* Login area with blur and transparency */
 .login-options {
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(5px);
@@ -114,6 +123,7 @@
   text-align: center;
 }
 
+/* Grid layout for icons with spacing and wrapping */
 .icons {
   display: flex;
   justify-content: center;
@@ -159,6 +169,7 @@
   transform: scale(1.05);
 }
 
+/* Footer styling with frosted look */
 .footer {
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(5px);
@@ -192,6 +203,7 @@
   color: rgba(255, 255, 255, 0.9);
 }
 
+/* Layout for quick links, contact info, etc. */
 .footer-links {
   display: flex;
   justify-content: space-around;
@@ -233,6 +245,7 @@
   text-decoration: underline;
 }
 
+/* Social icons row */
 .social-icons {
   display: flex;
   gap: 15px;
@@ -253,6 +266,7 @@
   color: #007bff;
 }
 
+/* Copyright block */
 .copyright {
   text-align: center;
   margin-top: 30px;
@@ -262,6 +276,7 @@
   color: rgba(255, 255, 255, 0.7);
 }
 
+/* Optional date display in top-right */
 .date-display {
   position: absolute;
   top: 20px;
@@ -273,6 +288,7 @@
   border-radius: 4px;
 }
 
+/* Responsive styles */
 @media (max-width: 768px) {
   .header {
     padding: 15px;
