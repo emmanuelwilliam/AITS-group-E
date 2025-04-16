@@ -35,6 +35,7 @@ class User(AbstractUser):
         return f"{self.username}-{self.role.get_role_name_display() if self.role else 'No role'}"
 
 class Student(models.Model):
+    # Model representing a student profile, linked to the User model
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile')
     college = models.CharField(max_length=100)
     
