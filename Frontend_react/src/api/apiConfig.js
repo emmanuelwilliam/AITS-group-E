@@ -15,13 +15,9 @@ const publicRoutes = [
 ];
 
 api.interceptors.request.use(config => {
-    const isPublicRoute = publicRoutes.some(route => config.url.includes(route));
-    
-    if (!isPublicRoute) {
-        const token = localStorage.getItem('token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
 });

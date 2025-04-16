@@ -69,46 +69,45 @@ const StudentRegister = () => {
     return Object.keys(newErrors).length === 0;
   };
   
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
-  if (!validateForm()) return;
-
   setIsSubmitting(true);
-  setErrors({});
 
-try {
-  const studentData = {
-      username: formData.username.trim(),
-      email: formData.email.trim(),
-      password: formData.password,
-      first_name: formData.first_name.trim(),
-      last_name: formData.last_name.trim(),
-      college: formData.college.trim(),
-      role: 'student'
-  };
-
-  console.log('Submitting data:', studentData);
-  
-  const response = await registerStudent(studentData);
-
-  // Check for tokens instead of token
-  if (response && response.tokens) {
-      // Store tokens
-      localStorage.setItem('token', response.tokens.access);
-      localStorage.setItem('refreshToken', response.tokens.refresh);
-      
-      navigate('/verify', { 
-          state: { 
-              email: formData.email, 
-              role: 'student',
-              message: 'Registration successful! Please verify your email'
-          },
-          replace: true 
-      });
-  } else {
-      throw new Error('Registration failed. No tokens received.');
+  if (!validateForm()) {
+    setIsSubmitting(false);
+    return;
   }
-} catch (err) {
+
+  try {
+      const studentData = {
+          username: formData.username.trim(),
+          email: formData.email.trim(),
+          password: formData.password,
+          first_name: formData.first_name.trim(),
+          last_name: formData.last_name.trim(),
+          college: formData.college.trim(),
+      };
+
+      console.log('Submitting data:', studentData);
+      
+      const response = await registerStudent(studentData);
+
+      if (response && response.tokens) {
+          localStorage.setItem('token', response.tokens.access);
+          localStorage.setItem('refreshToken', response.tokens.refresh);
+          
+          navigate('/verify', { 
+              state: { 
+                  email: formData.email, 
+                  role: 'student',
+                  message: 'Registration successful! Please verify your email'
+              },
+              replace: true 
+          });
+      } else {
+          throw new Error('Registration failed. No tokens received.');
+      }
+  } catch (err) {
   console.error('Registration error:', err);
   
   // Improved error handling
@@ -257,3 +256,13 @@ try {
 };
 
 export default StudentRegister; // Export the student registration component
+
+
+
+
+
+
+
+
+
+

@@ -24,36 +24,23 @@ export const registerLecturer = async (lecturerData) => {
   }
 };
 
-export const login = async (credentials) => {
-  try {
-      // First get the JWT token
-      const tokenResponse = await api.post('token/', {
-          username: credentials.username,
-          password: credentials.password
-      });
 
-      if (tokenResponse.data.access) {
-          // Store the token
-          localStorage.setItem('token', tokenResponse.data.access);
-          if (tokenResponse.data.refresh) {
-              localStorage.setItem('refreshToken', tokenResponse.data.refresh);
-          }
-
-          // Get user data with the token
-          const userResponse = await api.get('user-role/');
-          
-          return {
-              token: tokenResponse.data.access,
-              refresh: tokenResponse.data.refresh,
-              user: userResponse.data
-          };
-      }
-      throw new Error('Token not received');
-  } catch (error) {
-      console.error('Login error:', error);
-      throw error.response || error;
-  }
-};
+export async function login(credentials) {
+    try {
+        const response = await api.post('token/', credentials);
+        
+        if (response.data.access) {
+            // Store tokens
+            localStorage.setItem('token', response.data.access);
+            localStorage.setItem('refreshToken', response.data.refresh);
+            return response.data;
+        }
+        throw new Error('Login failed. No token received.');
+    } catch (error) {
+        console.error('Login error:', error);
+        throw error.response?.data || error;
+    }
+}
 
 export const getCurrentUser = async () => {
     try {
