@@ -32,6 +32,7 @@ class LecturerViewSet(viewsets.ModelViewSet):
     queryset = Lecturer.objects.select_related('student','lecturer').all()
     serializer_class = LecturerSerializer
 
+# ViewSet that provides full API access to Administrator objects
 class AdministratorViewSet(viewsets.ModelViewSet):
     queryset = Administrator.objects.all()
     serializer_class = AdministratorSerializer
