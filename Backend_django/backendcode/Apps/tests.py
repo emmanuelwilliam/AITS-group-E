@@ -51,11 +51,13 @@ class AcademicIssueTests(TestCase):
         self.assertTemplateUsed(response, 'issues/issue_list.html')
         self.assertContains(response, 'Test Issue') 
 
-    def test_issue_detail_view(self):
-        """Test that issue detail view returns 200"""
-        response = self.client.get(reverse('issue-detail', args=[self.issue.id]))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'issues/issue_detail.html')
+   def test_issue_detail_view(self):
+    """Test that issue detail view returns 200"""
+    # Ensure the issue detail page loads successfully with correct template
+    response = self.client.get(reverse('issue-detail', args=[self.issue.id]))
+    self.assertEqual(response.status_code, 200)
+    self.assertTemplateUsed(response, 'issues/issue_detail.html')
+
 
     def test_issue_update(self):
     """Test that an issue can be updated"""
