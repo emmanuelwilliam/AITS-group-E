@@ -33,13 +33,16 @@ class AcademicIssueTests(TestCase):
         # Login the test user
         self.client.login(username='testuser', password='testpass123')
 
-    def test_issue_creation(self):
-        """Test that an academic issue can be created"""
-        self.assertEqual(self.issue.title, 'Test Issue')
-        self.assertEqual(self.issue.description, 'This is a test issue')
-        self.assertEqual(self.issue.reported_by, self.user)
-        self.assertEqual(self.issue.course, self.course)
-        self.assertEqual(self.issue.status, 'OPEN')
+   def test_issue_creation(self):
+    """Test that an academic issue can be created"""
+    
+    # Validate that all key fields of the created issue match expected values
+    self.assertEqual(self.issue.title, 'Test Issue')
+    self.assertEqual(self.issue.description, 'This is a test issue')
+    self.assertEqual(self.issue.reported_by, self.user)
+    self.assertEqual(self.issue.course, self.course)
+    self.assertEqual(self.issue.status, 'OPEN')
+
 
     def test_issue_list_view(self):
         """Test that issues list view returns 200"""
