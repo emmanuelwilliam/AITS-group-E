@@ -25,6 +25,7 @@ class StudentForm(forms.ModelForm):
 
 # Form for lecturer model
 class LecturerForm(forms.ModelForm):
+    # Form for creating or editing lecturer profiles and related details
     class Meta:
         model = Lecturer
         fields = [
