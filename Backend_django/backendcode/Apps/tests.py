@@ -58,14 +58,18 @@ class AcademicIssueTests(TestCase):
         self.assertTemplateUsed(response, 'issues/issue_detail.html')
 
     def test_issue_update(self):
-        """Test that an issue can be updated"""
-        new_title = 'Updated Test Issue'
-        response = self.client.post(reverse('issue-update', args=[self.issue.id]), {
-            'title': new_title,
-            'description': self.issue.description,
-            'course': self.course.id,
-            'status': self.issue.status
-        })
+    """Test that an issue can be updated"""
+    
+    new_title = 'Updated Test Issue'
+    
+    # Send a POST request to update the issue with a new title and existing data
+    response = self.client.post(reverse('issue-update', args=[self.issue.id]), {
+        'title': new_title,
+        'description': self.issue.description,
+        'course': self.course.id,
+        'status': self.issue.status
+    })
+
         self.assertEqual(response.status_code, 302)  # Redirect after successful update
         self.issue.refresh_from_db()
         self.assertEqual(self.issue.title, new_title)
