@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 
 # Form for the student model
 class StudentForm(forms.ModelForm):
+    # Form for creating or updating student profiles
     class Meta:
         model = Student
         fields = [
