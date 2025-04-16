@@ -68,6 +68,7 @@ class AdministratorForm(forms.ModelForm):
 
 # Form for Issue model
 class IssueForm(forms.ModelForm):
+    # Form for submitting or updating an academic issue
     class Meta:
         model = Issue
         fields = [
@@ -79,6 +80,7 @@ class IssueForm(forms.ModelForm):
             'priority',
             'status',
         ]
+
 
     reported_date = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
