@@ -72,7 +72,7 @@ def get_user_role(request):
 def register_student(request):
     if request.method == 'POST':
         try:
-            # Log the received data
+            # Log the required data
             print("Received registration data:", request.data)
             
             data = request.data
