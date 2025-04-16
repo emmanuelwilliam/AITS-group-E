@@ -267,9 +267,11 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
 
 
 class PasswordResetConfirmSerializer(serializers.Serializer):
+    # Serializer for handling password reset confirmation input
     token = serializers.CharField()
     new_password = serializers.CharField(write_only=True)
     confirm_password = serializers.CharField(write_only=True)
+
 
     def validate(self, data):
         """Ensure the passwords match"""
