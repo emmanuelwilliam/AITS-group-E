@@ -116,9 +116,11 @@ class IssueForm(forms.ModelForm):
 
 # Form for Notification model
 class NotificationForm(forms.ModelForm):
+    # Form for creating or managing notifications
     class Meta:
         model = Notification
         fields = '__all__'
+
 
     def clean_message(self):
         """Validate notification message length"""
