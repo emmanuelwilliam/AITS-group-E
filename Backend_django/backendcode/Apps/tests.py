@@ -74,18 +74,21 @@ class AcademicIssueTests(TestCase):
         self.issue.refresh_from_db()
         self.assertEqual(self.issue.title, new_title)
 
-    def test_issue_status_change(self):
-        """Test that issue status can be changed"""
-        new_status = 'IN_PROGRESS'
-        response = self.client.post(reverse('issue-update', args=[self.issue.id]), {
-            'title': self.issue.title,
-            'description': self.issue.description,
-            'course': self.course.id,
-            'status': new_status
-        })
-        self.assertEqual(response.status_code, 302)  # Redirect after successful update
-        self.issue.refresh_from_db()
-        self.assertEqual(self.issue.status, new_status)
-
+   def test_issue_status_change(self):
+    """Test that issue status can be changed"""
+    
+    new_status = 'IN_PROGRESS'
+    
+    # Simulate a status update via POST request and verify the change
+    response = self.client.post(reverse('issue-update', args=[self.issue.id]), {
+        'title': self.issue.title,
+        'description': self.issue.description,
+        'course': self.course.id,
+        'status': new_status
+    })
+    
+    self.assertEqual(response.status_code, 302)  # Redirect after successful update
+    self.issue.refresh_from_db()
+    self.assertEqual(self.issue.status, new_status)
 
 
