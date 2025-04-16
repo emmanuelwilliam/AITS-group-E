@@ -52,6 +52,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
     serializer_class = NotificationSerializer
 
 
+# ViewSet that provides full API access to Status objects
 class StatusViewSet(viewsets.ModelViewSet):
     queryset = Status.objects.all()
     serializer_class = StatusSerializer
