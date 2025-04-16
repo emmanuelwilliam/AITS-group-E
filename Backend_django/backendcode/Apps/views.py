@@ -60,37 +60,22 @@ class LoginHistoryViewSet(viewsets.ModelViewSet):
 class UserRoleViewSet(viewsets.ModelViewSet):
     queryset = UserRole.objects.all()
     serializer_class = UserRoleSerializer
-    
-@api_view(['GET'])
-def filter_issues(request):
-    try:
-        status_param = request.GET.get('status', None)
-        issues_qs = Issue.objects.all()
-        if status_param:
-            issues_qs = issues_qs.filter(status=status_param)
-        serializer = IssueSerializer(issues_qs, many=True)
-        return Response(serializer.data)
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
-def get_notifications(request):
-    try:
-        user = request.user
-        if user.is_authenticated:
-            notifications = Notification.objects.filter(user=user)
-            serializer = NotificationSerializer(notifications, many=True)
-            return Response(serializer.data)
-        return Response({"error":"Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+@permission_classes([IsAuthenticated])
+def get_user_role(request):
+    user = request.user
+    return Response({'role': user.role.name if hasattr(user, 'role') else 'unknown'})
 
 @api_view(['POST', 'GET'])
 @permission_classes([AllowAny])
 def register_student(request):
     if request.method == 'POST':
-        data = request.data
         try:
+            # Log the received data
+            print("Received registration data:", request.data)
+            
+            data = request.data
             # Validate required fields
             required_fields = ['username', 'email', 'password', 'first_name', 'last_name']
             for field in required_fields:
@@ -111,8 +96,13 @@ def register_student(request):
                     'error': 'Email already exists'
                 }, status=status.HTTP_400_BAD_REQUEST)
 
-            # Get the student role
-            student_role = UserRole.objects.get(name='student')
+            try:
+                # Get the student role
+                student_role = UserRole.objects.get(name='student')
+            except UserRole.DoesNotExist:
+                # Create the student role if it doesn't exist
+                student_role = UserRole.objects.create(name='student')
+                print("Created new student role")
             
             # Create user with role object
             user = User.objects.create_user(
@@ -120,9 +110,13 @@ def register_student(request):
                 email=data['email'],
                 password=data['password'],
                 first_name=data['first_name'],
-                last_name=data['last_name'],
-                role=student_role
+                last_name=data['last_name']
             )
+            # Set the role after user creation
+            user.role = student_role
+            user.save()
+            
+            print(f"Created user: {user.username} with role: {user.role}")
             
             # Generate tokens
             refresh = RefreshToken.for_user(user)
@@ -144,35 +138,66 @@ def register_student(request):
                 }
             }, status=status.HTTP_201_CREATED)
             
-        except UserRole.DoesNotExist:
-            return Response({
-                'error': 'Student role not found in the system'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as e:
-            print(f"Registration error: {str(e)}")  # For server logs
+            import traceback
+            print("Registration error:", str(e))
+            print("Traceback:", traceback.format_exc())
             return Response({
                 'error': 'Registration failed',
                 'detail': str(e)
-            }, status=status.HTTP_400_BAD_REQUEST)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    return Response({
+        'message': 'Use POST method to register'
+    }, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        
 
 @api_view(['POST', 'GET'])
 @permission_classes([AllowAny])
 def register_lecturer(request):
     if request.method == 'POST':
-        data = request.data
         try:
-            # Get lecturer role
-            lecturer_role = UserRole.objects.get(name='lecturer')
+            data = request.data
+            # Validate required fields
+            required_fields = ['username', 'email', 'password', 'first_name', 'last_name']
+            for field in required_fields:
+                if not data.get(field):
+                    return Response({
+                        'error': f'Missing required field: {field}',
+                        'required_fields': required_fields
+                    }, status=status.HTTP_400_BAD_REQUEST)
+
+            # Check if username or email already exists
+            if User.objects.filter(username=data['username']).exists():
+                return Response({
+                    'error': 'Username already exists'
+                }, status=status.HTTP_400_BAD_REQUEST)
             
-            # Create user
+            if User.objects.filter(email=data['email']).exists():
+                return Response({
+                    'error': 'Email already exists'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            # Get or create the lecturer role
+            lecturer_role, created = UserRole.objects.get_or_create(
+                name='lecturer'
+            )
+            if created:
+                print("Created new lecturer role")
+            
+            # Create user with role object
             user = User.objects.create_user(
                 username=data['username'],
                 email=data['email'],
                 password=data['password'],
                 first_name=data['first_name'],
-                last_name=data['last_name'],
-                role=lecturer_role
+                last_name=data['last_name']
             )
+            # Set the role after user creation
+            user.role = lecturer_role
+            user.save()
+            
+            print(f"Created user: {user.username} with role: {user.role}")
             
             # Generate tokens
             refresh = RefreshToken.for_user(user)
@@ -184,6 +209,8 @@ def register_lecturer(request):
                     'id': user.id,
                     'username': user.username,
                     'email': user.email,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
                     'role': 'lecturer'
                 },
                 'tokens': {
@@ -193,11 +220,14 @@ def register_lecturer(request):
             }, status=status.HTTP_201_CREATED)
             
         except Exception as e:
+            import traceback
+            print("Registration error:", str(e))
+            print("Traceback:", traceback.format_exc())
             return Response({
                 'error': str(e),
                 'detail': 'Registration failed'
             }, status=status.HTTP_400_BAD_REQUEST)
-            
+
     return Response({
         'message': 'Use POST method to register'
     }, status=status.HTTP_405_METHOD_NOT_ALLOWED)
@@ -213,30 +243,49 @@ def register_administrator(request):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET'])
-def get_login_history(request):
-    try:
-        user = request.user
-        if user.is_authenticated:
-            login_history = LoginHistory.objects.filter(user=user)
-            serializer = LoginHistorySerializer(login_history, many=True)
-            return Response(serializer.data)
-        return Response({"error": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-@api_view(['GET'])
-def get_user_role(request):
-    user = request.user
-    if user.is_authenticated:
-        try:
-            user_role = UserRole.objects.get(user=user)
-            serializer = UserRoleSerializer(user_role)
-            return Response(serializer.data)
-        except UserRole.DoesNotExist:
-            return Response({"error":"User role no found"}, status=status.HTTP_404_NOT_FOUND)
-    return Response({"error":"Unauthorized"},status=status.HTTP_401_UNAUTHORIZED)
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def login_view(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
     
+    if not username or not password:
+        return Response({
+            'error': 'Please provide both username and password'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        user = User.objects.get(username=username)
+        
+        if user.check_password(password):
+            # Create login history entry
+            LoginHistory.objects.create(user=user)
+            
+            # Generate tokens
+            refresh = RefreshToken.for_user(user)
+            
+            return Response({
+                'success': True,
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'role': user.role.name if user.role else None
+                },
+                'tokens': {
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                }
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                'error': 'Invalid credentials'
+            }, status=status.HTTP_401_UNAUTHORIZED)
+            
+    except User.DoesNotExist:
+        return Response({
+            'error': 'Invalid credentials'
+        }, status=status.HTTP_401_UNAUTHORIZED)
+
 @api_view(['POST'])
 def reset_password(request):
     username = request.data.get('username')
@@ -297,35 +346,29 @@ def update_student(request, student_id):
         return Response(serializer.data)
     return Response(serializer.errors, status=400)
 
-#view for API error handling
-@api_view(['POST'])
-def login_view(request):
-    username = request.data.get('username')
-    password = request.data.get('password')
-    
-    if not username or not password:
-        return Response({'error': 'Please provide both username and password'},
-                      status=status.HTTP_400_BAD_REQUEST)
-    
+@api_view(['GET'])
+def filter_issues(request):
     try:
-        user = User.objects.get(username=username)
-    except User.DoesNotExist:
-        return Response({'error': 'Invalid credentials'}, 
-                      status=status.HTTP_401_UNAUTHORIZED)
-    
-    if user.check_password(password):
-        # Create login history entry
-        LoginHistory.objects.create(user=user)
-        
-        # Return success response
-        return Response({
-            'message': 'Login successful',
-            'user_id': user.id,
-            'username': user.username
-        }, status=status.HTTP_200_OK)
-    else:
-        return Response({'error': 'Invalid credentials'}, 
-                      status=status.HTTP_401_UNAUTHORIZED)
+        status_param = request.GET.get('status', None)
+        issues_qs = Issue.objects.all()
+        if status_param:
+            issues_qs = issues_qs.filter(status=status_param)
+        serializer = IssueSerializer(issues_qs, many=True)
+        return Response(serializer.data)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def get_notifications(request):
+    try:
+        user = request.user
+        if user.is_authenticated:
+            notifications = Notification.objects.filter(user=user)
+            serializer = NotificationSerializer(notifications, many=True)
+            return Response(serializer.data)
+        return Response({"error":"Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 def serve_home_page(request):
