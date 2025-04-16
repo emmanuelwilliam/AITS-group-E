@@ -36,6 +36,7 @@ class AdministratorViewSet(viewsets.ModelViewSet):
     queryset = Administrator.objects.all()
     serializer_class = AdministratorSerializer
 
+# ViewSet for managing Issue objects with authentication, filtering, search, and ordering support
 class IssueViewSet(viewsets.ModelViewSet):
     queryset = Issue.objects.select_related('lecturer').prefetch_related('notifications').all()
     serializer_class = IssueSerializer
@@ -44,7 +45,7 @@ class IssueViewSet(viewsets.ModelViewSet):
     filterset_fields = ['status', 'priority', 'lecturer']
     search_fields = ['title', 'description']
     ordering_fields = ['reported_date', 'priority']
-    
+
 class NotificationViewSet(viewsets.ModelViewSet):
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
