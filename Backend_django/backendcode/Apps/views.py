@@ -62,9 +62,11 @@ class LoginHistoryViewSet(viewsets.ModelViewSet):
     queryset = LoginHistory.objects.all()
     serializer_class = LoginHistorySerializer
 
+# ViewSet that provides full API access to UserRole objects
 class UserRoleViewSet(viewsets.ModelViewSet):
     queryset = UserRole.objects.all()
     serializer_class = UserRoleSerializer
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
