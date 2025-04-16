@@ -102,13 +102,14 @@ class UserRoleSerializer(serializers.ModelSerializer):
         
 # Model Serializers
 class UserSerializer(serializers.ModelSerializer):
+    # Nested serializer to display role details; accepts role_name separately for input
     role = UserRoleSerializer(read_only=True)
     role_name = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'role', 'role_name', 'first_name', 'last_name']
-    
+
     def create(self, validated_data):
         role_name = validated_data.pop('role_name')
         role = UserRole.objects.get(name=role_name)
