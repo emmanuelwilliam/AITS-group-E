@@ -46,6 +46,7 @@ class IssueViewSet(viewsets.ModelViewSet):
     search_fields = ['title', 'description']
     ordering_fields = ['reported_date', 'priority']
 
+# ViewSet for managing Notification objects using default CRUD operations
 class NotificationViewSet(viewsets.ModelViewSet):
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
