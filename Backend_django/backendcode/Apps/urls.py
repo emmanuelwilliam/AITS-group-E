@@ -19,13 +19,14 @@ from .views import (
     register_student,
     register_lecturer,
     register_administrator,
-    get_login_history,
+    #get_login_history,
     get_user_role,
     get_notifications,
     filter_issues,
     create_issue,
     update_issue,
     delete_issue,
+    login_view,
 )
 
 # Create a router object
@@ -47,6 +48,7 @@ urlpatterns = [
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+    path('login/', login_view, name='login'),
     
     # Registration endpoints
     path('register/student/', register_student, name='register_student'),
@@ -60,7 +62,7 @@ urlpatterns = [
     path('issue/delete/<int:pk>/', delete_issue, name='delete_issue'),
     
     # Other API endpoints
-    path('login-history/', get_login_history, name='get_login_history'),
+    #path('login-history/', get_login_history, name='get_login_history'),
     path('user-role/', get_user_role, name='get_user_role'),
     path('notifications/', get_notifications, name='get_notifications'),
     
