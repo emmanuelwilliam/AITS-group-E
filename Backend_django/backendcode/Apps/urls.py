@@ -55,7 +55,7 @@ urlpatterns = [
     path('register/lecturer/', register_lecturer, name='register_lecturer'),
     path('register/administrator/', register_administrator, name='register_administrator'),
     
-    #Issue management
+    # Issue management
     path('issue/filter/', filter_issues, name='filter_issues'),
     path('issue/create/', create_issue, name='create_issue'),
     path('issue/update/<int:pk>/', update_issue, name='update_issue'),
