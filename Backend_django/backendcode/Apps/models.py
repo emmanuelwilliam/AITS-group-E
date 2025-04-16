@@ -3,16 +3,18 @@ from django.contrib.auth.models import AbstractUser
 import uuid
 
 class UserRole(models.Model):
-    ROLE_CHOICES=[
-        ('student','Student'),
-        ('lecturer','Lecturer'),
-        ('admin','Administrator'),
+    # Model representing different user roles within the system
+    ROLE_CHOICES = [
+        ('student', 'Student'),
+        ('lecturer', 'Lecturer'),
+        ('admin', 'Administrator'),
     ]
     name = models.CharField(max_length=150, blank=True)
-    role_name = models.CharField(max_length=50,unique=True, choices=ROLE_CHOICES)
+    role_name = models.CharField(max_length=50, unique=True, choices=ROLE_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
     verification_token = models.UUIDField(default=uuid.uuid4, editable=False)
     is_verified = models.BooleanField(default=False)
+
 
     class Meta:
         db_table = 'user_roles'
