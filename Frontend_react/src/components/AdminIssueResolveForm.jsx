@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "../styles/adminForms.css";
 
 const AdminIssueResolveForm = () => {
+  // Initialize form data state
   const [formData, setFormData] = useState({
     studentId: "",
     issueType: "transcript",
@@ -12,25 +13,28 @@ const AdminIssueResolveForm = () => {
     priority: "medium"
   });
 
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Hook to programmatically navigate
 
+  // Handle input changes for all form fields
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // Handle form submission
   const handleSubmit = (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent default form behavior
     // API call would go here
     console.log("Issue resolution submitted:", formData);
     alert("Issue resolution recorded successfully!");
-    navigate("/admin/dashboard");
+    navigate("/admin/dashboard"); // Redirect to dashboard after submission
   };
 
   return (
     <div className="admin-form-container">
       <h2>Academic Issue Resolution</h2>
       <form onSubmit={handleSubmit}>
+        {/* Student ID input */}
         <div className="form-group">
           <label>Student ID</label>
           <input
@@ -42,6 +46,7 @@ const AdminIssueResolveForm = () => {
           />
         </div>
 
+        {/* Grouped Issue Type and Priority fields */}
         <div className="form-row">
           <div className="form-group">
             <label>Issue Type</label>
@@ -75,6 +80,7 @@ const AdminIssueResolveForm = () => {
           </div>
         </div>
 
+        {/* Issue Description textarea */}
         <div className="form-group">
           <label>Issue Description</label>
           <textarea
@@ -86,6 +92,7 @@ const AdminIssueResolveForm = () => {
           />
         </div>
 
+        {/* Resolution Details textarea */}
         <div className="form-group">
           <label>Resolution Details</label>
           <textarea
@@ -97,6 +104,7 @@ const AdminIssueResolveForm = () => {
           />
         </div>
 
+        {/* Status selection */}
         <div className="form-group">
           <label>Status</label>
           <select
@@ -112,6 +120,7 @@ const AdminIssueResolveForm = () => {
           </select>
         </div>
 
+        {/* Submit button */}
         <div className="form-actions">
           <button type="submit" className="submit-btn">
             Submit Resolution
