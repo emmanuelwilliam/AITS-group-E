@@ -27,6 +27,7 @@ from .views import (
     update_issue,
     delete_issue,
     login_view,
+    verify_email,
 )
 
 # Create a router object
@@ -54,6 +55,8 @@ urlpatterns = [
     path('register/student/', register_student, name='register_student'),
     path('register/lecturer/', register_lecturer, name='register_lecturer'),
     path('register/administrator/', register_administrator, name='register_administrator'),
+    path('verify-email/', verify_email, name='verify-email'),
+
     
     # Issue management
     path('issue/filter/', filter_issues, name='filter_issues'),

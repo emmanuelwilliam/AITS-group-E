@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 import uuid
+import random
+import string
 
 class UserRole(models.Model):
     # Model representing different user roles within the system
@@ -159,3 +161,16 @@ class PasswordResetToken(models.Model):
 
     def __str__(self):
         return f"Password reset token for {self.user.username}"
+
+
+class EmailVerification(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_verified = models.BooleanField(default=False)
+
+    def generate_code(self):
+        # Generate a 6-digit code
+        self.code = ''.join(random.choices(string.digits, k=6))
+        return self.code
