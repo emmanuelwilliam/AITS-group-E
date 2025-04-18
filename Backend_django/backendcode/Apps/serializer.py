@@ -10,17 +10,17 @@ class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
-   def validate(self, data):
-    username = data.get('username')
-    password = data.get('password')
-    if username and password:
-        user = authenticate(username=username, password=password)
-        if user:
-            if not user.is_active:
-                raise serializers.ValidationError("User account is disabled.")
-            return data  # Return the validated data instead of user
-        raise serializers.ValidationError("Unable to log in with provided credentials.")
-    raise serializers.ValidationError("Must include 'username' and 'password'.")
+    def validate(self, data):
+        username = data.get('username')
+        password = data.get('password')
+        if username and password:
+            user = authenticate(username=username, password=password)
+            if user:
+                if not user.is_active:
+                    raise serializers.ValidationError("User account is disabled.")
+                return data  # Return the validated data instead of user
+            raise serializers.ValidationError("Unable to log in with provided credentials.")
+        raise serializers.ValidationError("Must include 'username' and 'password'.")
 
 # Update the UserRegistrationSerializer
 class UserRegistrationSerializer(serializers.ModelSerializer):
