@@ -1,7 +1,7 @@
 import React, { useState } from "react"; // React and useState hook
 import { useNavigate, useLocation } from "react-router-dom"; // Navigation and location hooks
 import { useAuth } from "../context/AuthContext"; // Custom auth context hook
-import { login } from "../api/authService"; // API call to handle login
+import { getCurrentUser, login } from "../api/authService"; // API call to handle login
 import "../styles/login.css"; // Login form styling
 
 // Asset and icon imports
@@ -41,16 +41,17 @@ const Login = () => {
 
     try {
       // Call login API with credentials and role
-      const { token, refresh, user } = await login({ 
-        username: email, // 'username' used for Django compatibility
+      const data = await login({ 
+        email, // 'username' used for Django compatibility
         password,
-        role 
+        role
       });
+      const user = await getCurrentUser(); // Fetch current user data
 
       // Store login data in auth context
       authLogin({
-        token,
-        refresh,
+        token:data.access,
+        refresh:data.refresh,
         user,
         rememberMe
       });
