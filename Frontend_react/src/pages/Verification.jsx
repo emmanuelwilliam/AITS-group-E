@@ -1,50 +1,55 @@
-import React, { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import "../styles/verification.css";
+import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import  authService  from '../services/authService';
 
-const Verification = () => {
-  const [code, setCode] = useState("");
-  const location = useLocation();
+const VerifyEmail = () => {
+  const { state } = useLocation();
   const navigate = useNavigate();
-  
-  // Redirect if no email in state
-  useEffect(() => {
-    if (!location.state?.email) {
-      navigate('/', { replace: true });
-    }
-  }, [location, navigate]);
+  const [code, setCode] = useState('');
+  const [error, setError] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
 
-  const email = location.state?.email;
-  
-  if (!email) return null; // Prevent rendering while redirecting
-
-  const handleSubmit = (e) => {
+  const handleVerify = async (e) => {
     e.preventDefault();
-    // Add your verification logic here
-    alert(`Verification code ${code} submitted for ${email}`);
+    setIsVerifying(true);
+    
+    try {
+      const response = await authService.verifyEmail(state.email, code);
+      
+      if (response.success) {
+        // Store final tokens
+        localStorage.setItem('token', response.tokens.access);
+        localStorage.setItem('refreshToken', response.tokens.refresh);
+        
+        navigate('/dashboard');  // Redirect after successful verification
+      }
+    } catch (err) {
+      setError(err.message || 'Verification failed');
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   return (
-    <div className="verification-container">
-      <h2>Verify Your Account</h2>
-      <p>We've sent a verification code to {email}</p>
+    <div>
+      <h2>Verify Your Email</h2>
+      <p>We sent a code to {state?.email}</p>
       
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleVerify}>
         <input
           type="text"
-          placeholder="Enter 4-digit code"
           value={code}
           onChange={(e) => setCode(e.target.value)}
-          maxLength={4}
+          placeholder="Enter verification code"
+          required
         />
-        <button type="submit">Verify</button>
+        <button type="submit" disabled={isVerifying}>
+          {isVerifying ? 'Verifying...' : 'Verify'}
+        </button>
+        {error && <p className="error">{error}</p>}
       </form>
-      
-      <p className="back-link">
-        <Link to="/">Back to Login</Link>
-      </p>
     </div>
   );
 };
 
-export default Verification;// Export Verification component
+export default VerifyEmail;
