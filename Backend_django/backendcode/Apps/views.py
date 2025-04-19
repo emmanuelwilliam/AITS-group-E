@@ -129,6 +129,9 @@ def register_student(request):
             
             print(f"Created user: {user.username} with role: {user.role}")
             
+            # Generate okens even for inactive users
+            refresh = RefreshToken.for_user(user)
+
             # Create verification record
             verification = EmailVerification.objects.create(
                 user=user,
@@ -158,7 +161,11 @@ def register_student(request):
                 'message': 'Registration successful. Please check your email for verification code.',
                 'user': {
                     'email': user.email,
-                    'username': user.username
+                    'username': user.username,
+                },    
+                'tokens':{ #Include these for immediate login after verification
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
                 }
             }, status=status.HTTP_201_CREATED)
             
@@ -454,7 +461,7 @@ class IndexView(TemplateView):
 @permission_classes([AllowAny])
 def verify_email(request):
     try:
-        email = request.data.get('email')
+        email = request.data.get('email').lower()
         code = request.data.get('code')
 
         user = User.objects.get(email=email)
