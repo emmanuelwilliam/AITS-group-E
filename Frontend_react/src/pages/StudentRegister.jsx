@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { registerStudent } from '../services/authService';  
+import  authService   from '../services/authService';  
 import '../styles/register.css';
 
 // Student registration component
@@ -90,7 +90,7 @@ const handleSubmit = async (e) => {
 
       console.log('Submitting data:', studentData);
       
-      const response = await registerStudent(studentData);
+      const response = await authService.registerStudent(studentData);
 
       if (response && response.tokens) {
           localStorage.setItem('token', response.tokens.access);
@@ -99,6 +99,7 @@ const handleSubmit = async (e) => {
           navigate('/verify', { 
               state: { 
                   email: formData.email, 
+                  tempTokens: response.tokens, // Pass tokens temporarily
                   role: 'student',
                   message: 'Registration successful! Please verify your email'
               },
