@@ -25,7 +25,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
 from django.core.mail import send_mail
 from datetime import timedelta
-import traceback
 
 
 # DRF Viewsets
@@ -78,12 +77,7 @@ class UserRoleViewSet(viewsets.ModelViewSet):
 @permission_classes([IsAuthenticated])
 def get_user_role(request):
     user = request.user
-    return Response({
-        'id': user.id,
-        'username': user.username,
-        'email': user.email,
-        'role': user.role.name if user.role else None,
-    })
+    return Response({'role': user.role.name if hasattr(user, 'role') else 'unknown'})
 
 @api_view(['POST', 'GET'])
 @permission_classes([AllowAny])
@@ -417,68 +411,7 @@ def login_view(request):
         print("LOGIN ERROR:", str(e))
         print(traceback.format_exc())
         return Response({'error': 'Internal server error'}, status=500)
-    
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def login_redirect(request):
-    username = request.data.get('username')
-    password = request.data.get('password')
 
-    if not username or not password:
-        return Response({
-            'error': 'Please provide both username and password'
-        }, status=status.HTTP_400_BAD_REQUEST)
-
-    try:
-        user = User.objects.get(username=username)
-
-        if not user.is_active:
-            return Response({
-                'error': 'Account is not active. Please verify your email.'
-            }, status=status.HTTP_403_FORBIDDEN)
-
-        if user.check_password(password):
-            refresh = RefreshToken.for_user(user)
-
-            # Determine the user's role and redirect accordingly
-            role = user.role.name if user.role else None
-
-            if role == 'student':
-                redirect_url = '/student/dashboard'
-            elif role == 'lecturer':
-                redirect_url = '/lecturer/dashboard'
-            elif role == 'administrator':
-                redirect_url = '/admin/dashboard'
-            else:
-                redirect_url = '/'
-
-            return Response({
-                'success': True,
-                'user': {
-                    'id': user.id,
-                    'username': user.username,
-                    'role': role
-                },
-                'tokens': {
-                    'refresh': str(refresh),
-                    'access': str(refresh.access_token),
-                },
-                'redirect_url': redirect_url
-            }, status=status.HTTP_200_OK)
-        else:
-            return Response({
-                'error': 'Invalid credentials'
-            }, status=status.HTTP_401_UNAUTHORIZED)
-
-    except User.DoesNotExist:
-        return Response({
-            'error': 'Invalid credentials'
-        }, status=status.HTTP_401_UNAUTHORIZED)
-
-    except Exception as e:
-        print("LOGIN REDIRECT ERROR:", str(e))
-        print(traceback.format_exc())
-        return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 def reset_password(request):
