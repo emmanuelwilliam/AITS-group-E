@@ -1,17 +1,13 @@
-import React, { useState } from "react"; // React and useState hook
-import { useNavigate, useLocation } from "react-router-dom"; // Navigation and location hooks
-import { useAuth } from "../context/AuthContext"; // Custom auth context hook
-import { getCurrentUser, login } from "../api/authService"; // API call to handle login
-import "../styles/login.css"; // Login form styling
-
-// Asset and icon imports
+import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import authService from "../services/authService";
+import "../styles/login.css";
 import MakerereLogo from "../assets/Makerere Logo.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faLock, faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
-// Login component definition
 const Login = () => {
-  // State variables to track form inputs and UI behavior
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -19,44 +15,39 @@ const Login = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const location = useLocation(); // Access passed location state
-  const navigate = useNavigate(); // Navigation hook
-  const { login: authLogin } = useAuth(); // Auth context login method
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { login: authLogin } = useAuth();
 
-  // Determine role passed via location or default to "student"
   const role = location.state?.role || "student";
 
-  // Handle form submission
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent default form submission
-    setError(""); // Clear any previous error
-    setIsLoading(true); // Show loading state
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
 
-    // Basic validation
     if (!email || !password) {
-      setError("Please enter both email and password");
+      setError("Please enter both email/username and password");
       setIsLoading(false);
       return;
     }
 
     try {
-      // Call login API with credentials and role
-      const data = await login({ 
-        email, // 'username' used for Django compatibility
+      // Updated to send 'username' instead of 'email' to match Django expectations
+      const data = await authService.login({ 
+        username: email.trim(),  // Key fix: Changed from 'email' to 'username'
         password,
-        role
       });
-      const user = await getCurrentUser(); // Fetch current user data
 
-      // Store login data in auth context
+      const user = await authService.getCurrentUser();
+      
       authLogin({
-        token:data.access,
-        refresh:data.refresh,
+        token: data.access,
+        refresh: data.refresh,
         user,
         rememberMe
       });
 
-      // Redirect based on user role
       switch (user.role?.toLowerCase()) {
         case "student":
           navigate("/dashboard");
@@ -71,17 +62,27 @@ const Login = () => {
           navigate("/dashboard");
       }
     } catch (err) {
-      console.error("Login error:", err); // Log any errors
-      setError(
-        err.response?.data?.detail || 
-        "Invalid credentials. Please try again."
-      );
+      console.error("Login error:", err);
+      // Improved error handling
+      let errorMessage = "Invalid credentials. Please try again.";
+      if (err.response?.data) {
+        // Handle Django-style field errors
+        const errors = [];
+        for (const key of Object.keys(err.response.data)) {
+          if (Array.isArray(err.response.data[key])) {
+            errors.push(...err.response.data[key]);
+          } else {
+            errors.push(err.response.data[key]);
+          }
+        }
+        errorMessage = errors.join(" ");
+      }
+      setError(errorMessage);
     } finally {
-      setIsLoading(false); // Reset loading state
+      setIsLoading(false);
     }
   };
 
-  // JSX return for login form
   return (
     <div className="login-container">
       <div className="login-box">
@@ -89,28 +90,25 @@ const Login = () => {
         <h2>Welcome to MAK Academic Issue Tracking System</h2>
         <p className="role-info">Logging in as: {role.charAt(0).toUpperCase() + role.slice(1)}</p>
         
-        {/* Error message if login fails */}
         {error && <div className="error-message">{error}</div>}
 
         <form onSubmit={handleSubmit}>
-          {/* Email/Username input */}
           <div className="input-group">
             <label htmlFor="email">Email/Username</label>
             <div className="input-container">
               <FontAwesomeIcon icon={faEnvelope} className="input-icon" />
               <input
                 id="email"
-                type="text" // Support both email and usernames
+                type="text"
                 placeholder="Enter your email or username"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value.trim())} // Added trim
                 required
                 autoComplete="username"
               />
             </div>
           </div>
 
-          {/* Password input with show/hide toggle */}
           <div className="input-group">
             <label htmlFor="password">Password</label>
             <div className="input-container">
@@ -132,7 +130,6 @@ const Login = () => {
             </div>
           </div>
 
-          {/* Remember me and forgot password options */}
           <div className="options">
             <label className="remember-me">
               <input
@@ -151,7 +148,6 @@ const Login = () => {
             </button>
           </div>
 
-          {/* Login button */}
           <button 
             type="submit" 
             className="login-btn"
@@ -161,7 +157,6 @@ const Login = () => {
           </button>
         </form>
 
-        {/* Registration redirect */}
         <div className="register-link">
           Don't have an account?{" "}
           <button 
@@ -176,4 +171,4 @@ const Login = () => {
   );
 };
 
-export default Login; // Export login component
+export default Login;
