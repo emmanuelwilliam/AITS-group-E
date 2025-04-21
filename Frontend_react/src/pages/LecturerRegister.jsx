@@ -1,10 +1,9 @@
-import React, { useState } from "react"; // React and useState hook
-import { useNavigate } from "react-router-dom"; // Hook to navigate programmatically
-import "../styles/register.css"; // CSS for registration styling
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import authService from "../services/authService";
+import "../styles/register.css";
 
-// Component for lecturer registration form
 const LecturerRegister = () => {
-  // State to track form input values
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -15,18 +14,15 @@ const LecturerRegister = () => {
     confirmPassword: ""
   });
 
-  // State to track form validation errors
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
-  const navigate = useNavigate(); // Hook to redirect after registration
-
-  // Update formData when an input field changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Function to validate the form fields
   const validateForm = () => {
     const newErrors = {};
     if (!formData.firstName) newErrors.firstName = "First name is required";
@@ -42,43 +38,45 @@ const LecturerRegister = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Submit form and handle registration logic
-  const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent default form submit behavior
-    if (!validateForm()) return; // Stop if form is invalid
+  // LecturerRegister.jsx
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (isSubmitting) return;
+  if (!validateForm()) return;
 
-    try {
-      // Send registration data to backend
-      const response = await fetch("/api/register/lecturer", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, role: "lecturer" }) // Include role in request
-      });
+  setIsSubmitting(true);
 
-      const data = await response.json(); // Parse response
+  try {
+    // Use authService instead of direct fetch
+    await authService.registerLecturer({
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      email: formData.webmail,
+      username: formData.webmail,
+      contact_number: formData.contact,
+      department: formData.department,
+      password: formData.password
+    });
 
-      if (response.ok) {
-        // Redirect to verification page if successful
-        navigate("/verify", { state: { email: formData.webmail, role: "lecturer" } });
-      } else {
-        // Show error message from response
-        setErrors({ form: data.message || "Registration failed" });
-      }
-    } catch (error) {
-      console.error("Error:", error); // Log unexpected error
-      setErrors({ form: "An error occurred. Please try again." }); // Show generic error message
-    }
-  };
+    navigate("/verify", { 
+      state: { email: formData.webmail, role: "lecturer" }
+    });
 
-  // JSX for the registration form layout
+  } catch (error) {
+    console.error("Registration Error:", error);
+    setErrors({ form: error.message || "Registration failed" });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
   return (
     <div className="register-container">
       <div className="register-box">
         <h2>Lecturer Registration</h2>
-        {/* Show form-level error if any */}
         {errors.form && <div className="error-message">{errors.form}</div>}
         <form onSubmit={handleSubmit}>
-          {/* First and Last Name */}
+          {/* First and Last Name Row */}
           <div className="form-row">
             <div className="form-group">
               <label>First Name</label>
@@ -87,6 +85,7 @@ const LecturerRegister = () => {
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
+                disabled={isSubmitting}
               />
               {errors.firstName && <span className="error">{errors.firstName}</span>}
             </div>
@@ -97,12 +96,13 @@ const LecturerRegister = () => {
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
+                disabled={isSubmitting}
               />
               {errors.lastName && <span className="error">{errors.lastName}</span>}
             </div>
           </div>
 
-          {/* Webmail input */}
+          {/* Webmail Input */}
           <div className="form-group">
             <label>Webmail</label>
             <input
@@ -110,11 +110,12 @@ const LecturerRegister = () => {
               name="webmail"
               value={formData.webmail}
               onChange={handleChange}
+              disabled={isSubmitting}
             />
             {errors.webmail && <span className="error">{errors.webmail}</span>}
           </div>
 
-          {/* Contact and Department */}
+          {/* Contact and Department Row */}
           <div className="form-row">
             <div className="form-group">
               <label>Contact</label>
@@ -123,6 +124,7 @@ const LecturerRegister = () => {
                 name="contact"
                 value={formData.contact}
                 onChange={handleChange}
+                disabled={isSubmitting}
               />
               {errors.contact && <span className="error">{errors.contact}</span>}
             </div>
@@ -133,12 +135,13 @@ const LecturerRegister = () => {
                 name="department"
                 value={formData.department}
                 onChange={handleChange}
+                disabled={isSubmitting}
               />
               {errors.department && <span className="error">{errors.department}</span>}
             </div>
           </div>
 
-          {/* Password and Confirm Password */}
+          {/* Password and Confirm Password Row */}
           <div className="form-row">
             <div className="form-group">
               <label>Password</label>
@@ -147,6 +150,7 @@ const LecturerRegister = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
+                disabled={isSubmitting}
               />
               {errors.password && <span className="error">{errors.password}</span>}
             </div>
@@ -157,17 +161,24 @@ const LecturerRegister = () => {
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
+                disabled={isSubmitting}
               />
               {errors.confirmPassword && <span className="error">{errors.confirmPassword}</span>}
             </div>
           </div>
 
-          {/* Submit button */}
-          <button type="submit" className="submit-btn">Register</button>
+          {/* Submit Button */}
+          <button 
+            type="submit" 
+            className="submit-btn"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Registering..." : "Register"}
+          </button>
         </form>
       </div>
     </div>
   );
 };
 
-export default LecturerRegister; // Export LecturerRegister component
+export default LecturerRegister;
