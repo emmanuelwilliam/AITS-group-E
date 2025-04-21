@@ -1,23 +1,20 @@
-import api from './apiConfig';
+import axios from "axios";
 
-export const login = async (emailOrUsername, password) => {
-    try {
-        const response = await api.post('token/', {
-            username: emailOrUsername, // 'username' used for Django compatibility
-            password
-        });
+const API_URL = 'http://127.0.0.1:8000/api/';
 
-        if (response.data.access) {
-            localStorage.setItem('token', response.data.access);
-            localStorage.setItem('refreshToken', response.data.refresh);
-            return response.data;
-        }
-        throw new Error('No access token received');
-    } catch (error) {
-        console.error('Login error:', error);
-        throw error.response?.data || error;
+// Create an Axios instance
+const api = axios.create({
+    baseURL: API_URL,
+  });
+  
+  // Add a request interceptor to include the access token
+  api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-};
+    return config;
+  });
 
 export const registerStudent = async (studentData) => {
     try {
@@ -44,6 +41,76 @@ export const registerStudent = async (studentData) => {
     }
 };
 
+export const registerLecturer = async (lecturerData) => {
+    try {
+        const response = await axios.post(`${API_URL}register/lecturer/`, lecturerData);
+        console.log('Lecturer registration success:', response.data);
+
+        if (response.data.success) {
+            return {
+                success: true,
+                user: response.data.user,
+                tokens: response.data.tokens,
+                message: response.data.message,
+            };
+        }
+
+        throw new Error(response.data.error || 'Lecturer registration failed');
+    } catch (error) {
+        console.error('Lecturer registration error:', error);
+        throw {
+            message: error.message || 'Lecturer registration failed',
+            status: error.response?.status,
+            details: error.response?.data
+        };
+    }
+};
+
+export const registerAdministrator = async (adminData) => {
+    try {
+        const response = await axios.post(`${API_URL}register/administrator/`, adminData);
+        console.log('Admin registration success:', response.data);
+
+        if (response.data.success) {
+            return {
+                success: true,
+                user: response.data.user,
+                tokens: response.data.tokens,
+                message: response.data.message,
+            };
+        }
+
+        throw new Error(response.data.error || 'Administrator registration failed');
+    } catch (error) {
+        console.error('Administrator registration error:', error);
+        throw {
+            message: error.message || 'Administrator registration failed',
+            status: error.response?.status,
+            details: error.response?.data
+        };
+    }
+};
+
+
+export const login = async ({ username, password }) => {
+    try {
+      const response = await axios.post(`${API_URL}login/`, {
+        username,
+        password
+      });
+  
+      // Save tokens to local storage
+      const { access, refresh } = response.data.tokens;
+      localStorage.setItem('access_token', access);
+      localStorage.setItem('refresh_token', refresh);
+  
+      return response.data;
+    } catch (error) {
+      console.error('Login error:', error.response?.data || error.message);
+      throw error.response?.data || error;
+    }
+  };
+  
 export const verifyEmail = async (email, code) => {
     try {
         console.log("Sending verification request for:", email);
@@ -65,6 +132,7 @@ export const verifyEmail = async (email, code) => {
         throw error;
     }
 };
+
 export const getCurrentUser = async () => {
     try {
         const token = localStorage.getItem('token');
