@@ -1,10 +1,9 @@
-import React, { useState } from "react"; // Import React and useState hook
-import { useNavigate } from "react-router-dom"; // Import useNavigate hook from React Router
-import "../styles/register.css"; // Import the CSS styling for register form
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import authService from "../services/authService"; // 🔌 Import auth service
+import "../styles/register.css";
 
-// Functional component for admin registration
 const AdminRegister = () => {
-  // useState to handle form input values
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -14,17 +13,14 @@ const AdminRegister = () => {
     confirmPassword: ""
   });
 
-  // useState to track form validation errors
   const [errors, setErrors] = useState({});
-  const navigate = useNavigate(); // Hook to navigate programmatically
+  const navigate = useNavigate();
 
-  // Function to update form data on input change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Function to validate form input values before submission
   const validateForm = () => {
     const newErrors = {};
     if (!formData.firstName) newErrors.firstName = "First name is required";
@@ -39,34 +35,33 @@ const AdminRegister = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Function to handle form submission
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent default form submission behavior
-    if (!validateForm()) return; // Stop if validation fails
-    
+    e.preventDefault();
+    if (!validateForm()) return;
+
     try {
-      // Send POST request to server to register admin
-      const response = await fetch("/api/register/admin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, role: "admin" })
-      });
-      
-      const data = await response.json(); // Parse JSON response
-      if (response.ok) {
-        // Navigate to verification page on success
-        navigate("/verify", { state: { email: formData.email, role: "admin" } });
+      const payload = {
+        username: formData.email, // Using email as username
+        email: formData.email,
+        password: formData.password,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+      };
+
+      const response = await authService.registerAdmin(payload);
+      if (response?.success) {
+        navigate("/verify", {
+          state: { email: formData.email, role: "administrator" }
+        });
       } else {
-        // Show error message returned by server
-        setErrors({ form: data.message || "Registration failed" });
+        setErrors({ form: response.message || "Registration failed" });
       }
     } catch (error) {
-      console.error("Error:", error); // Log error in console
-      setErrors({ form: "An error occurred. Please try again." }); // Set general error message
+      console.error("Admin registration error:", error);
+      setErrors({ form: error.message || "An error occurred. Please try again." });
     }
   };
 
-  // JSX for the registration form UI
   return (
     <div className="register-container">
       <div className="register-box">
@@ -149,4 +144,4 @@ const AdminRegister = () => {
   );
 };
 
-export default AdminRegister; // Export the component for use elsewhere
+export default AdminRegister;
