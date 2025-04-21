@@ -150,7 +150,7 @@ class LoginHistory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='login_history')
     ip_address = models.GenericIPAddressField()
     login_time = models.DateTimeField(auto_now_add=True)
-    session_time = models.DurationField()
+    session_time = models.DateTimeField()
 
 
 class PasswordResetToken(models.Model):
