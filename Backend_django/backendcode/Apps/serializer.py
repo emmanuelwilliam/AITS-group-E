@@ -98,7 +98,7 @@ class VerifyEmailSerializer(serializers.Serializer):
 class UserRoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserRole
-        fields = ['id', 'name']
+        fields = ['id', 'role_name']
         
 # Model Serializers
 class UserSerializer(serializers.ModelSerializer):
@@ -112,7 +112,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         role_name = validated_data.pop('role_name')
-        role = UserRole.objects.get(name=role_name)
+        role = UserRole.objects.get(role_name=role_name)
         user = User.objects.create(**validated_data, role=role)
         return user
 
