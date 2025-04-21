@@ -78,7 +78,12 @@ class UserRoleViewSet(viewsets.ModelViewSet):
 @permission_classes([IsAuthenticated])
 def get_user_role(request):
     user = request.user
-    return Response({'role': user.role.name if hasattr(user, 'role') else 'unknown'})
+    return Response({
+        'id': user.id,
+        'username': user.username,
+        'email': user.email,
+        'role': user.role.name if user.role else None,
+    })
 
 @api_view(['POST', 'GET'])
 @permission_classes([AllowAny])
