@@ -21,40 +21,6 @@ const privateAxios = axios.create({
   timeout: 10000,
 });
 
-// Add interceptors to the privateAxios instance
-privateAxios.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    } else {
-      console.warn("No access token found. Redirecting to login...");
-      window.location.href = "/login";
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-privateAxios.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    if (error.response?.status === 401) {
-      console.error("Unauthorized! Attempting token refresh...");
-      try {
-        await authService.refreshToken();
-        return privateAxios.request(error.config);
-      } catch (refreshError) {
-        console.error("Token refresh failed. Redirecting to login...");
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-        window.location.href = "/login";
-      }
-    }
-    return Promise.reject(error);
-  }
-);
-
 // 🔧 Auth Service
 const authService = {
   // Student Registration (uses publicAxios)
@@ -113,12 +79,11 @@ const authService = {
   },
 
   // Login (uses publicAxios)
-  login: async (credentials) => {
+  login: async ({ username, password }) => {
     try {
-      const response = await publicAxios.post("login/", credentials, {
-        headers: {
-          "Content-Type": "application/json",
-        },
+      const response = await publicAxios.post("login/", {
+        username,
+        password,
       });
 
       if (response.data?.tokens?.access && response.data?.tokens?.refresh) {
@@ -185,5 +150,39 @@ const authService = {
     }
   },
 };
+
+// Add interceptors after authService is defined
+privateAxios.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      console.warn("No access token found. Redirecting to login...");
+      window.location.href = "/login";
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+privateAxios.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      console.error("Unauthorized! Attempting token refresh...");
+      try {
+        await authService.refreshToken();
+        return privateAxios.request(error.config);
+      } catch (refreshError) {
+        console.error("Token refresh failed. Redirecting to login...");
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        window.location.href = "/login";
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default authService;
