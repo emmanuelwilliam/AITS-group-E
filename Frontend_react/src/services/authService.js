@@ -65,6 +65,42 @@ const authService = {
     }
   },
 
+   // Add Lecturer Registration
+   registerLecturer: async (userData) => {
+    try {
+      const response = await publicAxios.post('register/lecturer/', userData);
+      if (response.data?.tokens) {
+        localStorage.setItem('access_token', response.data.tokens.access);
+        localStorage.setItem('refresh_token', response.data.tokens.refresh);
+      }
+      return response.data;
+    } catch (error) {
+      console.error('Lecturer registration error:', {
+        message: error.response?.data?.error || error.message,
+        status: error.response?.status,
+      });
+      throw error.response?.data || error;
+    }
+  },
+
+  // Admin Registration (uses publicAxios)
+  registerAdmin: async (userData) => {
+    try {
+      const response = await publicAxios.post('register/administrator/', userData);
+      if (response.data?.tokens) {
+        localStorage.setItem('access_token', response.data.tokens.access);
+        localStorage.setItem('refresh_token', response.data.tokens.refresh);
+      }
+      return response.data;
+    } catch (error) {
+      console.error('Administrator registration error:', {
+        message: error.response?.data?.error || error.message,
+        status: error.response?.status,
+      });
+      throw error.response?.data || error;
+    }
+  },
+
   // Login (uses publicAxios)
   login: async (credentials) => {
     try {
