@@ -24,6 +24,11 @@ urlpatterns = [
     path('register/administrator/', serve_frontend),
     path('issue/', serve_frontend),
     path('verification/', serve_frontend),
+
+    # Explicit user dashboard routes
+    path('student/dashboard/', serve_frontend),
+    path('lecturer/dashboard/', serve_frontend),
+    path('admin/dashboard/', serve_frontend),
     
     # Catch-all route - must be last
     re_path(r'^(?!api/|admin/).*$', serve_frontend),
