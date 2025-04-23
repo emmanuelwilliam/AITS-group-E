@@ -1,125 +1,191 @@
-import React, { useState, useEffect } from 'react'; // Import React with hooks
-import { useAuth } from '../context/AuthContext'; // Custom auth context hook
-import { getStudentIssues, getAllIssues } from '../api/issueService'; // API functions to fetch issues
-import Sidebar from '../components/Sidebar'; // Sidebar component
-import TopBar from '../components/TopBar'; // Top navigation bar
-import Notifications from '../components/Notifications'; // Component to show notifications
-import IssueReporting from '../components/IssueReporting'; // Component for reporting issues
-import IssueTracking from '../components/IssueTracking'; // Component for tracking issues
-import '../styles/dashboard.css'; // Import CSS styling
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { getStudentIssues } from '../api/issueService';
+import Sidebar from '../components/Sidebar';
+import TopBar from '../components/TopBar';
+import Notifications from '../components/Notifications';
+import IssueReporting from '../components/IssueReporting';
+import IssueTracking from '../components/IssueTracking';
+import IssueStatsCard from '../components/IssueStatsCard';
+import '../styles/dashboard.css';
 
-// Main Dashboard component
-const Dashboard = () => {
-  // State to control which component is visible
+const StudentDashboard = () => {
   const [activeComponent, setActiveComponent] = useState('notifications');
-
-  // State to hold list of issues
   const [issues, setIssues] = useState([]);
-
-  // Loading and error state management
+  const [filteredIssues, setFilteredIssues] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('');
 
-  // Get the current user and logout method from auth context
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [sortOrder, setSortOrder] = useState('newest');
+
   const { user, logout } = useAuth();
 
-  // Fetch issues on component mount or when user changes
   useEffect(() => {
-    const fetchIssues = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // Conditionally fetch issues based on user role
-        const data = user?.role === 'student' 
-          ? await getStudentIssues() 
-          : await getAllIssues();
-        
-        setIssues(data); // Set fetched issues
-      } catch (err) {
-        console.error('Error fetching issues:', err);
-        setError('Failed to load issues. Please try again.');
+    if (!user) return;
+    fetchStudentIssues();
 
-        // Auto-logout on unauthorized (401) error
-        if (err.response?.status === 401) {
-          logout();
-        }
-      } finally {
-        setLoading(false); // Stop loading regardless of outcome
-      }
+    const handleResize = () => {
+      if (window.innerWidth > 768) setSidebarOpen(false);
     };
 
-    fetchIssues(); // Call the fetch function
-  }, [user, logout]); // Dependencies
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [user]);
 
-  // Add a newly created issue to the top of the list
+  const fetchStudentIssues = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getStudentIssues();
+      setIssues(data);
+      setFilteredIssues(data);
+    } catch (err) {
+      console.error('Fetch error:', err);
+      setError('We couldn’t load your issues. Please refresh or try again.');
+      if (err.response?.status === 401) logout();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!issues.length) return;
+    let result = [...issues];
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(
+        i => i.title?.toLowerCase().includes(query) ||
+             i.description?.toLowerCase().includes(query) ||
+             i.id?.toString().includes(query)
+      );
+    }
+
+    if (statusFilter !== 'all') {
+      result = result.filter(issue => issue.status === statusFilter);
+    }
+
+    result.sort((a, b) => {
+      const aDate = new Date(a.createdAt || a.timestamp);
+      const bDate = new Date(b.createdAt || b.timestamp);
+      return sortOrder === 'newest' ? bDate - aDate : aDate - bDate;
+    });
+
+    setFilteredIssues(result);
+  }, [issues, searchQuery, statusFilter, sortOrder]);
+
   const handleIssueCreated = (newIssue) => {
-    setIssues(prevIssues => [newIssue, ...prevIssues]);
-    setActiveComponent('issueTracking'); // Navigate to tracking view
+    setIssues(prev => [newIssue, ...prev]);
+    setActiveComponent('issueTracking');
+    flashMessage('Issue submitted successfully. We’ll review it soon.');
   };
 
-  // Update an existing issue in the list
-  const handleIssueUpdated = (updatedIssue) => {
-    setIssues(prevIssues => 
-      prevIssues.map(issue => 
-        issue.id === updatedIssue.id ? updatedIssue : issue
-      )
-    );
+  const handleIssueUpdated = (updated) => {
+    setIssues(prev => prev.map(i => i.id === updated.id ? updated : i));
+    flashMessage('Issue updated.');
   };
 
-  // Remove an issue from the list
   const handleIssueDeleted = (issueId) => {
-    setIssues(prevIssues => 
-      prevIssues.filter(issue => issue.id !== issueId)
-    );
+    setIssues(prev => prev.filter(i => i.id !== issueId));
+    flashMessage('Issue removed.');
   };
 
-  // Conditionally render the component based on active state
-  const renderComponent = () => {
-    if (loading) {
-      return <div className="loading-spinner">Loading...</div>;
-    }
+  const flashMessage = (msg) => {
+    setStatusMessage(msg);
+    setTimeout(() => setStatusMessage(''), 3000);
+  };
 
-    if (error) {
-      return <div className="error-message">{error}</div>;
-    }
+  const issueStats = {
+    pending: issues.filter(i => i.status === 'pending').length,
+    inProgress: issues.filter(i => i.status === 'in-progress').length,
+    resolved: issues.filter(i => i.status === 'resolved').length,
+    total: issues.length,
+  };
 
-    // Render the appropriate child component
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
+  const renderContent = () => {
+    if (loading) return (
+      <div className="loading-container">
+        <div className="spinner" />
+        <p>Loading issues...</p>
+      </div>
+    );
+
+    if (error) return (
+      <div className="error-message">
+        <p>{error}</p>
+        <button onClick={fetchStudentIssues}>Reload</button>
+      </div>
+    );
+
     switch (activeComponent) {
       case 'notifications':
         return <Notifications />;
       case 'issueReporting':
-        return <IssueReporting onIssueCreated={handleIssueCreated} />;
+        return <IssueReporting onIssueCreated={handleIssueCreated} userRole="student" />;
       case 'issueTracking':
         return (
-          <IssueTracking 
-            issues={issues} 
+          <IssueTracking
+            issues={filteredIssues}
             onIssueUpdated={handleIssueUpdated}
             onIssueDeleted={handleIssueDeleted}
-            userRole={user?.role}
+            userRole="student"
+            onSearch={setSearchQuery}
+            searchQuery={searchQuery}
+            onFilterChange={setStatusFilter}
+            currentFilter={statusFilter}
+            onSortChange={setSortOrder}
+            currentSort={sortOrder}
+            refreshData={fetchStudentIssues}
           />
         );
       default:
-        return <Notifications />; // Fallback to notifications
+        return <Notifications />;
     }
   };
 
-  // JSX layout of the Dashboard
   return (
     <div className="dashboard">
-      <TopBar user={user} /> {/* Top bar with user info */}
-      <Sidebar 
-        setActiveComponent={setActiveComponent} 
-        activeComponent={activeComponent}
-        userRole={user?.role}
+      {statusMessage && <div className="status-message">{statusMessage}</div>}
+
+      <TopBar
+        user={user}
+        toggleSidebar={toggleSidebar}
+        issueStats={issueStats}
+        refreshData={fetchStudentIssues}
       />
-      <div className="main-content">
+
+      <Sidebar
+        setActiveComponent={setActiveComponent}
+        activeComponent={activeComponent}
+        userRole="student"
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
+
+      <div className={`main-content ${sidebarOpen ? 'sidebar-open' : ''}`}>
+        <div className="stats-summary">
+          {Object.entries(issueStats).map(([key, val]) => (
+            <IssueStatsCard
+              key={key}
+              label={key.replace(/([A-Z])/g, ' $1')}
+              value={val}
+              onClick={() => setStatusFilter(key === 'total' ? 'all' : key)}
+              active={statusFilter === key}
+            />
+          ))}
+        </div>
         <div className="content">
-          {renderComponent()} {/* Render selected section */}
+          {renderContent()}
         </div>
       </div>
     </div>
   );
 };
 
-export default Dashboard; // Export the Dashboard component
+export default StudentDashboard;
