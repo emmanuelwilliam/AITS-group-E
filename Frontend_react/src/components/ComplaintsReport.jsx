@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "../styles/complaints.css";
 
 const ComplaintsReport = () => {
+  // Sample complaints data stored in state
   const [complaints] = useState([
     {
       id: 1,
@@ -24,22 +25,28 @@ const ComplaintsReport = () => {
   ]);
 
   return (
-    <div className="complaints-report">
-      <h2>Complaints Management</h2>
+    <div className="complaints-report"> {/* Main container for complaints report */}
+      <h2>Complaints Management</h2> {/* Page heading */}
       
+      {/* Action bar with a button to add new complaints and filters */}
       <div className="complaints-actions">
-        <button className="btn-primary">+ New Complaint</button>
+        <button className="btn-primary">+ New Complaint</button> {/* New complaint button */}
+
+        {/* Filter and search controls */}
         <div className="filter-controls">
-          <select>
+          <select> {/* Status filter dropdown */}
             <option>All Status</option>
             <option>Pending</option>
             <option>In Progress</option>
             <option>Resolved</option>
           </select>
+          
+          {/* Search input for filtering complaints */}
           <input type="text" placeholder="Search complaints..." />
         </div>
       </div>
 
+      {/* Complaints data table */}
       <table className="complaints-table">
         <thead>
           <tr>
@@ -54,6 +61,7 @@ const ComplaintsReport = () => {
           </tr>
         </thead>
         <tbody>
+          {/* Map through complaints and render each one in a table row */}
           {complaints.map(complaint => (
             <tr key={complaint.id}>
               <td>{complaint.id}</td>
@@ -61,12 +69,22 @@ const ComplaintsReport = () => {
               <td>{complaint.lecturer}</td>
               <td>{complaint.date}</td>
               <td>{complaint.category}</td>
-              <td><span className={`status-badge ${complaint.status.toLowerCase()}`}>
-                {complaint.status}
-              </span></td>
-              <td><span className={`priority-badge ${complaint.priority.toLowerCase()}`}>
-                {complaint.priority}
-              </span></td>
+              
+              {/* Status with styling class based on status value */}
+              <td>
+                <span className={`status-badge ${complaint.status.toLowerCase()}`}>
+                  {complaint.status}
+                </span>
+              </td>
+
+              {/* Priority with styling class based on priority value */}
+              <td>
+                <span className={`priority-badge ${complaint.priority.toLowerCase()}`}>
+                  {complaint.priority}
+                </span>
+              </td>
+
+              {/* Action buttons for each complaint */}
               <td>
                 <button className="btn-action">View</button>
                 <button className="btn-action">Resolve</button>

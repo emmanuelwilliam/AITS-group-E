@@ -1,3 +1,4 @@
+import ErrorBoundary from "./components/Errorboundary";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import Login from "./pages/Login";
@@ -16,9 +17,11 @@ import StudentActivity from "./components/StudentActivity";
 import CollegeStatistics from "./components/CollegeStatistics";
 import AdminIssueResolveForm from "./components/AdminIssueResolveForm";
 import StudentRegister from "./pages/StudentRegister";
+import VerifyEmail from "./pages/Verification";
 
 const App = () => {
   return (
+    <ErrorBoundary>
     <AuthProvider>
       <Router future={{ 
         v7_startTransition: true,
@@ -44,11 +47,12 @@ const App = () => {
           </Route>
           
           {/* Other Routes */}
-          <Route path="/verify" element={<Verification />} />
+          <Route path="/verify" element={<VerifyEmail />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </AuthProvider>
+    </ErrorBoundary>
   );
 };
 

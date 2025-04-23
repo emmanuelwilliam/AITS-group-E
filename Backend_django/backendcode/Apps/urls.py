@@ -25,6 +25,7 @@ from .views import (
     update_issue,
     delete_issue,
     login_view,
+    verify_email,
 )
 
 # Create a router object and register viewsets only once
@@ -50,17 +51,20 @@ urlpatterns = [
     path('register/student/', register_student, name='register_student'),
     path('register/lecturer/', register_lecturer, name='register_lecturer'),
     path('register/administrator/', register_administrator, name='register_administrator'),
-    path('get_user_role/', get_user_role, name='get_user_role'),
-    path('get_notifications/', get_notifications, name='get_notifications'),
-    path('filter_issues/', filter_issues, name='filter_issues'),
-    path('create_issue/', create_issue, name='create_issue'),
-    path('update_issue/', update_issue, name='update_issue'),
-    path('delete_issue/', delete_issue, name='delete_issue'),
-    path('login/', login_view, name='login_view'),
+    path('verify-email/', verify_email, name='verify-email'),
 
-    # Include the router's URLs for the viewsets
-    path('api/', include(router.urls)),
-
-    # React App route (this should be the last route)
-    path('', ReactAppView.as_view(), name='react_app'),  # If you are using a React view
+    
+    # Issue management
+    path('issue/filter/', filter_issues, name='filter_issues'),
+    path('issue/create/', create_issue, name='create_issue'),
+    path('issue/update/<int:pk>/', update_issue, name='update_issue'),
+    path('issue/delete/<int:pk>/', delete_issue, name='delete_issue'),
+    
+    # Other API endpoints
+    #path('login-history/', get_login_history, name='get_login_history'),
+    path('user-role/', get_user_role, name='get_user_role'),
+    path('notifications/', get_notifications, name='get_notifications'),
+    
+    # Include router URLs
+    path('', include(router.urls)),
 ]

@@ -1,19 +1,22 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { registerStudent } from '../services/authService';  
-import '../styles/register.css';
+import React, { useState } from 'react'; // React and useState hook
+import { useNavigate } from 'react-router-dom'; // Hook for programmatic navigation
+import { registerStudent } from '../api/authService'; // API service to register students
+import '../styles/register.css'; // CSS styling for the registration page
 
 // Student registration component
 const StudentRegister = () => {
   // State to manage form input values
   const [formData, setFormData] = useState({
-    username: '',
-    first_name: '',  // Changed from firstName to match backend
-    last_name: '',   // Changed from lastName to match backend
-    email: '',
+    username: '', // Required for Django User model
+    firstName: '',
+    lastName: '',
+    studentNumber: '',
+    registrationNumber: '',
+    email: '', // Matching Django's expected field
     college: '',
+    course: '',
     password: '',
-    confirm_password: ''  // Changed from confirmPassword to match backend
+    confirmPassword: ''
   });
 
   // Error messages for fields or the whole form
@@ -33,113 +36,82 @@ const StudentRegister = () => {
   // Validate inputs before submission
   const validateForm = () => {
     const newErrors = {};
-
-     // Required field validation
-     const requiredFields = {
-      username: "Username",
-      first_name: "First name",
-      last_name: "Last name",
-      email: "Email",
-      college: "College",
-      password: "Password"
-    };
-
-    Object.entries(requiredFields).forEach(([field, label]) => {
-      if (!formData[field]?.trim()) {
-        newErrors[field] = `${label} is required`;
-      }
-    });
-
-    // Email validation
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
+    if (!formData.username) newErrors.username = "Username is required";
+    if (!formData.firstName) newErrors.firstName = "First name is required";
+    if (!formData.lastName) newErrors.lastName = "Last name is required";
+    if (!formData.studentNumber) newErrors.studentNumber = "Student number is required";
+    if (!formData.registrationNumber) newErrors.registrationNumber = "Registration number is required";
+    if (!formData.email) newErrors.email = "Email is required";
+    if (!formData.college) newErrors.college = "College is required";
+    if (!formData.course) newErrors.course = "Course is required";
+    if (!formData.password) newErrors.password = "Password is required";
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
     }
-
-    // Password validation
-    if (formData.password && formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters long";
-    }
-
-    // Password confirmation
-    if (formData.password !== formData.confirm_password) {
-      newErrors.confirm_password = "Passwords do not match";
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setIsSubmitting(true);
 
-  if (!validateForm()) {
-    setIsSubmitting(false);
-    return;
-  }
+  // Submit handler for form
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Prevent page reload
+    if (!validateForm()) return;
 
-  try {
+    setIsSubmitting(true);
+
+    try {
+      // Structure payload for backend compatibility
       const studentData = {
-          username: formData.username.trim(),
-          email: formData.email.trim(),
+        user: {
+          username: formData.username,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          email: formData.email,
           password: formData.password,
-          first_name: formData.first_name.trim(),
-          last_name: formData.last_name.trim(),
-          college: formData.college.trim(),
+          role: 'student' // Match your backend's user role field
+        },
+        college: formData.college,
+        email: formData.email,
+        student_number: formData.studentNumber,
+        registration_number: formData.registrationNumber,
+        course: formData.course
       };
 
-      console.log('Submitting data:', studentData);
-      
-      const response = await registerStudent(studentData);
+      // Call API to register student
+      await registerStudent(studentData);
 
-      if (response && response.tokens) {
-          localStorage.setItem('token', response.tokens.access);
-          localStorage.setItem('refreshToken', response.tokens.refresh);
-          
-          navigate('/verify', { 
-              state: { 
-                  email: formData.email, 
-                  role: 'student',
-                  message: 'Registration successful! Please verify your email'
-              },
-              replace: true 
-          });
-      } else {
-          throw new Error('Registration failed. No tokens received.');
+      // Navigate to verification screen on success
+      navigate('/verify', { state: { email: formData.email, role: 'student' } });
+    } catch (err) {
+      console.error('Registration error:', err);
+      // Handle general error
+      setErrors({
+        form: err.response?.data?.message || 
+              err.message || 
+              'Registration failed. Please try again.'
+      });
+
+      // Extract and display field-specific errors from backend if any
+      if (err.response?.data) {
+        const backendErrors = err.response.data;
+        const fieldErrors = {};
+
+        for (const key in backendErrors) {
+          if (key in formData) {
+            fieldErrors[key] = backendErrors[key].join(' ');
+          }
+        }
+
+        if (Object.keys(fieldErrors).length > 0) {
+          setErrors(prev => ({ ...prev, ...fieldErrors }));
+        }
       }
-  } catch (err) {
-  console.error('Registration error:', err);
-  
-  // Improved error handling
-  if (err.response?.data?.error) {
-      // Handle specific error from backend
-      setErrors({
-          form: err.response.data.error
-      });
-  } else if (err.response?.data) {
-      // Handle validation errors
-      const backendErrors = err.response.data;
-      const fieldErrors = {};
-      
-      Object.entries(backendErrors).forEach(([key, value]) => {
-          fieldErrors[key] = Array.isArray(value) ? value[0] : value;
-      });
+    } finally {
+      setIsSubmitting(false); // End submitting state
+    }
+  };
 
-      setErrors({
-          ...fieldErrors,
-          form: 'Please correct the errors below.'
-      });
-  } else {
-      // Handle other errors
-      setErrors({
-          form: err.message || 'Registration failed. Please try again later.'
-      });
-  }
-} finally {
-  setIsSubmitting(false);
-}
-};
-
+  // Render the registration form
   return (
     <div className="register-container">
       <div className="register-box">
@@ -170,23 +142,49 @@ const handleSubmit = async (e) => {
               <label>First Name</label>
               <input
                 type="text"
-                name="first_name"
-                value={formData.first_name}
+                name="firstName"
+                value={formData.firstName}
                 onChange={handleChange}
-                className={errors.first_name ? 'error' : ''}
+                className={errors.firstName ? 'error' : ''}
               />
-              {errors.first_name && <span className="error">{errors.first_name}</span>}
+              {errors.firstName && <span className="error">{errors.firstName}</span>}
             </div>
             <div className="form-group">
               <label>Last Name</label>
               <input
                 type="text"
-                name="last_name"
-                value={formData.last_name}
+                name="lastName"
+                value={formData.lastName}
                 onChange={handleChange}
-                className={errors.last_name ? 'error' : ''}
+                className={errors.lastName ? 'error' : ''}
               />
-              {errors.last_name && <span className="error">{errors.last_name}</span>}
+              {errors.lastName && <span className="error">{errors.lastName}</span>}
+            </div>
+          </div>
+
+          {/* Student & Registration Number */}
+          <div className="form-row">
+            <div className="form-group">
+              <label>Student Number</label>
+              <input
+                type="text"
+                name="studentNumber"
+                value={formData.studentNumber}
+                onChange={handleChange}
+                className={errors.studentNumber ? 'error' : ''}
+              />
+              {errors.studentNumber && <span className="error">{errors.studentNumber}</span>}
+            </div>
+            <div className="form-group">
+              <label>Registration Number</label>
+              <input
+                type="text"
+                name="registrationNumber"
+                value={formData.registrationNumber}
+                onChange={handleChange}
+                className={errors.registrationNumber ? 'error' : ''}
+              />
+              {errors.registrationNumber && <span className="error">{errors.registrationNumber}</span>}
             </div>
           </div>
 
@@ -203,16 +201,30 @@ const handleSubmit = async (e) => {
             {errors.email && <span className="error">{errors.email}</span>}
           </div>
 
-          <div className="form-group">
-            <label>College</label>
-            <input
-              type="text"
-              name="college"
-              value={formData.college}
-              onChange={handleChange}
-              className={errors.college ? 'error' : ''}
-            />
-            {errors.college && <span className="error">{errors.college}</span>}
+          {/* College & Course */}
+          <div className="form-row">
+            <div className="form-group">
+              <label>College</label>
+              <input
+                type="text"
+                name="college"
+                value={formData.college}
+                onChange={handleChange}
+                className={errors.college ? 'error' : ''}
+              />
+              {errors.college && <span className="error">{errors.college}</span>}
+            </div>
+            <div className="form-group">
+              <label>Course</label>
+              <input
+                type="text"
+                name="course"
+                value={formData.course}
+                onChange={handleChange}
+                className={errors.course ? 'error' : ''}
+              />
+              {errors.course && <span className="error">{errors.course}</span>}
+            </div>
           </div>
 
           {/* Password & Confirm Password */}
@@ -232,12 +244,12 @@ const handleSubmit = async (e) => {
               <label>Confirm Password</label>
               <input
                 type="password"
-                name="confirm_password"
-                value={formData.confirm_password}
+                name="confirmPassword"
+                value={formData.confirmPassword}
                 onChange={handleChange}
-                className={errors.confirm_password ? 'error' : ''}
+                className={errors.confirmPassword ? 'error' : ''}
               />
-              {errors.confirm_password && <span className="error">{errors.confirm_password}</span>}
+              {errors.confirmPassword && <span className="error">{errors.confirmPassword}</span>}
             </div>
           </div>
 
@@ -255,14 +267,4 @@ const handleSubmit = async (e) => {
   );
 };
 
-export default StudentRegister; // Export the student registration component
-
-
-
-
-
-
-
-
-
-
+export default StudentRegister; // Export the registration component

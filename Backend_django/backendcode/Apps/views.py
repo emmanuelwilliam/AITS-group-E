@@ -3,7 +3,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework import viewsets, mixins, status,filters
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .models import User, Student, Lecturer, Administrator, Issue, Notification, Status, LoginHistory, UserRole
+from .models import User, Student, Lecturer, Administrator, Issue, Notification, Status, LoginHistory, UserRole, EmailVerification
 from .serializer import (
     UserRegistrationSerializer, StudentSerializer, LecturerSerializer, AdministratorSerializer,
     IssueSerializer, NotificationSerializer, StatusSerializer, LoginHistorySerializer, UserRoleSerializer
@@ -22,6 +22,10 @@ from django.core.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.utils import timezone
+from django.core.mail import send_mail
+from datetime import timedelta
+
 
 # DRF Viewsets
 class StudentViewSet(viewsets.ModelViewSet):
@@ -80,7 +84,6 @@ def get_user_role(request):
 def register_student(request):
     if request.method == 'POST':
         try:
-            # Log the required data
             print("Received registration data:", request.data)
             
             data = request.data
@@ -112,13 +115,14 @@ def register_student(request):
                 student_role = UserRole.objects.create(name='student')
                 print("Created new student role")
             
-            # Create user with role object
+            # Create user with role object but set is_active=False
             user = User.objects.create_user(
                 username=data['username'],
                 email=data['email'],
                 password=data['password'],
                 first_name=data['first_name'],
-                last_name=data['last_name']
+                last_name=data['last_name'],
+                is_active=False  # User starts inactive until email is verified
             )
             # Set the role after user creation
             user.role = student_role
@@ -126,102 +130,41 @@ def register_student(request):
             
             print(f"Created user: {user.username} with role: {user.role}")
             
-            # Generate tokens
+            # Generate okens even for inactive users
             refresh = RefreshToken.for_user(user)
+
+            # Create verification record
+            verification = EmailVerification.objects.create(
+                user=user,
+                expires_at=timezone.now() + timedelta(minutes=30)
+            )
+            verification_code = verification.generate_code()
+            verification.save()
+
+            # Send verification email
+            try:
+                send_mail(
+                    'Verify your email - Student Registration',
+                    f'Your verification code is: {verification_code}\nThis code will expire in 30 minutes.',
+                    'from@yourdomain.com',  # Update this in settings.py
+                    [user.email],
+                    fail_silently=False,
+                )
+            except Exception as e:
+                print(f"Failed to send email: {str(e)}")
+                user.delete()  # Rollback user creation if email fails
+                return Response({
+                    'error': 'Failed to send verification email'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
             return Response({
                 'success': True,
-                'message': 'Student registered successfully',
+                'message': 'Registration successful. Please check your email for verification code.',
                 'user': {
-                    'id': user.id,
-                    'username': user.username,
                     'email': user.email,
-                    'first_name': user.first_name,
-                    'last_name': user.last_name,
-                    'role': 'student'
-                },
-                'tokens': {
-                    'refresh': str(refresh),
-                    'access': str(refresh.access_token),
-                }
-            }, status=status.HTTP_201_CREATED)
-            
-        except Exception as e:
-            import traceback
-            print("Registration error:", str(e))
-            print("Traceback:", traceback.format_exc())
-            return Response({
-                'error': 'Registration failed',
-                'detail': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    return Response({
-        'message': 'Use POST method to register'
-    }, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        
-
-@api_view(['POST', 'GET'])
-@permission_classes([AllowAny])
-def register_lecturer(request):
-    if request.method == 'POST':
-        try:
-            data = request.data
-            # Validate required fields
-            required_fields = ['username', 'email', 'password', 'first_name', 'last_name']
-            for field in required_fields:
-                if not data.get(field):
-                    return Response({
-                        'error': f'Missing required field: {field}',
-                        'required_fields': required_fields
-                    }, status=status.HTTP_400_BAD_REQUEST)
-
-            # Check if username or email already exists
-            if User.objects.filter(username=data['username']).exists():
-                return Response({
-                    'error': 'Username already exists'
-                }, status=status.HTTP_400_BAD_REQUEST)
-            
-            if User.objects.filter(email=data['email']).exists():
-                return Response({
-                    'error': 'Email already exists'
-                }, status=status.HTTP_400_BAD_REQUEST)
-
-            # Get or create the lecturer role
-            lecturer_role, created = UserRole.objects.get_or_create(
-                name='lecturer'
-            )
-            if created:
-                print("Created new lecturer role")
-            
-            # Create user with role object
-            user = User.objects.create_user(
-                username=data['username'],
-                email=data['email'],
-                password=data['password'],
-                first_name=data['first_name'],
-                last_name=data['last_name']
-            )
-            # Set the role after user creation
-            user.role = lecturer_role
-            user.save()
-            
-            print(f"Created user: {user.username} with role: {user.role}")
-            
-            # Generate tokens
-            refresh = RefreshToken.for_user(user)
-            
-            return Response({
-                'success': True,
-                'message': 'Lecturer registered successfully',
-                'user': {
-                    'id': user.id,
                     'username': user.username,
-                    'email': user.email,
-                    'first_name': user.first_name,
-                    'last_name': user.last_name,
-                    'role': 'lecturer'
-                },
-                'tokens': {
+                },    
+                'tokens':{ #Include these for immediate login after verification
                     'refresh': str(refresh),
                     'access': str(refresh.access_token),
                 }
@@ -234,44 +177,213 @@ def register_lecturer(request):
             return Response({
                 'error': str(e),
                 'detail': 'Registration failed'
-            }, status=status.HTTP_400_BAD_REQUEST)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     return Response({
         'message': 'Use POST method to register'
     }, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+@api_view(['POST', 'GET'])
+@permission_classes([AllowAny])
+def register_lecturer(request):
+    if request.method == 'POST':
+        try:
+            data = request.data
+            required_fields = ['username', 'email', 'password', 'first_name', 'last_name']
+            for field in required_fields:
+                if not data.get(field):
+                    return Response({
+                        'error': f'Missing required field: {field}',
+                        'required_fields': required_fields
+                    }, status=status.HTTP_400_BAD_REQUEST)
+
+            if User.objects.filter(username=data['username']).exists():
+                return Response({'error': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
+            if User.objects.filter(email=data['email']).exists():
+                return Response({'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Get or create the lecturer role
+            lecturer_role, created = UserRole.objects.get_or_create(role_name='lecturer')
+            if created:
+                print("Created new lecturer role")
+
+            # Create user with is_active=False
+            user = User.objects.create_user(
+                username=data['username'],
+                email=data['email'],
+                password=data['password'],
+                first_name=data['first_name'],
+                last_name=data['last_name'],
+                is_active=False
+            )
+            user.role = lecturer_role
+            user.save()
+
+            print(f"Created user: {user.username} with role: {user.role}")
+
+            # Generate verification code
+            verification = EmailVerification.objects.create(
+                user=user,
+                expires_at=timezone.now() + timedelta(minutes=30)
+            )
+            verification_code = verification.generate_code()
+            verification.save()
+
+            # Send verification email
+            try:
+                send_mail(
+                    'Verify your email - Lecturer Registration',
+                    f'Your verification code is: {verification_code}\nThis code will expire in 30 minutes.',
+                    'from@yourdomain.com',
+                    [user.email],
+                    fail_silently=False,
+                )
+            except Exception as e:
+                print(f"Failed to send email: {str(e)}")
+                user.delete()
+                return Response({'error': 'Failed to send verification email'}, status=500)
+
+            # Generate tokens
+            refresh = RefreshToken.for_user(user)
+
+            return Response({
+                'success': True,
+                'message': 'Lecturer registered successfully. Please check your email for verification code.',
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'role': 'lecturer'
+                },
+                'tokens': {
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                }
+            }, status=201)
+
+        except Exception as e:
+            import traceback
+            print("Registration error:", str(e))
+            print("Traceback:", traceback.format_exc())
+            return Response({'error': str(e), 'detail': 'Registration failed'}, status=400)
+
+    return Response({'message': 'Use POST method to register'}, status=405)
+      
+
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def register_administrator(request):
     try:
-        serializer = AdministratorSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data = request.data
+        required_fields = ['username', 'email', 'password', 'first_name', 'last_name']
+        for field in required_fields:
+            if not data.get(field):
+                return Response({
+                    'error': f'Missing required field: {field}',
+                    'required_fields': required_fields
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+        if User.objects.filter(username=data['username']).exists():
+            return Response({'error': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
+        if User.objects.filter(email=data['email']).exists():
+            return Response({'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Get or create the administrator role
+        admin_role, created = UserRole.objects.get_or_create(role_name='administrator')
+        if created:
+            print("Created new administrator role")
+
+        # Create inactive admin user
+        user = User.objects.create_user(
+            username=data['username'],
+            email=data['email'],
+            password=data['password'],
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            is_active=False
+        )
+        user.role = admin_role
+        user.save()
+
+        verification = EmailVerification.objects.create(
+            user=user,
+            expires_at=timezone.now() + timedelta(minutes=30)
+        )
+        code = verification.generate_code()
+        verification.save()
+
+        # Send email
+        send_mail(
+            'Verify your email - Admin Registration',
+            f'Your verification code is: {code}\nThis code will expire in 30 minutes.',
+            'from@yourdomain.com',
+            [user.email],
+            fail_silently=False,
+        )
+
+        # Generate JWT tokens
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+            'success': True,
+            'message': 'Administrator registered successfully. Please check your email for verification code.',
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'role': 'administrator'
+            },
+            'tokens': {
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            }
+        }, status=status.HTTP_201_CREATED)
+
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        import traceback
+        print("Admin registration error:", str(e))
+        print(traceback.format_exc())
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+from django.utils import timezone
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login_view(request):
     username = request.data.get('username')
     password = request.data.get('password')
-    
+
     if not username or not password:
         return Response({
             'error': 'Please provide both username and password'
         }, status=status.HTTP_400_BAD_REQUEST)
-    
+
     try:
         user = User.objects.get(username=username)
-        
+
+        if not user.is_active:
+            return Response({
+                'error': 'Account is not active. Please verify your email.'
+            }, status=status.HTTP_403_FORBIDDEN)
+
         if user.check_password(password):
-            # Create login history entry
-            LoginHistory.objects.create(user=user)
-            
-            # Generate tokens
+            # Extract IP address with fallback
+            x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+            ip = x_forwarded_for.split(',')[0] if x_forwarded_for else request.META.get('REMOTE_ADDR') or '127.0.0.1'
+
+            # ✅ Add session_time
+            LoginHistory.objects.create(
+                user=user,
+                ip_address=ip,
+                session_time=timezone.now()
+            )
+
             refresh = RefreshToken.for_user(user)
-            
+
             return Response({
                 'success': True,
                 'user': {
@@ -288,11 +400,18 @@ def login_view(request):
             return Response({
                 'error': 'Invalid credentials'
             }, status=status.HTTP_401_UNAUTHORIZED)
-            
+
     except User.DoesNotExist:
         return Response({
             'error': 'Invalid credentials'
         }, status=status.HTTP_401_UNAUTHORIZED)
+
+    except Exception as e:
+        import traceback
+        print("LOGIN ERROR:", str(e))
+        print(traceback.format_exc())
+        return Response({'error': 'Internal server error'}, status=500)
+
 
 @api_view(['POST'])
 def reset_password(request):
@@ -434,3 +553,51 @@ class IndexView(TemplateView):
             if js_files:
                 context['main_js'] = f'assets/js/{js_files[0]}'
         return context
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def verify_email(request):
+    try:
+        email = request.data.get('email').lower()
+        code = request.data.get('code')
+
+        user = User.objects.get(email=email)
+        verification = EmailVerification.objects.get(user=user)
+
+        if verification.is_verified:
+            return Response({
+                'error': 'Email already verified'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        if verification.code != code:
+            return Response({
+                'error': 'Invalid verification code'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        if verification.expires_at < timezone.now():
+            return Response({
+                'error': 'Verification code expired'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Verify the user
+        verification.is_verified = True
+        verification.save()
+        user.is_active = True
+        user.save()
+
+        # Generate tokens
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+            'success': True,
+            'message': 'Email verified successfully',
+            'tokens': {
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            }
+        })
+
+    except (User.DoesNotExist, EmailVerification.DoesNotExist):
+        return Response({
+            'error': 'Invalid verification attempt'
+        }, status=status.HTTP_400_BAD_REQUEST)

@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import "../styles/adminSidebar.css";
 
 const AdminSidebar = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Hook to programmatically navigate to different routes
 
+  // Sidebar menu items with labels and paths
   const menuItems = [
     { id: "dashboard", label: "Dashboard", path: "dashboard" },
     { id: "complaints", label: "Complaints", path: "complaints" },
@@ -14,14 +15,14 @@ const AdminSidebar = () => {
   ];
 
   return (
-    <div className="admin-sidebar">
+    <div className="admin-sidebar"> {/* Sidebar container with custom styling */}
       <ul>
         {menuItems.map((item) => (
           <li
-            key={item.id}
-            onClick={() => navigate(item.path)}
+            key={item.id} // Unique key for each list item
+            onClick={() => navigate(item.path)} // Navigate to the route on click
           >
-            {item.label}
+            {item.label} {/* Display label of the menu item */}
           </li>
         ))}
       </ul>

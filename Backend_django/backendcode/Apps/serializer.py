@@ -20,7 +20,7 @@ class LoginSerializer(serializers.Serializer):
             if user:
                 if not user.is_active:
                     raise serializers.ValidationError("User account is disabled.")
-                return data
+                return data  # Return the validated data instead of user
             raise serializers.ValidationError("Unable to log in with provided credentials.")
         raise serializers.ValidationError("Must include 'username' and 'password'.")
 
@@ -80,9 +80,9 @@ class VerifyEmailSerializer(serializers.Serializer):
 class UserRoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserRole
-        fields = ['id', 'name']
-
-# User Serializer
+        fields = ['id', 'role_name']
+        
+# Model Serializers
 class UserSerializer(serializers.ModelSerializer):
     role = UserRoleSerializer(read_only=True)
     role_name = serializers.CharField(write_only=True)
@@ -93,7 +93,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         role_name = validated_data.pop('role_name')
-        role = UserRole.objects.get(name=role_name)
+        role = UserRole.objects.get(role_name=role_name)
         user = User.objects.create(**validated_data, role=role)
         return user
 
