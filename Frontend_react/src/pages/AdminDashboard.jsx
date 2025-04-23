@@ -1,30 +1,89 @@
-import React, { useState } from "react"; // Import React and useState hook
-import { Outlet, useLocation, useNavigate } from "react-router-dom"; // Import routing hooks from react-router-dom
-import AdminSidebar from "../components/AdminSidebar"; // Import the AdminSidebar component
-import AdminTopBar from "../components/AdminTopBar"; // Import the AdminTopBar component
-import "../styles/adminDashboard.css"; // Import the CSS file for dashboard styling
-import logo from "../assets/Makerere Logo.png"; // Import the Makerere University logo image
+import React, { useState, useEffect } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import AdminSidebar from "../components/AdminSidebar";
+import AdminTopBar from "../components/AdminTopBar";
+import AdminStatCard from "../components/AdminStatCard";
+import "../styles/adminDashboard.css";
+import logo from "../assets/Makerere Logo.png";
 
-// Functional component for AdminDashboard
 const AdminDashboard = () => {
-  const location = useLocation(); // Hook to access the current route's location object
-  const navigate = useNavigate(); // Hook to programmatically navigate to different routes
-  
-  // Destructure user data from location.state, provide default values if undefined
-  const { firstName, lastName, email } = location.state || {
-    firstName: "Admin",
-    lastName: "User",
-    email: "admin@mak.ac.ug",
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const { firstName = "Admin", lastName = "User", email = "admin@mak.ac.ug" } =
+    location?.state || {};
+
+  const [activeSection, setActiveSection] = useState("overview");
+  const [notifications, setNotifications] = useState([]);
+  const [hasUnread, setHasUnread] = useState(false);
+  const [menuCollapsed, setMenuCollapsed] = useState(window.innerWidth < 768);
+  const [issueSummary, setIssueSummary] = useState({
+   
+    open: 0,
+    inProgress: 0,
+    resolved: 0,
+    total: 0,
+  });
+
+  // Responsive menu toggle on resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setMenuCollapsed(true);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Load mock notifications and stats
+  useEffect(() => {
+    const mockNotifications = [
+      { id: 1, title: "New urgent issue reported", read: false, time: "10 mins ago" },
+      { id: 2, title: "Weekly report ready", read: true, time: "2 hours ago" },
+      { id: 3, title: "System backup completed", read: true, time: "Yesterday" },
+    ];
+    setNotifications(mockNotifications);
+    setHasUnread(mockNotifications.some((n) => !n.read));
+    fetchIssueSummary();
+  }, []);
+
+  const fetchIssueSummary = () => {
+    setTimeout(() => {
+      setIssueSummary({
+        open: 18,
+        inProgress: 12,
+        resolved: 34,
+        total: 64,
+      });
+    }, 500);
   };
 
-  // Function to handle logout, redirects user to the login page
   const handleLogout = () => {
-    navigate("/login");
+    if (window.confirm("Are you sure you want to logout?")) {
+      sessionStorage.removeItem("adminToken");
+      navigate("/login");
+    }
+  };
+
+  const toggleMenu = () => setMenuCollapsed((prev) => !prev);
+
+  const markNotificationRead = (id) => {
+    const updated = notifications.map((n) =>
+      n.id === id ? { ...n, read: true } : n
+    );
+    setNotifications(updated);
+    setHasUnread(updated.some((n) => !n.read));
+  };
+
+  const markAllRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    setHasUnread(false);
   };
 
   return (
-    <div className="admin-dashboard"> {/* Container for the entire admin dashboard */}
-      <AdminTopBar 
+    <div className="admin-dashboard">
+      <AdminTopBar
         firstName={firstName}
         lastName={lastName}
         email={email}
@@ -32,15 +91,42 @@ const AdminDashboard = () => {
         institutionName="Makerere University"
         logo={logo}
         onLogout={handleLogout}
+        toggleMenu={toggleMenu}
+        notifications={notifications}
+        hasUnread={hasUnread}
+        markNotificationRead={markNotificationRead}
+        markAllRead={markAllRead}
       />
-      <div className="dashboard-container"> {/* Main dashboard layout */}
-        <AdminSidebar /> {/* Sidebar navigation component */}
-        <main className="main-content"> {/* Area for rendering nested routes */}
-          <Outlet /> {/* Placeholder for nested route content */}
+
+      <div className="dashboard-container">
+        <AdminSidebar
+          activeSection={activeSection}
+          setActiveSection={setActiveSection}
+          collapsed={menuCollapsed}
+          issueSummary={issueSummary}
+        />
+
+        <main className={`main-content ${menuCollapsed ? "expanded" : ""}`}>
+          {/* Stats Summary Cards */}
+          <div className="admin-stats-summary">
+            <AdminStatCard label="Open Issues" value={issueSummary.open} />
+            <AdminStatCard label="In Progress" value={issueSummary.inProgress} />
+            <AdminStatCard label="Resolved" value={issueSummary.resolved} />
+            <AdminStatCard label="Total Issues" value={issueSummary.total} />
+          </div>
+
+          {/* Nested Routes */}
+          <Outlet
+            context={{
+              refreshData: fetchIssueSummary,
+              adminName: `${firstName} ${lastName}`,
+              adminEmail: email,
+            }}
+          />
         </main>
       </div>
     </div>
   );
 };
 
-export default AdminDashboard; // Export AdminDashboard component
+export default AdminDashboard;
