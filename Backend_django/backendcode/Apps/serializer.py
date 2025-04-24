@@ -106,6 +106,7 @@ class StudentSerializer(serializers.ModelSerializer):
         fields = '__all__'
         depth = 1
 
+# Serializer for the Lecturer model, including a nested UserSerializer with a depth of 1.
 class LecturerSerializer(serializers.ModelSerializer):
     user = UserSerializer()
 
