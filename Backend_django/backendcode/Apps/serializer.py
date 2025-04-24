@@ -140,6 +140,7 @@ class StatusSerializer(serializers.ModelSerializer):
         model = Status
         fields = '__all__'
 
+# Serializer for handling issue data, including related student, lecturer, and status information.
 class IssueSerializer(serializers.ModelSerializer):
     student = StudentSerializer(read_only=True)
     lecturer = LecturerSerializer(read_only=True)
