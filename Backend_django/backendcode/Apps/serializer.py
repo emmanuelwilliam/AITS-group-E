@@ -151,6 +151,7 @@ class IssueSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['reported_date']
 
+# Serializer for Notification model with related issue data.
 class NotificationSerializer(serializers.ModelSerializer):
     issue = IssueSerializer(read_only=True)
 
