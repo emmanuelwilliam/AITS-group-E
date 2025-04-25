@@ -1,6 +1,5 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from django.views.generic import TemplateView
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -19,7 +18,6 @@ from .views import (
     register_student,
     register_lecturer,
     register_administrator,
-    #get_login_history,
     get_user_role,
     get_notifications,
     filter_issues,
@@ -30,28 +28,26 @@ from .views import (
     verify_email,
 )
 
-# Create a router object
+# Create a router object and register viewsets only once
 router = DefaultRouter()
 
-# Register ViewSets
-router.register(r'student', StudentViewSet)
-router.register(r'administrator', AdministratorViewSet)
-router.register(r'lecturer', LecturerViewSet)
-router.register(r'issue', IssueViewSet)
-router.register(r'notification', NotificationViewSet)
-router.register(r'status', StatusViewSet)
-router.register(r'loginHistory', LoginHistoryViewSet)
-router.register(r'userrole', UserRoleViewSet)
+router.register(r'login-history', LoginHistoryViewSet, basename='login-history')
+router.register(r'students', StudentViewSet, basename='students')
+router.register(r'administrators', AdministratorViewSet, basename='administrators')
+router.register(r'lecturers', LecturerViewSet, basename='lecturers')
+router.register(r'issues', IssueViewSet, basename='issues')
+router.register(r'notifications', NotificationViewSet, basename='notifications')
+router.register(r'status', StatusViewSet, basename='status')  # Only register once
+router.register(r'user-roles', UserRoleViewSet, basename='user-roles')
 
-# API URLs
+# Define the URL patterns
 urlpatterns = [
-    # Authentication endpoints
-    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
-    path('login/', login_view, name='login'),
-    
-    # Registration endpoints
+    # API endpoints for JWT authentication
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+
+    # Custom views for registration, issues, etc.
     path('register/student/', register_student, name='register_student'),
     path('register/lecturer/', register_lecturer, name='register_lecturer'),
     path('register/administrator/', register_administrator, name='register_administrator'),

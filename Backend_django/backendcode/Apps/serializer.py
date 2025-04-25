@@ -1,9 +1,11 @@
 from rest_framework import serializers
-from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
-from .models import User, Student, Lecturer, Administrator, Issue, Notification, Status, LoginHistory, UserRole, PasswordResetToken
+from .models import (
+    User, Student, Lecturer, Administrator, Issue, Notification, 
+    Status, LoginHistory, UserRole, PasswordResetToken
+)
 
 # Authentication Serializers
 class LoginSerializer(serializers.Serializer):
@@ -22,7 +24,7 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError("Unable to log in with provided credentials.")
         raise serializers.ValidationError("Must include 'username' and 'password'.")
 
-# Update the UserRegistrationSerializer
+# User Registration Serializer
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
     confirm_password = serializers.CharField(write_only=True, required=True)
@@ -33,13 +35,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'username', 
-            'email', 
-            'password', 
-            'confirm_password',
-            'first_name',
-            'last_name',
-            'college'
+            'username', 'email', 'password', 'confirm_password',
+            'first_name', 'last_name', 'college'
         ]
         extra_kwargs = {
             'password': {'write_only': True},
@@ -47,30 +44,18 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, attrs):
-        # Validate passwords match
         if attrs['password'] != attrs['confirm_password']:
             raise serializers.ValidationError({"password": "Password fields didn't match."})
-        
-        # Validate email is unique
         if User.objects.filter(email=attrs['email']).exists():
             raise serializers.ValidationError({"email": "Email already exists"})
-            
-        # Validate username is unique
-        #if User.objects.filter(username=attrs['username']).exists():
-        #    raise serializers.ValidationError({"username": "Username already exists"})
-            
         return attrs
 
     def create(self, validated_data):
         try:
-            # Remove confirm_password from the data
             validated_data.pop('confirm_password')
             college = validated_data.pop('college')
-            
-            # Get or create student role
             student_role, _ = UserRole.objects.get_or_create(role_name='student')
-            
-            # Create user instance
+
             user = User.objects.create(
                 username=validated_data['username'],
                 email=validated_data['email'],
@@ -78,23 +63,20 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
                 last_name=validated_data['last_name'],
                 role=student_role
             )
-            
-            # Set password
             user.set_password(validated_data['password'])
             user.save()
-            
-            # Create student profile
+
             Student.objects.create(user=user, college=college)
-            
             return user
-            
         except Exception as e:
             raise serializers.ValidationError(f"Error creating user: {str(e)}")
 
+# Email Verification Serializer
 class VerifyEmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
-    token = serializers.CharField(max_length=50)  # Changed from 'otp' to 'token' to match your views
+    token = serializers.CharField(max_length=50)
 
+# Role Serializer
 class UserRoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserRole
@@ -102,7 +84,6 @@ class UserRoleSerializer(serializers.ModelSerializer):
         
 # Model Serializers
 class UserSerializer(serializers.ModelSerializer):
-    # Nested serializer to display role details; accepts role_name separately for input
     role = UserRoleSerializer(read_only=True)
     role_name = serializers.CharField(write_only=True)
 
@@ -116,6 +97,7 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create(**validated_data, role=role)
         return user
 
+# Profile Serializers
 class StudentSerializer(serializers.ModelSerializer):
     user = UserSerializer()
 
@@ -124,6 +106,7 @@ class StudentSerializer(serializers.ModelSerializer):
         fields = '__all__'
         depth = 1
 
+# Serializer for the Lecturer model, including a nested UserSerializer with a depth of 1.
 class LecturerSerializer(serializers.ModelSerializer):
     user = UserSerializer()
 
@@ -141,7 +124,6 @@ class AdministratorSerializer(serializers.ModelSerializer):
         depth = 1
 
     def create(self, validated_data):
-        # Create a new student and hash the password
         student = Student.objects.create(
             username=validated_data['username'],
             email=validated_data['email'],
@@ -152,11 +134,13 @@ class AdministratorSerializer(serializers.ModelSerializer):
         student.save()
         return student
 
+# Issue Tracking Serializers
 class StatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Status
         fields = '__all__'
 
+# Serializer for handling issue data, including related student, lecturer, and status information.
 class IssueSerializer(serializers.ModelSerializer):
     student = StudentSerializer(read_only=True)
     lecturer = LecturerSerializer(read_only=True)
@@ -167,6 +151,7 @@ class IssueSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['reported_date']
 
+# Serializer for Notification model with related issue data.
 class NotificationSerializer(serializers.ModelSerializer):
     issue = IssueSerializer(read_only=True)
 
@@ -216,7 +201,6 @@ class PasswordResetSerializer(serializers.Serializer):
             user = User.objects.get(email=email)
             user.set_password(new_password)
             user.save()
-            # Create a new login history entry
             LoginHistory.objects.create(user=user)
             return user
         except Exception as e:
@@ -228,54 +212,6 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
     confirm_password = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        """Ensure the passwords match"""
-        if data['new_password'] != data['confirm_password']:
-            raise serializers.ValidationError("Passwords don't match")
-        return data
-
-    def validate_new_password(self, value):
-        """Validate the new password meets Django's password strength requirements."""
-        try:
-            validate_password(value)  # Django's built-in password validation
-        except ValidationError as exc:
-            raise serializers.ValidationError(str(exc))  # Raise error if password is weak
-        return value
-
-    def save(self):
-        """Update the user's password if the token is valid"""
-        token = self.validated_data['token']
-        new_password = self.validated_data['new_password']
-        
-        try:
-            # Check if the token is valid (implement your logic for token validation)
-            password_reset_token = PasswordResetToken.objects.get(token=token)
-            user = password_reset_token.user  # Get the user associated with the token
-            
-            if password_reset_token.is_expired:
-                raise serializers.ValidationError("This token has expired.")
-            
-            user.set_password(new_password)
-            user.save()
-
-            # Create a new login history entry after password reset
-            LoginHistory.objects.create(user=user)
-            return user  # Return the user with the updated password
-
-        except PasswordResetToken.DoesNotExist:
-            raise serializers.ValidationError("Invalid or expired token.")
-        except Exception as e:
-            raise serializers.ValidationError(f"Error resetting password: {str(e)}")
-
-
-class PasswordResetConfirmSerializer(serializers.Serializer):
-    # Serializer for handling password reset confirmation input
-    token = serializers.CharField()
-    new_password = serializers.CharField(write_only=True)
-    confirm_password = serializers.CharField(write_only=True)
-
-
-    def validate(self, data):
-        """Ensure the passwords match"""
         if data['new_password'] != data['confirm_password']:
             raise serializers.ValidationError("Passwords don't match")
         return data
@@ -286,3 +222,24 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         except ValidationError as exc:
             raise serializers.ValidationError(str(exc))
         return value
+
+    def save(self):
+        token = self.validated_data['token']
+        new_password = self.validated_data['new_password']
+
+        try:
+            password_reset_token = PasswordResetToken.objects.get(token=token)
+            user = password_reset_token.user
+
+            if password_reset_token.is_expired:
+                raise serializers.ValidationError("This token has expired.")
+
+            user.set_password(new_password)
+            user.save()
+            LoginHistory.objects.create(user=user)
+            return user
+
+        except PasswordResetToken.DoesNotExist:
+            raise serializers.ValidationError("Invalid or expired token.")
+        except Exception as e:
+            raise serializers.ValidationError(f"Error resetting password: {str(e)}")
