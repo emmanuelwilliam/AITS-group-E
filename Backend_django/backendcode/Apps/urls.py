@@ -43,9 +43,9 @@ router.register(r'user-roles', UserRoleViewSet, basename='user-roles')
 # Define the URL patterns
 urlpatterns = [
     # API endpoints for JWT authentication
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 
     # Custom views for registration, issues, etc.
     path('register/student/', register_student, name='register_student'),
