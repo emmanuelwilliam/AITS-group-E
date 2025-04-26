@@ -25,7 +25,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
 from django.core.mail import send_mail
 from datetime import timedelta
-
+from django.db import IntegrityError
 
 # DRF Viewsets
 class StudentViewSet(viewsets.ModelViewSet):
@@ -79,109 +79,58 @@ def get_user_role(request):
     user = request.user
     return Response({'role': user.role.name if hasattr(user, 'role') else 'unknown'})
 
-@api_view(['POST', 'GET'])
+@api_view(['POST'])
 @permission_classes([AllowAny])
 def register_student(request):
-    if request.method == 'POST':
+    print("Incoming student registration data:", request.data) 
+    serializer = StudentSerializer(data=request.data)
+    
+    if serializer.is_valid():
         try:
-            print("Received registration data:", request.data)
+            # Check if student number already exists
+            student_number = serializer.validated_data.get('student_number')
+            if Student.objects.filter(student_number=student_number).exists():
+                return Response(
+                    {"error": "Student number already exists."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             
-            data = request.data
-            # Validate required fields
-            required_fields = ['username', 'email', 'password', 'first_name', 'last_name']
-            for field in required_fields:
-                if not data.get(field):
-                    return Response({
-                        'error': f'Missing required field: {field}',
-                        'required_fields': required_fields
-                    }, status=status.HTTP_400_BAD_REQUEST)
+            student = serializer.save()  # <-- Now it's safe to save
 
-            # Check if username or email already exists
-            if User.objects.filter(username=data['username']).exists():
-                return Response({
-                    'error': 'Username already exists'
-                }, status=status.HTTP_400_BAD_REQUEST)
-            
-            if User.objects.filter(email=data['email']).exists():
-                return Response({
-                    'error': 'Email already exists'
-                }, status=status.HTTP_400_BAD_REQUEST)
-
-            try:
-                # Get the student role
-                student_role = UserRole.objects.get(name='student')
-            except UserRole.DoesNotExist:
-                # Create the student role if it doesn't exist
-                student_role = UserRole.objects.create(name='student')
-                print("Created new student role")
-            
-            # Create user with role object but set is_active=False
-            user = User.objects.create_user(
-                username=data['username'],
-                email=data['email'],
-                password=data['password'],
-                first_name=data['first_name'],
-                last_name=data['last_name'],
-                is_active=False  # User starts inactive until email is verified
-            )
-            # Set the role after user creation
-            user.role = student_role
-            user.save()
-            
-            print(f"Created user: {user.username} with role: {user.role}")
-            
-            # Generate okens even for inactive users
-            refresh = RefreshToken.for_user(user)
-
-            # Create verification record
+            refresh = RefreshToken.for_user(student.user)
             verification = EmailVerification.objects.create(
-                user=user,
+                user=student.user,
                 expires_at=timezone.now() + timedelta(minutes=30)
             )
-            verification_code = verification.generate_code()
+            code = verification.generate_code()
             verification.save()
 
-            # Send verification email
-            try:
-                send_mail(
-                    'Verify your email - Student Registration',
-                    f'Your verification code is: {verification_code}\nThis code will expire in 30 minutes.',
-                    'from@yourdomain.com',  # Update this in settings.py
-                    [user.email],
-                    fail_silently=False,
-                )
-            except Exception as e:
-                print(f"Failed to send email: {str(e)}")
-                user.delete()  # Rollback user creation if email fails
-                return Response({
-                    'error': 'Failed to send verification email'
-                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            
+            send_mail(
+                'Verify your email',
+                f'Your verification code is: {code}',
+                'no-reply@yourdomain.com',
+                [student.user.email],
+                fail_silently=False,
+            )
+
             return Response({
                 'success': True,
-                'message': 'Registration successful. Please check your email for verification code.',
-                'user': {
-                    'email': user.email,
-                    'username': user.username,
-                },    
-                'tokens':{ #Include these for immediate login after verification
+                'message': 'Student registered successfully! Check your email for verification.',
+                'tokens': {
                     'refresh': str(refresh),
                     'access': str(refresh.access_token),
                 }
             }, status=status.HTTP_201_CREATED)
-            
-        except Exception as e:
-            import traceback
-            print("Registration error:", str(e))
-            print("Traceback:", traceback.format_exc())
-            return Response({
-                'error': str(e),
-                'detail': 'Registration failed'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        except IntegrityError as e:
+            print("Integrity error:", str(e))
+            return Response(
+                {"error": "Database integrity error. Please try again."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-    return Response({
-        'message': 'Use POST method to register'
-    }, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    print("Validation errors:", serializer.errors)  
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST', 'GET'])
 @permission_classes([AllowAny])
