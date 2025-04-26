@@ -60,26 +60,23 @@ const StudentRegister = () => {
     setIsSubmitting(true);
 
     try {
-      // Structure payload for backend compatibility
-      const studentData = {
+      const data = {
         user: {
           username: formData.username,
-          first_name: formData.firstName,
-          last_name: formData.lastName,
           email: formData.email,
           password: formData.password,
-          role: 'student' // Match your backend's user role field
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          role_name: "student",
         },
         college: formData.college,
-        email: formData.email,
+        course: formData.course,
         student_number: formData.studentNumber,
         registration_number: formData.registrationNumber,
-        course: formData.course
       };
-
-      // Call API to register student
-      await registerStudent(studentData);
-
+      
+      await registerStudent(data);
+      
       // Navigate to verification screen on success
       navigate('/verify', { state: { email: formData.email, role: 'student' } });
     } catch (err) {
