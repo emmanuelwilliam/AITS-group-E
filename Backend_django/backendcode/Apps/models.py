@@ -8,7 +8,7 @@ class UserRole(models.Model):
     # Model representing different user roles within the system
     ROLE_CHOICES = [
         ('student', 'Student'),
-        ('lecturer', 'Lecturer'),
+        ('Lecturer', 'Lecturer'),
         ('admin', 'Administrator'),
     ]
     name = models.CharField(max_length=150, blank=True)
@@ -45,12 +45,12 @@ class Student(models.Model):
         return f"{self.user.username}-{self.college}"
 
 class Lecturer(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='lecturer_profile')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='Lecturer_profile')
     employee_id = models.CharField(max_length=50, unique=True)
     department = models.CharField(max_length=200)
     college = models.CharField(max_length=200)
     position = models.CharField(max_length=100)
-    course_units = models.ManyToManyField("CourseUnit", related_name="lecturers")
+    course_units = models.ManyToManyField("CourseUnit", related_name="Lecturers")
     
 
     def __str__(self):
@@ -67,13 +67,7 @@ class CourseUnit(models.Model):
     def __str__(self):
         return f"{self.course_code}-{self.course_name}"
 
-class Issue(models.Model):
-    # according to the frontend we have ;
-    #PRIORITY_CHOICES = [
-    #   ('pending', 'pending'),
-    #   ('resolved', 'resolved'),
-    #   ('submitted', 'submitted'),
-    # ]    
+class Issue(models.Model):    
     PRIORITY_CHOICES = [
         ('Low', 'Low'),
         ('Medium', 'Medium'),

@@ -33,7 +33,7 @@ class StudentViewSet(viewsets.ModelViewSet):
     serializer_class = StudentSerializer
 
 class LecturerViewSet(viewsets.ModelViewSet):
-    queryset = Lecturer.objects.select_related('student','lecturer').all()
+    queryset = Lecturer.objects.select_related('student','Lecturer').all()
     serializer_class = LecturerSerializer
 
 # ViewSet that provides full API access to Administrator objects
@@ -43,13 +43,14 @@ class AdministratorViewSet(viewsets.ModelViewSet):
 
 # ViewSet for managing Issue objects with authentication, filtering, search, and ordering support
 class IssueViewSet(viewsets.ModelViewSet):
-    queryset = Issue.objects.select_related('lecturer').prefetch_related('notifications').all()
+    queryset = Issue.objects.select_related('Lecturer').prefetch_related('notifications').all()
     serializer_class = IssueSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['status', 'priority', 'lecturer']
+    filterset_fields = ['status', 'priority', 'Lecturer']
     search_fields = ['title', 'description']
     ordering_fields = ['reported_date', 'priority']
+    filterset_class = IssueFilter 
 
 # ViewSet that provides full API access to Notification objects
 class NotificationViewSet(viewsets.ModelViewSet):
@@ -185,7 +186,7 @@ def register_student(request):
 
 @api_view(['POST', 'GET'])
 @permission_classes([AllowAny])
-def register_lecturer(request):
+def register_Lecturer(request):
     if request.method == 'POST':
         try:
             data = request.data
@@ -202,10 +203,10 @@ def register_lecturer(request):
             if User.objects.filter(email=data['email']).exists():
                 return Response({'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Get or create the lecturer role
-            lecturer_role, created = UserRole.objects.get_or_create(role_name='lecturer')
+            # Get or create the Lecturer role
+            Lecturer_role, created = UserRole.objects.get_or_create(role_name='Lecturer')
             if created:
-                print("Created new lecturer role")
+                print("Created new Lecturer role")
 
             # Create user with is_active=False
             user = User.objects.create_user(
@@ -216,7 +217,7 @@ def register_lecturer(request):
                 last_name=data['last_name'],
                 is_active=False
             )
-            user.role = lecturer_role
+            user.role = Lecturer_role
             user.save()
 
             print(f"Created user: {user.username} with role: {user.role}")
@@ -255,7 +256,7 @@ def register_lecturer(request):
                     'email': user.email,
                     'first_name': user.first_name,
                     'last_name': user.last_name,
-                    'role': 'lecturer'
+                    'role': 'Lecturer'
                 },
                 'tokens': {
                     'refresh': str(refresh),
@@ -348,8 +349,6 @@ def register_administrator(request):
         print("Admin registration error:", str(e))
         print(traceback.format_exc())
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-from django.utils import timezone
 
 @api_view(['POST'])
 @permission_classes([AllowAny])

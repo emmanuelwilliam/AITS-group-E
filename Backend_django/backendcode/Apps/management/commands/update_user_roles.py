@@ -11,8 +11,8 @@ class Command(BaseCommand):
                 role_name='student',
                 defaults={'is_verified': True}
             )
-            lecturer_role, _ = UserRole.objects.get_or_create(
-                role_name='lecturer',
+            Lecturer_role, _ = UserRole.objects.get_or_create(
+                role_name='Lecturer',
                 defaults={'is_verified': True}
             )
             admin_role, _ = UserRole.objects.get_or_create(
@@ -26,11 +26,11 @@ class Command(BaseCommand):
                 student.user.role = student_role
                 student.user.save()
             
-            # Update lecturers
-            lecturers_updated = Lecturer.objects.select_related('user').all()
-            for lecturer in lecturers_updated:
-                lecturer.user.role = lecturer_role
-                lecturer.user.save()
+            # Update Lecturers
+            Lecturers_updated = Lecturer.objects.select_related('user').all()
+            for Lecturer in Lecturers_updated:
+                Lecturer.user.role = Lecturer_role
+                Lecturer.user.save()
             
             # Update administrators
             admins_updated = Administrator.objects.select_related('user').all()
@@ -42,7 +42,7 @@ class Command(BaseCommand):
                 self.style.SUCCESS(
                     f'Successfully updated roles for:'
                     f'\n- {students_updated.count()} students'
-                    f'\n- {lecturers_updated.count()} lecturers'
+                    f'\n- {Lecturers_updated.count()} Lecturers'
                     f'\n- {admins_updated.count()} administrators'
                 )
             )
