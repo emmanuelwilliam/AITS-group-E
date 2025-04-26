@@ -24,52 +24,66 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError("Unable to log in with provided credentials.")
         raise serializers.ValidationError("Must include 'username' and 'password'.")
 
-# User Registration Serializer
-class UserRegistrationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=True)
-    confirm_password = serializers.CharField(write_only=True, required=True)
-    college = serializers.CharField(required=True)
-    first_name = serializers.CharField(required=True)
-    last_name = serializers.CharField(required=True)
 
-    class Meta:
-        model = User
-        fields = [
-            'username', 'email', 'password', 'confirm_password',
-            'first_name', 'last_name', 'college'
-        ]
-        extra_kwargs = {
-            'password': {'write_only': True},
-            'email': {'required': True}
-        }
+class UserRegistrationSerializer(serializers.Serializer):
+    # User fields
+    username           = serializers.CharField()
+    email              = serializers.EmailField()
+    password           = serializers.CharField(write_only=True)
+    confirm_password   = serializers.CharField(write_only=True)
+    first_name         = serializers.CharField()
+    last_name          = serializers.CharField()
+    # Student fields
+    college            = serializers.CharField()
+    student_number     = serializers.CharField()
+    registration_number= serializers.CharField()
+    course             = serializers.CharField()
 
-    def validate(self, attrs):
-        if attrs['password'] != attrs['confirm_password']:
-            raise serializers.ValidationError({"password": "Password fields didn't match."})
-        if User.objects.filter(email=attrs['email']).exists():
-            raise serializers.ValidationError({"email": "Email already exists"})
-        return attrs
+    def validate(self, data):
+        if data['password'] != data['confirm_password']:
+            raise serializers.ValidationError("Passwords do not match.")
+        if User.objects.filter(username=data['username']).exists():
+            raise serializers.ValidationError("Username already taken.")
+        if User.objects.filter(email=data['email']).exists():
+            raise serializers.ValidationError("Email already registered.")
+        return data
 
     def create(self, validated_data):
-        try:
-            validated_data.pop('confirm_password')
-            college = validated_data.pop('college')
-            student_role, _ = UserRole.objects.get_or_create(role_name='student')
+        # 1) Pop student fields
+        college            = validated_data.pop('college')
+        student_number     = validated_data.pop('student_number')
+        registration_number= validated_data.pop('registration_number')
+        course             = validated_data.pop('course')
+        validated_data.pop('confirm_password')
 
-            user = User.objects.create(
-                username=validated_data['username'],
-                email=validated_data['email'],
-                first_name=validated_data['first_name'],
-                last_name=validated_data['last_name'],
-                role=student_role
-            )
-            user.set_password(validated_data['password'])
-            user.save()
+        # 2) Get or create student role
+        student_role, _ = UserRole.objects.get_or_create(
+            role_name='student',
+            defaults={'name': 'Student'}
+        )
 
-            Student.objects.create(user=user, college=college)
-            return user
-        except Exception as e:
-            raise serializers.ValidationError(f"Error creating user: {str(e)}")
+        # 3) Create User
+        user = User(
+            username   = validated_data['username'],
+            email      = validated_data['email'],
+            first_name = validated_data['first_name'],
+            last_name  = validated_data['last_name'],
+            role       = student_role,
+            is_active  = False,  # pending email verification
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+
+        # 4) Create Student profile
+        Student.objects.create(
+            user               = user,
+            college            = college,
+            student_number     = student_number,
+            registration_number= registration_number,
+            course             = course
+        )
+
+        return user
 
 # Email Verification Serializer
 class VerifyEmailSerializer(serializers.Serializer):
@@ -86,34 +100,68 @@ class UserRoleSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     role = UserRoleSerializer(read_only=True)
     role_name = serializers.CharField(write_only=True)
-
+    password = serializers.CharField(write_only=True)
+    
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'role', 'role_name', 'first_name', 'last_name']
-
+        fields = ['username', 'email', 'password', 'first_name', 'last_name', 'role', 'role_name']
+    
     def create(self, validated_data):
-        role_name = validated_data.pop('role_name')
-        role = UserRole.objects.get(role_name=role_name)
-        user = User.objects.create(**validated_data, role=role)
+        role_name = validated_data.pop('role_name', None)
+        password = validated_data.pop('password')
+
+        # Handle role assignment if necessary
+        if role_name:
+            role = UserRole.objects.get(role_name=role_name)
+            validated_data['role'] = role
+
+        user = User(**validated_data)
+        user.set_password(password)
+        user.save()
         return user
+
 
 # Profile Serializers
 class StudentSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+      user = UserSerializer()
 
-    class Meta:
-        model = Student
-        fields = '__all__'
-        depth = 1
+      class Meta:
+          model = Student
+          fields = ['user', 'college', 'course', 'student_number', 'registration_number']
+  
+      def create(self, validated_data):
+          user_data = validated_data.pop('user')
+          user_data['role_name'] = 'student'  # Force role to student
+      
+          # Use UserSerializer to create the user correctly
+          user_serializer = UserSerializer(data=user_data)
+          user_serializer.is_valid(raise_exception=True)
+          user = user_serializer.save()
+      
+          student = Student.objects.create(user=user, **validated_data)
+          return student
+
+
+      def validate_student_number(self, value):
+          if Student.objects.filter(student_number=value).exists():
+              raise serializers.ValidationError("Student number already exists. Please provide a unique student number.")
+          return value
 
 # Serializer for the Lecturer model, including a nested UserSerializer with a depth of 1.
 class LecturerSerializer(serializers.ModelSerializer):
     user = UserSerializer()
-
     class Meta:
-        model = Lecturer
-        fields = '__all__'
-        depth = 1
+       model = Lecturer
+       fields ='__all__'
+
+    def create(self, validated_data):
+        user_data = validated_data.pop('user')
+        user_data['role_name'] = 'lecturer'  # Force role
+        user_serializer = UserSerializer(data=user_data)
+        user_serializer.is_valid(raise_exception=True)
+        user = user_serializer.save()
+        lecturer = Lecturer.objects.create(user=user, **validated_data)
+        return lecturer
 
 class AdministratorSerializer(serializers.ModelSerializer):
     user = UserSerializer()
@@ -124,15 +172,16 @@ class AdministratorSerializer(serializers.ModelSerializer):
         depth = 1
 
     def create(self, validated_data):
-        student = Student.objects.create(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name']
-        )
-        student.set_password(validated_data['password'])
-        student.save()
-        return student
+        user_data = validated_data.pop('user')
+        user_data['role_name'] = 'administrator'  # Force role
+
+        user_serializer = UserSerializer(data=user_data)
+        user_serializer.is_valid(raise_exception=True)
+        user = user_serializer.save()
+
+        administrator = Administrator.objects.create(user=user, **validated_data)
+        return administrator
+
 
 # Issue Tracking Serializers
 class StatusSerializer(serializers.ModelSerializer):
