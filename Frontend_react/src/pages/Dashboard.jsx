@@ -1,6 +1,7 @@
+// src/pages/Dashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getStudentIssues } from '../api/issueService';
+import { fetchIssues } from '../api/issueService';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
 import Notifications from '../components/Notifications';
@@ -11,123 +12,97 @@ import '../styles/dashboard.css';
 
 const StudentDashboard = () => {
   const [activeComponent, setActiveComponent] = useState('notifications');
-  const [issues, setIssues] = useState([]);
+  const [issues, setIssues]          = useState([]);
   const [filteredIssues, setFilteredIssues] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [loading, setLoading]        = useState(false);
+  const [error, setError]            = useState(null);
   const [statusMessage, setStatusMessage] = useState('');
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [sortOrder, setSortOrder] = useState('newest');
+  const [sortOrder, setSortOrder]       = useState('newest');
 
   const { user, logout } = useAuth();
 
+  // Load issues whenever the user changes or on mount
   useEffect(() => {
     if (!user) return;
-    fetchStudentIssues();
-
-    const handleResize = () => {
-      if (window.innerWidth > 768) setSidebarOpen(false);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    loadIssues();
   }, [user]);
 
-  const fetchStudentIssues = async () => {
+  const loadIssues = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await getStudentIssues();
-      setIssues(data);
-      setFilteredIssues(data);
+      const res = await fetchIssues();
+      setIssues(res.data);
+      setFilteredIssues(res.data);
     } catch (err) {
       console.error('Fetch error:', err);
-      setError('We couldn’t load your issues. Please refresh or try again.');
-      if (err.response?.status === 401) logout();
+      setError('Could not load issues. Please try again.');
+      if (err.response?.status === 401) {
+        logout();
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  // Apply search/filter/sort
   useEffect(() => {
-    if (!issues.length) return;
-    let result = [...issues];
+    let data = [...issues];
 
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        i => i.title?.toLowerCase().includes(query) ||
-             i.description?.toLowerCase().includes(query) ||
-             i.id?.toString().includes(query)
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      data = data.filter(i =>
+        i.title.toLowerCase().includes(q) ||
+        i.description.toLowerCase().includes(q)
       );
     }
 
     if (statusFilter !== 'all') {
-      result = result.filter(issue => issue.status === statusFilter);
+      data = data.filter(i => i.status?.id === statusFilter);
     }
 
-    result.sort((a, b) => {
-      const aDate = new Date(a.createdAt || a.timestamp);
-      const bDate = new Date(b.createdAt || b.timestamp);
-      return sortOrder === 'newest' ? bDate - aDate : aDate - bDate;
+    data.sort((a,b) => {
+      const da = new Date(a.reported_date);
+      const db = new Date(b.reported_date);
+      return sortOrder === 'newest' ? db - da : da - db;
     });
 
-    setFilteredIssues(result);
+    setFilteredIssues(data);
   }, [issues, searchQuery, statusFilter, sortOrder]);
 
-  const handleIssueCreated = (newIssue) => {
-    setIssues(prev => [newIssue, ...prev]);
-    setActiveComponent('issueTracking');
-    flashMessage('Issue submitted successfully. We’ll review it soon.');
-  };
-
-  const handleIssueUpdated = (updated) => {
-    setIssues(prev => prev.map(i => i.id === updated.id ? updated : i));
-    flashMessage('Issue updated.');
-  };
-
-  const handleIssueDeleted = (issueId) => {
-    setIssues(prev => prev.filter(i => i.id !== issueId));
-    flashMessage('Issue removed.');
-  };
-
-  const flashMessage = (msg) => {
+  const flashMessage = msg => {
     setStatusMessage(msg);
     setTimeout(() => setStatusMessage(''), 3000);
   };
 
-  const issueStats = {
-    pending: issues.filter(i => i.status === 'pending').length,
-    inProgress: issues.filter(i => i.status === 'in-progress').length,
-    resolved: issues.filter(i => i.status === 'resolved').length,
-    total: issues.length,
+  const handleIssueCreated = newIssue => {
+    setIssues(prev => [newIssue, ...prev]);
+    setActiveComponent('issueTracking');
+    flashMessage('Issue submitted successfully!');
   };
 
-  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  const handleIssueUpdated = updated =>
+    setIssues(prev => prev.map(i => i.id === updated.id ? updated : i));
+
+  const handleIssueDeleted = id =>
+    setIssues(prev => prev.filter(i => i.id !== id));
 
   const renderContent = () => {
-    if (loading) return (
-      <div className="loading-container">
-        <div className="spinner" />
-        <p>Loading issues...</p>
-      </div>
-    );
+    if (loading) return <p>Loading issues…</p>;
+    if (error)   return <div className="error">{error}</div>;
 
-    if (error) return (
-      <div className="error-message">
-        <p>{error}</p>
-        <button onClick={fetchStudentIssues}>Reload</button>
-      </div>
-    );
-
-    switch (activeComponent) {
-      case 'notifications':
-        return <Notifications />;
+    switch(activeComponent) {
       case 'issueReporting':
-        return <IssueReporting onIssueCreated={handleIssueCreated} userRole="student" />;
+        return (
+          <IssueReporting
+            onIssueCreated={handleIssueCreated}
+            userRole="student"
+            user={user}
+          />
+        );
       case 'issueTracking':
         return (
           <IssueTracking
@@ -136,12 +111,8 @@ const StudentDashboard = () => {
             onIssueDeleted={handleIssueDeleted}
             userRole="student"
             onSearch={setSearchQuery}
-            searchQuery={searchQuery}
             onFilterChange={setStatusFilter}
-            currentFilter={statusFilter}
             onSortChange={setSortOrder}
-            currentSort={sortOrder}
-            refreshData={fetchStudentIssues}
           />
         );
       default:
@@ -149,38 +120,40 @@ const StudentDashboard = () => {
     }
   };
 
+  const issueStats = {
+    total:    issues.length,
+    low:      issues.filter(i => i.priority==='Low').length,
+    medium:   issues.filter(i => i.priority==='Medium').length,
+    high:     issues.filter(i => i.priority==='High').length,
+    urgent:   issues.filter(i => i.priority==='Urgent').length,
+  };
+
   return (
     <div className="dashboard">
-      {statusMessage && <div className="status-message">{statusMessage}</div>}
+      {statusMessage && <div className="flash">{statusMessage}</div>}
 
-      <TopBar
-        user={user}
-        toggleSidebar={toggleSidebar}
-        issueStats={issueStats}
-        refreshData={fetchStudentIssues}
-      />
+      <TopBar user={user} toggleSidebar={() => {/*…*/}} />
 
       <Sidebar
-        setActiveComponent={setActiveComponent}
-        activeComponent={activeComponent}
+        active={activeComponent}
+        onSelect={setActiveComponent}
         userRole="student"
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
       />
 
-      <div className={`main-content ${sidebarOpen ? 'sidebar-open' : ''}`}>
-        <div className="stats-summary">
-          {Object.entries(issueStats).map(([key, val]) => (
+      <div className="main-content">
+        <div className="stats">
+          {Object.entries(issueStats).map(([key, val]) =>
             <IssueStatsCard
               key={key}
-              label={key.replace(/([A-Z])/g, ' $1')}
+              label={key}
               value={val}
-              onClick={() => setStatusFilter(key === 'total' ? 'all' : key)}
-              active={statusFilter === key}
+              onClick={() => setStatusFilter(key)}
+              active={statusFilter===key}
             />
-          ))}
+          )}
         </div>
-        <div className="content">
+
+        <div className="content-area">
           {renderContent()}
         </div>
       </div>
