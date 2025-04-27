@@ -29,7 +29,6 @@ const IssueReporting = ({ onIssueCreated }) => {
     course_code: "",
     category: "Academic",
     priority: "Medium",
-    assigned_to: ""
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -82,7 +81,6 @@ const IssueReporting = ({ onIssueCreated }) => {
         course_code: "",
         category: "Academic",
         priority: "Medium",
-        assigned_to: ""
       });
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
