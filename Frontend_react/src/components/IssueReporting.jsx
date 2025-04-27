@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useAuth } from '../context/AuthContext';
 import { createIssue } from '../api/issueService';
-import api from '../api/apiConfig';
 import '../styles/issueReporting.css';
 
 const colleges = [
@@ -17,7 +16,6 @@ const colleges = [
 
 const IssueReporting = ({ onIssueCreated }) => {
   const { user } = useAuth();
-  const [lecturers, setLecturers] = useState([]);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -33,13 +31,6 @@ const IssueReporting = ({ onIssueCreated }) => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-
-  // Fetch lecturers for assignment dropdown
-  useEffect(() => {
-    api.get('lecturers/')
-      .then(res => setLecturers(res.data))
-      .catch(err => console.error('Failed to load lecturers:', err));
-  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -65,12 +56,11 @@ const IssueReporting = ({ onIssueCreated }) => {
     setIsSubmitting(true);
 
     try {
-      // Ensure user and student_profile exist
       if (!user || !user.student_profile) {
         throw new Error('User or student profile is not available.');
       }
 
-      const studentId = user.student_profile.id; // Safely access student ID
+      const studentId = user.student_profile.id;
       const payload = { ...formData, student: studentId };
       const newIssue = await createIssue(payload); // Send data to backend
       onIssueCreated?.(newIssue);
@@ -87,9 +77,11 @@ const IssueReporting = ({ onIssueCreated }) => {
         category: "Academic",
         priority: "Medium",
       });
+      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
-      console.error('Error submitting issue:', err);
-      setErrors({ form: err.message || 'Failed to submit the issue. Please try again.' });
+      console.error('Issue submission error:', err);
+      const backend = err.response?.data;
+      setErrors({ form: backend?.message || 'Failed to submit issue. Please try again.' });
     } finally {
       setIsSubmitting(false);
     }
