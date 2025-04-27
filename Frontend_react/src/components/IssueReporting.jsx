@@ -61,13 +61,18 @@ const IssueReporting = ({ onIssueCreated }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
+
     setIsSubmitting(true);
 
     try {
-      // Use student_profile if available, fallback to user.id
-      const studentId = user.student_profile?.id || user.id;
+      // Ensure user and student_profile exist
+      if (!user || !user.student_profile) {
+        throw new Error('User or student profile is not available.');
+      }
+
+      const studentId = user.student_profile.id; // Safely access student ID
       const payload = { ...formData, student: studentId };
-      const newIssue = await createIssue(payload);
+      const newIssue = await createIssue(payload); // Send data to backend
       onIssueCreated?.(newIssue);
       setSuccessMessage('Issue submitted successfully!');
       setFormData({
@@ -82,11 +87,9 @@ const IssueReporting = ({ onIssueCreated }) => {
         category: "Academic",
         priority: "Medium",
       });
-      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
-      console.error('Issue submission error:', err);
-      const backend = err.response?.data;
-      setErrors({ form: backend?.message || 'Failed to submit issue. Please try again.' });
+      console.error('Error submitting issue:', err);
+      setErrors({ form: err.message || 'Failed to submit the issue. Please try again.' });
     } finally {
       setIsSubmitting(false);
     }
