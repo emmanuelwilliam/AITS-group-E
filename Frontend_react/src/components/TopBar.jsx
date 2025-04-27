@@ -14,7 +14,7 @@ const TopBar = ({ firstName, lastName, studentNumber, registrationNumber, webmai
   };
 
   const handleLogout = () => {
-    navigate("/login");
+    navigate("/"); // Redirect to the home page
   };
 
   const handleSearch = (e) => {
