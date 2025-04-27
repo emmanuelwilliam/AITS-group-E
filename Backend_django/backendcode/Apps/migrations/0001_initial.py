@@ -66,7 +66,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(blank=True, max_length=150)),
-                ('role_name', models.CharField(choices=[('student', 'Student'), ('lecturer', 'Lecturer'), ('admin', 'Administrator')], max_length=50, unique=True)),
+                ('role_name', models.CharField(choices=[('student', 'Student'), ('Lecturer', 'Lecturer'), ('admin', 'Administrator')], max_length=50, unique=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('verification_token', models.UUIDField(default=uuid.uuid4, editable=False)),
                 ('is_verified', models.BooleanField(default=False)),
@@ -158,8 +158,8 @@ class Migration(migrations.Migration):
                 ('department', models.CharField(max_length=200)),
                 ('college', models.CharField(max_length=200)),
                 ('position', models.CharField(max_length=100)),
-                ('course_units', models.ManyToManyField(related_name='lecturers', to='Apps.courseunit')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='lecturer_profile', to=settings.AUTH_USER_MODEL)),
+                ('course_units', models.ManyToManyField(related_name='Lecturers', to='Apps.courseunit')),
+                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='Lecturer_profile', to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(

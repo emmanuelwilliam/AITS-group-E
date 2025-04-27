@@ -189,10 +189,10 @@ class StatusSerializer(serializers.ModelSerializer):
         model = Status
         fields = '__all__'
 
-# Serializer for handling issue data, including related student, lecturer, and status information.
+# Serializer for handling issue data, including related student, Lecturer, and status information.
 class IssueSerializer(serializers.ModelSerializer):
     student = StudentSerializer(read_only=True)
-    lecturer = LecturerSerializer(read_only=True)
+    Lecturer = LecturerSerializer(read_only=True)
     status = StatusSerializer(read_only=True)
 
     class Meta:

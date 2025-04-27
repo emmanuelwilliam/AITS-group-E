@@ -24,9 +24,9 @@ class StudentForm(forms.ModelForm):
         return self.cleaned_data['user']
 
 
-# Form for lecturer model
+# Form for Lecturer model
 class LecturerForm(forms.ModelForm):
-    # Form for creating or editing lecturer profiles and related details
+    # Form for creating or editing Lecturer profiles and related details
     class Meta:
         model = Lecturer
         fields = [

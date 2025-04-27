@@ -16,7 +16,7 @@ from .views import (
     StatusViewSet,
     UserRoleViewSet,
     register_student,
-    register_lecturer,
+    register_Lecturer,
     register_administrator,
     get_user_role,
     get_notifications,
@@ -34,7 +34,7 @@ router = DefaultRouter()
 router.register(r'login-history', LoginHistoryViewSet, basename='login-history')
 router.register(r'students', StudentViewSet, basename='students')
 router.register(r'administrators', AdministratorViewSet, basename='administrators')
-router.register(r'lecturers', LecturerViewSet, basename='lecturers')
+router.register(r'Lecturers', LecturerViewSet, basename='Lecturers')
 router.register(r'issues', IssueViewSet, basename='issues')
 router.register(r'notifications', NotificationViewSet, basename='notifications')
 router.register(r'status', StatusViewSet, basename='status')  # Only register once
@@ -49,7 +49,7 @@ urlpatterns = [
 
     # Custom views for registration, issues, etc.
     path('register/student/', register_student, name='register_student'),
-    path('register/lecturer/', register_lecturer, name='register_lecturer'),
+    path('register/Lecturer/', register_Lecturer, name='register_Lecturer'),
     path('register/administrator/', register_administrator, name='register_administrator'),
     path('verify-email/', verify_email, name='verify-email'),
 
