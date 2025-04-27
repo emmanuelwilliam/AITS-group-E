@@ -56,12 +56,7 @@ const IssueReporting = ({ onIssueCreated }) => {
     setIsSubmitting(true);
 
     try {
-      if (!user || !user.student_profile) {
-        throw new Error('User or student profile is not available.');
-      }
-
-      const studentId = user.student_profile.id;
-      const payload = { ...formData, student: studentId };
+      const payload = { ...formData }; // Use formData directly without adding a student field
       const newIssue = await createIssue(payload); // Send data to backend
       onIssueCreated?.(newIssue);
       setSuccessMessage('Issue submitted successfully!');
