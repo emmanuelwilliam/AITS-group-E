@@ -56,7 +56,7 @@ const IssueReporting = ({ onIssueCreated }) => {
     setIsSubmitting(true);
 
     try {
-      const payload = { ...formData }; // Use formData directly without adding a student field
+      const payload = { ...formData }; // Use formData directly
       const newIssue = await createIssue(payload); // Send data to backend
       onIssueCreated?.(newIssue);
       setSuccessMessage('Issue submitted successfully!');
