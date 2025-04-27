@@ -1,6 +1,5 @@
 // src/pages/Dashboard.jsx
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { useAuth } from '../context/AuthContext';
 import { fetchIssues } from '../api/issueService';
 import Sidebar from '../components/Sidebar';
@@ -13,18 +12,17 @@ import '../styles/dashboard.css';
 
 const StudentDashboard = () => {
   const [activeComponent, setActiveComponent] = useState('notifications');
-  const [issues, setIssues] = useState([]);
+  const [issues, setIssues]          = useState([]);
   const [filteredIssues, setFilteredIssues] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [loading, setLoading]        = useState(false);
+  const [error, setError]            = useState(null);
   const [statusMessage, setStatusMessage] = useState('');
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [sortOrder, setSortOrder] = useState('newest');
+  const [sortOrder, setSortOrder]       = useState('newest');
 
   const { user, logout } = useAuth();
-  const navigate = useNavigate(); // Initialize useNavigate
 
   // Load issues whenever the user changes or on mount
   useEffect(() => {
@@ -43,16 +41,11 @@ const StudentDashboard = () => {
       console.error('Fetch error:', err);
       setError('Could not load issues. Please try again.');
       if (err.response?.status === 401) {
-        handleLogout(); // Call handleLogout if unauthorized
+        logout();
       }
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleLogout = () => {
-    logout(); // Clear authentication state
-    navigate('/'); // Redirect to the home screen
   };
 
   // Apply search/filter/sort
@@ -155,7 +148,7 @@ const StudentDashboard = () => {
               label={key}
               value={val}
               onClick={() => setStatusFilter(key)}
-              active={statusFilter === key}
+              active={statusFilter===key}
             />
           )}
         </div>
