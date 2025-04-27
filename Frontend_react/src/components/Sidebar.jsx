@@ -4,20 +4,20 @@ import IssueReportingIcon from "../assets/IR.jpg"; // Import Issue Reporting ico
 import IssueTrackingIcon from "../assets/IT.png"; // Import Issue Tracking icon
 import NotificationsIcon from "../assets/NOT.png"; // Import Notifications icon
 
-const Sidebar = ({ setActiveComponent }) => {
+const Sidebar = ({ onSelect }) => {
   return (
     <div className="sidebar">
       <div className="sidebar-logo">AITS</div>
       <ul className="sidebar-menu">
-        <li onClick={() => setActiveComponent("notifications")}>
+        <li onClick={() => onSelect("notifications")}>
           <img src={NotificationsIcon} alt="Notifications" className="sidebar-icon" />
           Notifications
         </li>
-        <li onClick={() => setActiveComponent("issueReporting")}>
+        <li onClick={() => onSelect("issueReporting")}>
           <img src={IssueReportingIcon} alt="Issue Reporting" className="sidebar-icon" />
           Issue Reporting
         </li>
-        <li onClick={() => setActiveComponent("issueTracking")}>
+        <li onClick={() => onSelect("issueTracking")}>
           <img src={IssueTrackingIcon} alt="Issue Tracking" className="sidebar-icon" />
           Issue Tracking
         </li>
