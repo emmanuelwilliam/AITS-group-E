@@ -108,7 +108,6 @@ class Issue(models.Model):
     course_unit = models.CharField(max_length=100)
     course_code = models.CharField(max_length=20)
     # System fields
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='issues_raised')
     category = models.CharField(max_length=100, choices=CATEGORY_CHOICES, default='Academic')
     reported_date = models.DateTimeField(auto_now_add=True)
     priority = models.CharField(max_length=50, choices=PRIORITY_CHOICES, default='Medium')

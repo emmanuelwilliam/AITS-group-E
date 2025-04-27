@@ -52,31 +52,29 @@ const IssueReporting = ({ onIssueCreated }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-
+  
     setIsSubmitting(true);
-
+  
     try {
-      const payload = { ...formData }; // Use formData directly
-      const newIssue = await createIssue(payload); // Send data to backend
-      onIssueCreated?.(newIssue);
+      const payload = {
+        ...formData,
+        // Keep as strings (matches backend CharField)
+        year_of_study: formData.year_of_study,  // Already string from select
+        semester: formData.semester,            // Already string from select
+        // No student field included
+      };
+  
+      console.log('Submitting:', payload);
+      const response = await createIssue(payload);
+      
       setSuccessMessage('Issue submitted successfully!');
-      setFormData({
-        title: "",
-        description: "",
-        college: "",
-        program: "",
-        year_of_study: "1",
-        semester: "1",
-        course_unit: "",
-        course_code: "",
-        category: "Academic",
-        priority: "Medium",
-      });
-      setTimeout(() => setSuccessMessage(''), 3000);
+      resetForm();
     } catch (err) {
-      console.error('Issue submission error:', err);
-      const backend = err.response?.data;
-      setErrors({ form: backend?.message || 'Failed to submit issue. Please try again.' });
+      console.error('Submission error:', err);
+      setErrors({
+        form: err.response?.data?.error || 
+             'Submission failed. Please try again.'
+      });
     } finally {
       setIsSubmitting(false);
     }

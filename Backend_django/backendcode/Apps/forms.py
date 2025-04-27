@@ -74,13 +74,16 @@ class IssueForm(forms.ModelForm):
     class Meta:
         model = Issue
         fields = [
-            'student',
-            'assigned_to',
             'title',
             'description',
+            'college',
+            'program',
+            'year_of_study',
+            'semester',
+            'course_unit',
+            'course_code',
             'category',
             'priority',
-            'status',
         ]
 
 

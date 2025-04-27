@@ -191,14 +191,23 @@ class StatusSerializer(serializers.ModelSerializer):
 
 # Serializer for handling issue data, including related student, Lecturer, and status information.
 class IssueSerializer(serializers.ModelSerializer):
-    student = StudentSerializer(read_only=True)
-    Lecturer = LecturerSerializer(read_only=True)
-    status = StatusSerializer(read_only=True)
-
     class Meta:
         model = Issue
-        fields = '__all__'
-        read_only_fields = ['reported_date']
+        fields = [
+            'title', 'description', 'college', 'program', 
+            'year_of_study', 'semester', 'course_unit', 
+            'course_code', 'category', 'priority'
+        ]
+        extra_kwargs = {
+            'title': {'required': True},
+            'description': {'required': True},
+            'college': {'required': True},
+            'program': {'required': True},
+            'year_of_study': {'required': True},
+            'semester': {'required': True},
+            'course_unit': {'required': True},
+            'course_code': {'required': True},
+        }
 
 # Serializer for Notification model with related issue data.
 class NotificationSerializer(serializers.ModelSerializer):
