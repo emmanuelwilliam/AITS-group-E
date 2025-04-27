@@ -6,8 +6,8 @@ import "../styles/lecturerTopBar.css";
 
 const LecturerTopBar = () => {
   const handleLogout = () => {
-    // Handle logout logic here
-    console.log("Logged out");
+    sessionStorage.removeItem("lecturerToken"); // Clear lecturer token from session storage
+    window.location.href = "/"; // Redirect to the home page
   };
 
   return (
