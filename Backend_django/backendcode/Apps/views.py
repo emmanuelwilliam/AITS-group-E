@@ -381,6 +381,7 @@ def issue_list(request):
     return Response(serializer.data)
 
 @api_view(['POST'])
+@permission_classes([AllowAny])  # Allow unauthenticated access
 def create_issue(request):
     serializer = IssueSerializer(data=request.data)
     if serializer.is_valid():
