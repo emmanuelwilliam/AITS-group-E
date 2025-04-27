@@ -51,7 +51,7 @@ const StudentDashboard = () => {
   };
 
   const handleLogout = () => {
-    logout(); // Perform logout
+    logout(); // Clear authentication state
     navigate('/'); // Redirect to the home screen
   };
 
