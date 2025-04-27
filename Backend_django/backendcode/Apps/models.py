@@ -70,7 +70,11 @@ class CourseUnit(models.Model):
     def __str__(self):
         return f"{self.course_code}-{self.course_name}"
 
+<<<<<<< HEAD
 class Issue(models.Model):    
+=======
+class Issue(models.Model):
+>>>>>>> 4359f13f8cd558357a9e0f5b6054c7bc46867ab4
     PRIORITY_CHOICES = [
         ('Low', 'Low'),
         ('Medium', 'Medium'),
@@ -109,12 +113,10 @@ class Issue(models.Model):
     course_code = models.CharField(max_length=20)
     # System fields
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='issues_raised')
-    assigned_to = models.CharField(max_length=100, null=True, blank=True)
     category = models.CharField(max_length=100, choices=CATEGORY_CHOICES, default='Academic')
     reported_date = models.DateTimeField(auto_now_add=True)
     priority = models.CharField(max_length=50, choices=PRIORITY_CHOICES, default='Medium')
-    status = models.ForeignKey('Status', on_delete=models.SET_NULL, null=True, blank=True)
-
+    
     def __str__(self):
         return f"{self.title} - {self.student}"
 

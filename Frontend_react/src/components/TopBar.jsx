@@ -14,7 +14,10 @@ const TopBar = ({ firstName, lastName, studentNumber, registrationNumber, webmai
   };
 
   const handleLogout = () => {
-    navigate("/login");
+    if (window.confirm("Are you sure you want to logout?")) {
+      sessionStorage.removeItem("adminToken"); // Clear admin token from session storage
+      navigate("/"); // Redirect to the home page
+    }
   };
 
   const handleSearch = (e) => {

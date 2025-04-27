@@ -1,147 +1,89 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getStudentIssues } from '../api/issueService';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
 import Notifications from '../components/Notifications';
 import IssueReporting from '../components/IssueReporting';
 import IssueTracking from '../components/IssueTracking';
-import IssueStatsCard from '../components/IssueStatsCard';
 import '../styles/dashboard.css';
 
-const StudentDashboard = () => {
+const Dashboard = () => {
   const [activeComponent, setActiveComponent] = useState('notifications');
   const [issues, setIssues] = useState([]);
-  const [filteredIssues, setFilteredIssues] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Changed to false since we're not loading
   const [error, setError] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [statusMessage, setStatusMessage] = useState('');
-
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [sortOrder, setSortOrder] = useState('newest');
-
   const { user, logout } = useAuth();
 
   useEffect(() => {
-    if (!user) return;
-    fetchStudentIssues();
+    // Mock issues data
+    const mockIssues = [
+      {
+        id: 1,
+        title: "Network Connectivity",
+        description: "Unable to access university WiFi",
+        status: "Pending",
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 2,
+        title: "Library Access",
+        description: "Student ID not working at library entrance",
+        status: "In Progress",
+        createdAt: new Date().toISOString()
+      }
+    ];
 
-    const handleResize = () => {
-      if (window.innerWidth > 768) setSidebarOpen(false);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [user]);
-
-  const fetchStudentIssues = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await getStudentIssues();
-      setIssues(data);
-      setFilteredIssues(data);
-    } catch (err) {
-      console.error('Fetch error:', err);
-      setError('We couldn’t load your issues. Please refresh or try again.');
-      if (err.response?.status === 401) logout();
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!issues.length) return;
-    let result = [...issues];
-
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        i => i.title?.toLowerCase().includes(query) ||
-             i.description?.toLowerCase().includes(query) ||
-             i.id?.toString().includes(query)
-      );
-    }
-
-    if (statusFilter !== 'all') {
-      result = result.filter(issue => issue.status === statusFilter);
-    }
-
-    result.sort((a, b) => {
-      const aDate = new Date(a.createdAt || a.timestamp);
-      const bDate = new Date(b.createdAt || b.timestamp);
-      return sortOrder === 'newest' ? bDate - aDate : aDate - bDate;
-    });
-
-    setFilteredIssues(result);
-  }, [issues, searchQuery, statusFilter, sortOrder]);
+    setIssues(mockIssues);
+  }, []);
 
   const handleIssueCreated = (newIssue) => {
-    setIssues(prev => [newIssue, ...prev]);
+    // For mock implementation, just add to local state
+    const mockIssue = {
+      ...newIssue,
+      id: Math.max(...issues.map(i => i.id), 0) + 1,
+      status: "Pending",
+      createdAt: new Date().toISOString()
+    };
+    setIssues(prevIssues => [mockIssue, ...prevIssues]);
     setActiveComponent('issueTracking');
-    flashMessage('Issue submitted successfully. We’ll review it soon.');
   };
 
-  const handleIssueUpdated = (updated) => {
-    setIssues(prev => prev.map(i => i.id === updated.id ? updated : i));
-    flashMessage('Issue updated.');
+  const handleIssueUpdated = (updatedIssue) => {
+    setIssues(prevIssues => 
+      prevIssues.map(issue => 
+        issue.id === updatedIssue.id ? updatedIssue : issue
+      )
+    );
   };
 
   const handleIssueDeleted = (issueId) => {
-    setIssues(prev => prev.filter(i => i.id !== issueId));
-    flashMessage('Issue removed.');
-  };
-
-  const flashMessage = (msg) => {
-    setStatusMessage(msg);
-    setTimeout(() => setStatusMessage(''), 3000);
-  };
-
-  const issueStats = {
-    pending: issues.filter(i => i.status === 'pending').length,
-    inProgress: issues.filter(i => i.status === 'in-progress').length,
-    resolved: issues.filter(i => i.status === 'resolved').length,
-    total: issues.length,
-  };
-
-  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
-
-  const renderContent = () => {
-    if (loading) return (
-      <div className="loading-container">
-        <div className="spinner" />
-        <p>Loading issues...</p>
-      </div>
+    setIssues(prevIssues => 
+      prevIssues.filter(issue => issue.id !== issueId)
     );
+  };
 
-    if (error) return (
-      <div className="error-message">
-        <p>{error}</p>
-        <button onClick={fetchStudentIssues}>Reload</button>
-      </div>
-    );
+  // Rest of the component remains the same
+  const renderComponent = () => {
+    if (loading) {
+      return <div className="loading-spinner">Loading...</div>;
+    }
+
+    if (error) {
+      return <div className="error-message">{error}</div>;
+    }
 
     switch (activeComponent) {
       case 'notifications':
         return <Notifications />;
       case 'issueReporting':
-        return <IssueReporting onIssueCreated={handleIssueCreated} userRole="student" />;
+        return <IssueReporting onIssueCreated={handleIssueCreated} />;
       case 'issueTracking':
         return (
-          <IssueTracking
-            issues={filteredIssues}
+          <IssueTracking 
+            issues={issues} 
             onIssueUpdated={handleIssueUpdated}
             onIssueDeleted={handleIssueDeleted}
-            userRole="student"
-            onSearch={setSearchQuery}
-            searchQuery={searchQuery}
-            onFilterChange={setStatusFilter}
-            currentFilter={statusFilter}
-            onSortChange={setSortOrder}
-            currentSort={sortOrder}
-            refreshData={fetchStudentIssues}
+            userRole={user?.role}
           />
         );
       default:
@@ -151,41 +93,19 @@ const StudentDashboard = () => {
 
   return (
     <div className="dashboard">
-      {statusMessage && <div className="status-message">{statusMessage}</div>}
-
-      <TopBar
-        user={user}
-        toggleSidebar={toggleSidebar}
-        issueStats={issueStats}
-        refreshData={fetchStudentIssues}
-      />
-
-      <Sidebar
-        setActiveComponent={setActiveComponent}
+      <TopBar user={user} />
+      <Sidebar 
+        setActiveComponent={setActiveComponent} 
         activeComponent={activeComponent}
-        userRole="student"
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
+        userRole={user?.role}
       />
-
-      <div className={`main-content ${sidebarOpen ? 'sidebar-open' : ''}`}>
-        <div className="stats-summary">
-          {Object.entries(issueStats).map(([key, val]) => (
-            <IssueStatsCard
-              key={key}
-              label={key.replace(/([A-Z])/g, ' $1')}
-              value={val}
-              onClick={() => setStatusFilter(key === 'total' ? 'all' : key)}
-              active={statusFilter === key}
-            />
-          ))}
-        </div>
+      <div className="main-content">
         <div className="content">
-          {renderContent()}
+          {renderComponent()}
         </div>
       </div>
     </div>
   );
 };
 
-export default StudentDashboard;
+export default Dashboard;

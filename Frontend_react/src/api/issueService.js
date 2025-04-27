@@ -1,31 +1,30 @@
 // issueService.js
+// Axios instance configured in apiConfig.js with baseURL and auth interceptors
 import api from './apiConfig';
 
-export const createIssue = async (issueData) => {
-  const response = await api.post('issue/create/', issueData); // Changed endpoint
-  return response.data;
+// Fetch all issues (list)
+//export const fetchIssues = () =>
+  //axios.get(`${API_URL}issues/`);
+  //api.get('issues/');
+
+// Create a new issue
+export const createIssue = async issueData => {
+    const response = await api.post('issues/', issueData);
+    return response.data;
 };
 
-export const getStudentIssues = async () => {
-  const response = await api.get('issue/'); // Filtering might be handled by your viewset
-  return response.data;
-};
+// Fetch issues for the current student (if your backend filters by user)
+export const getStudentIssues = () =>
+  api.get('issues/'); // Add query params if needed, e.g. `?student=<id>`
 
-export const getAllIssues = async () => {
-  const response = await api.get('issue/');
-  return response.data;
-};
+// Assign an issue to a lecturer
+export const assignIssue = (issueId, lecturerId) =>
+  api.patch(`issues/${issueId}/`, { assigned_to: lecturerId });
 
-export const assignIssue = async (issueId, lecturerId) => {
-  const response = await api.patch(`issue/${issueId}/`, { 
-    assigned_to: lecturerId 
-  });
-  return response.data;
-};
+// Resolve or update status of an issue
+export const resolveIssue = (issueId, status) =>
+  api.patch(`issues/${issueId}/`, { status });
 
-export const resolveIssue = async (issueId, resolution) => {
-  const response = await api.patch(`issue/${issueId}/`, { 
-    status: resolution 
-  });
-  return response.data;
-};
+// Delete an issue (if needed)
+export const deleteIssue = (issueId) =>
+  api.delete(`issues/${issueId}/`);
