@@ -245,23 +245,6 @@ const IssueReporting = ({ onIssueCreated }) => {
           </div>
         </div>
 
-        {/* Assign to Lecturer */}
-        <div className="form-group">
-          <label>Assign to Lecturer</label>
-          <select
-            name="assigned_to"
-            value={formData.assigned_to}
-            onChange={handleChange}
-          >
-            <option value="">(none)</option>
-            {lecturers.map(l => (
-              <option key={l.id} value={l.id}>
-                {l.user.first_name} {l.user.last_name}
-              </option>
-            ))}
-          </select>
-        </div>
-
         <button type="submit" disabled={isSubmitting} className="submit-btn">
           {isSubmitting ? 'Submitting…' : 'Submit Issue'}
         </button>
