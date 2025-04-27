@@ -1,44 +1,37 @@
-import axios from "axios";
+import axios from 'axios';
 
-const API_URL = 'http://127.0.0.1:8000/api/';
-
-// Create an Axios instance
 const api = axios.create({
-    baseURL: API_URL,
-  });
-  
-  // Add a request interceptor to include the access token
-  api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('access_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  });
+  baseURL: 'http://127.0.0.1:8000/api/',
+});
 
-export const registerStudent = async (studentData) => {
+// Auto-attach JWT
+api.interceptors.request.use(cfg => {
+  const token = localStorage.getItem('access_token');
+  if (token) cfg.headers.Authorization = `Bearer ${token}`;
+  return cfg;
+});
+
+// Registration: flat payload, hit the correct endpoint
+export const registerStudent = async (data) => {
     try {
-        const response = await api.post('register/student/', studentData);
-        console.log('Registration success:', response.data);
-        
-        if (response.data.success) {
-            // Don't store token yet - wait for email verification
-            return {
-                success: true,
-                email: response.data.user.email,
-                tokens: response.data.tokens, //store these tokens temporarily
-                message: response.data.message,
-            };
-        }
-        throw new Error(response.data.error || 'Registration failed');
-    } catch (error) {
-        console.error('Registration error:', error);
-        throw {
-            message: error.message || 'Registration failed',
-            status: error.response?.status,
-            details: error.response?.data
-        };
+      return (await api.post('register/student/', data)).data;
+    } catch (err) {
+      console.error('Registration error:', err.response?.data || err.message);
+      throw err;
     }
+  };
+
+export const getCurrentUser = async () => {
+  const token = localStorage.getItem('access_token');
+  if (!token) return { authenticated: false };
+  try {
+    const { data } = await api.get('user-role/');
+    return { authenticated: true, ...data };
+  } catch {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    return { authenticated: false };
+  }
 };
 
 export const registerLecturer = async (lecturerData) => {
@@ -133,22 +126,3 @@ export const verifyEmail = async (email, code) => {
     }
 };
 
-export const getCurrentUser = async () => {
-    try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            return { authenticated: false };
-        }
-        const response = await api.get('user-role/');
-        return {
-            authenticated: true,
-            ...response.data
-        };
-    } catch (error) {
-        if (error.response?.status === 401) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('refreshToken');
-        }
-        return { authenticated: false };
-    }
-};

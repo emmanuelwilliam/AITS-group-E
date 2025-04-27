@@ -40,10 +40,13 @@ class Student(models.Model):
     # Model representing a student profile, linked to the User model
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile')
     college = models.CharField(max_length=100)
-    
-    def __str__(self):
-        return f"{self.user.username}-{self.college}"
+    student_number = models.CharField(max_length=50, unique=True)
+    registration_number = models.CharField(max_length=50, unique=True)
+    course = models.CharField(max_length=100)
 
+    def __str__(self):
+        return f"{self.user.username} ({self.student_number})"
+   
 class Lecturer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='Lecturer_profile')
     employee_id = models.CharField(max_length=50, unique=True)

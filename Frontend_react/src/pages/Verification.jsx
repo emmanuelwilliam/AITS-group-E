@@ -43,7 +43,7 @@ const VerifyEmail = () => {
             break;
           case 'student':
           default:
-            navigate('/student-dashboard');
+            navigate('/dashboard');
             break;
         }
       } else {
