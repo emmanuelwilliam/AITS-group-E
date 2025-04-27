@@ -43,19 +43,11 @@ class AdministratorViewSet(viewsets.ModelViewSet):
 
 # ViewSet for managing Issue objects with authentication, filtering, search, and ordering support
 class IssueViewSet(viewsets.ModelViewSet):
-<<<<<<< HEAD
-    queryset = Issue.objects.select_related('Lecturer').prefetch_related('notifications').all()
-    serializer_class = IssueSerializer
-    permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['status', 'priority', 'Lecturer']
-=======
     queryset = Issue.objects.select_related('student', 'assigned_to', 'status').prefetch_related('notifications').all()
     serializer_class = IssueSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['status', 'priority', 'assigned_to']
->>>>>>> 4359f13f8cd558357a9e0f5b6054c7bc46867ab4
     search_fields = ['title', 'description']
     ordering_fields = ['reported_date', 'priority']
     filterset_class = IssueFilter 

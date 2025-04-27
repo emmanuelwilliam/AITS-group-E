@@ -70,11 +70,7 @@ class CourseUnit(models.Model):
     def __str__(self):
         return f"{self.course_code}-{self.course_name}"
 
-<<<<<<< HEAD
 class Issue(models.Model):    
-=======
-class Issue(models.Model):
->>>>>>> 4359f13f8cd558357a9e0f5b6054c7bc46867ab4
     PRIORITY_CHOICES = [
         ('Low', 'Low'),
         ('Medium', 'Medium'),
