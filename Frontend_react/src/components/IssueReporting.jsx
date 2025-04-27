@@ -170,7 +170,7 @@ const IssueReporting = ({ onIssueCreated }) => {
               value={formData.year_of_study}
               onChange={handleChange}
             >
-              {[1,2,3,4].map(y => (
+              {[1, 2, 3, 4].map(y => (
                 <option key={y} value={y.toString()}>{y}</option>
               ))}
             </select>
@@ -217,7 +217,7 @@ const IssueReporting = ({ onIssueCreated }) => {
         </div>
 
         {/* Category & Priority */}
-        <div className="form-row">  
+        <div className="form-row">
           <div className="form-group">
             <label>Category</label>
             <select
@@ -225,7 +225,7 @@ const IssueReporting = ({ onIssueCreated }) => {
               value={formData.category}
               onChange={handleChange}
             >
-              {['Academic','Discipline','Financial','Other'].map(c => (
+              {['Academic', 'Discipline', 'Financial', 'Other'].map(c => (
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
@@ -238,7 +238,7 @@ const IssueReporting = ({ onIssueCreated }) => {
               value={formData.priority}
               onChange={handleChange}
             >
-              {['Low','Medium','High','Urgent'].map(p => (
+              {['Low', 'Medium', 'High', 'Urgent'].map(p => (
                 <option key={p} value={p}>{p}</option>
               ))}
             </select>
