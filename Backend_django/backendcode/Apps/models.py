@@ -109,12 +109,10 @@ class Issue(models.Model):
     course_code = models.CharField(max_length=20)
     # System fields
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='issues_raised')
-    assigned_to = models.ForeignKey(Lecturer, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_issues')
     category = models.CharField(max_length=100, choices=CATEGORY_CHOICES, default='Academic')
     reported_date = models.DateTimeField(auto_now_add=True)
     priority = models.CharField(max_length=50, choices=PRIORITY_CHOICES, default='Medium')
-    status = models.ForeignKey('Status', on_delete=models.SET_NULL, null=True, blank=True)
-
+    
     def __str__(self):
         return f"{self.title} - {self.student}"
 
