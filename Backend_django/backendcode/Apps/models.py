@@ -71,12 +71,6 @@ class CourseUnit(models.Model):
         return f"{self.course_code}-{self.course_name}"
 
 class Issue(models.Model):
-    # according to the frontend we have ;
-    #PRIORITY_CHOICES = [
-    #   ('pending', 'pending'),
-    #   ('resolved', 'resolved'),
-    #   ('submitted', 'submitted'),
-    # ]    
     PRIORITY_CHOICES = [
         ('Low', 'Low'),
         ('Medium', 'Medium'),
@@ -115,7 +109,7 @@ class Issue(models.Model):
     course_code = models.CharField(max_length=20)
     # System fields
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='issues_raised')
-    assigned_to = models.CharField(max_length=100, null=True, blank=True)
+    assigned_to = models.ForeignKey(Lecturer, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_issues')
     category = models.CharField(max_length=100, choices=CATEGORY_CHOICES, default='Academic')
     reported_date = models.DateTimeField(auto_now_add=True)
     priority = models.CharField(max_length=50, choices=PRIORITY_CHOICES, default='Medium')
