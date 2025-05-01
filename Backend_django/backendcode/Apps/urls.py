@@ -7,6 +7,7 @@ from rest_framework_simplejwt.views import (
 )
 from .views import (
     ReactAppView,
+    EmailOrUsernameTokenObtainPairView,
     LoginHistoryViewSet,
     StudentViewSet,
     AdministratorViewSet,
@@ -26,6 +27,7 @@ from .views import (
     delete_issue,
     login_view,
     verify_email,
+    current_user,
 )
 
 # Create a router object and register viewsets only once
@@ -46,6 +48,8 @@ urlpatterns = [
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+    path('login/', EmailOrUsernameTokenObtainPairView.as_view(), name='api-login'),
+     path('user/me/', current_user, name='current-user'),
 
     # Custom views for registration, issues, etc.
     path('register/student/', register_student, name='register_student'),
