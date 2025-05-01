@@ -26,6 +26,12 @@ from django.utils import timezone
 from django.core.mail import send_mail
 from datetime import timedelta
 from django.db import IntegrityError
+from django.contrib.auth import get_user_model
+from django.db.models import Q
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.exceptions import AuthenticationFailed
+from .serializer import UserSerializer
 
 # DRF Viewsets
 class StudentViewSet(viewsets.ModelViewSet):
@@ -300,9 +306,12 @@ def register_administrator(request):
 
 from django.utils import timezone
 
+import logging
+logger = logging.getLogger(__name__)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login_view(request):
+    logger.debug("🔑 Login payload: %r", request.data)
     username = request.data.get('username')
     password = request.data.get('password')
 
@@ -361,6 +370,14 @@ def login_view(request):
         print(traceback.format_exc())
         return Response({'error': 'Internal server error'}, status=500)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def current_user(request):
+    """
+    Return the logged-in user's data.
+    """
+    serializer = UserSerializer(request.user)
+    return Response(serializer.data)
 
 @api_view(['POST'])
 def reset_password(request):
@@ -550,3 +567,69 @@ def verify_email(request):
         return Response({
             'error': 'Invalid verification attempt'
         }, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Apps/views.py
+
+from django.contrib.auth import get_user_model
+from django.db.models import Q
+from django.utils import timezone
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.exceptions import AuthenticationFailed
+from .models import LoginHistory
+
+User = get_user_model()
+
+class EmailOrUsernameTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """
+    Allow users to log in with either their username or their email address.
+    """
+
+    def validate(self, attrs):
+        login_input = attrs.get(self.username_field)
+        password    = attrs.get('password')
+
+        # 1. Find the user by username *or* email (case-insensitive)
+        try:
+            user_obj = User.objects.get(
+                Q(username__iexact=login_input) |
+                Q(email__iexact=login_input)
+            )
+        except User.DoesNotExist:
+            raise AuthenticationFailed(
+                'No active account found with the given credentials',
+                'no_active_account'
+            )
+
+        # 2. Check password
+        if not user_obj.check_password(password):
+            raise AuthenticationFailed(
+                'No active account found with the given credentials',
+                'no_active_account'
+            )
+
+        # 3. “Prime” attrs so super().validate() sees the correct username
+        attrs[self.username_field] = getattr(user_obj, self.username_field)
+
+        # 4. Call the parent to do the real token creation
+        data = super().validate(attrs)
+
+        # 5. Record login history
+        request = self.context['request']
+        ip = (
+            request.META.get('HTTP_X_FORWARDED_FOR', '')
+            .split(',')[0] or
+            request.META.get('REMOTE_ADDR', '127.0.0.1')
+        )
+        LoginHistory.objects.create(
+            user=user_obj,
+            ip_address=ip,
+            session_time=timezone.now(),
+        )
+
+        return data
+
+
+class EmailOrUsernameTokenObtainPairView(TokenObtainPairView):
+    serializer_class = EmailOrUsernameTokenObtainPairSerializer
