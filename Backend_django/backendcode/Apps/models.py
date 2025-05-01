@@ -8,7 +8,7 @@ class UserRole(models.Model):
     # Model representing different user roles within the system
     ROLE_CHOICES = [
         ('student', 'Student'),
-        ('lecturer', 'Lecturer'),
+        ('Lecturer', 'Lecturer'),
         ('admin', 'Administrator'),
     ]
     name = models.CharField(max_length=150, blank=True)
@@ -48,12 +48,12 @@ class Student(models.Model):
         return f"{self.user.username} ({self.student_number})"
    
 class Lecturer(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='lecturer_profile')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='Lecturer_profile')
     employee_id = models.CharField(max_length=50, unique=True)
     department = models.CharField(max_length=200)
     college = models.CharField(max_length=200)
     position = models.CharField(max_length=100)
-    course_units = models.ManyToManyField("CourseUnit", related_name="lecturers")
+    course_units = models.ManyToManyField("CourseUnit", related_name="Lecturers")
     
 
     def __str__(self):
@@ -70,7 +70,7 @@ class CourseUnit(models.Model):
     def __str__(self):
         return f"{self.course_code}-{self.course_name}"
 
-class Issue(models.Model):
+class Issue(models.Model):    
     PRIORITY_CHOICES = [
         ('Low', 'Low'),
         ('Medium', 'Medium'),
@@ -108,13 +108,10 @@ class Issue(models.Model):
     course_unit = models.CharField(max_length=100)
     course_code = models.CharField(max_length=20)
     # System fields
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='issues_raised')
-    assigned_to = models.ForeignKey(Lecturer, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_issues')
     category = models.CharField(max_length=100, choices=CATEGORY_CHOICES, default='Academic')
     reported_date = models.DateTimeField(auto_now_add=True)
     priority = models.CharField(max_length=50, choices=PRIORITY_CHOICES, default='Medium')
-    status = models.ForeignKey('Status', on_delete=models.SET_NULL, null=True, blank=True)
-
+    
     def __str__(self):
         return f"{self.title} - {self.student}"
 

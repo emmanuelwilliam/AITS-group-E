@@ -15,4 +15,7 @@ class IssueFilter(django_filters.FilterSet):
 
     class Meta:
         model = Issue
-        fields = ['status', 'priority', 'assigned_to']
+        fields = [
+            'title', 'description', 'college', 'program', 'year_of_study',
+            'semester', 'course_unit', 'course_code', 'category', 'priority'
+        ]

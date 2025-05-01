@@ -24,9 +24,9 @@ class StudentForm(forms.ModelForm):
         return self.cleaned_data['user']
 
 
-# Form for lecturer model
+# Form for Lecturer model
 class LecturerForm(forms.ModelForm):
-    # Form for creating or editing lecturer profiles and related details
+    # Form for creating or editing Lecturer profiles and related details
     class Meta:
         model = Lecturer
         fields = [
@@ -74,13 +74,16 @@ class IssueForm(forms.ModelForm):
     class Meta:
         model = Issue
         fields = [
-            'student',
-            'assigned_to',
             'title',
             'description',
+            'college',
+            'program',
+            'year_of_study',
+            'semester',
+            'course_unit',
+            'course_code',
             'category',
             'priority',
-            'status',
         ]
 
 

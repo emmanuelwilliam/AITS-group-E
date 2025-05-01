@@ -1,118 +1,89 @@
-// src/pages/Dashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { fetchIssues } from '../api/issueService';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
 import Notifications from '../components/Notifications';
 import IssueReporting from '../components/IssueReporting';
 import IssueTracking from '../components/IssueTracking';
-import IssueStatsCard from '../components/IssueStatsCard';
 import '../styles/dashboard.css';
 
-const StudentDashboard = () => {
+const Dashboard = () => {
   const [activeComponent, setActiveComponent] = useState('notifications');
-  const [issues, setIssues]          = useState([]);
-  const [filteredIssues, setFilteredIssues] = useState([]);
-  const [loading, setLoading]        = useState(false);
-  const [error, setError]            = useState(null);
-  const [statusMessage, setStatusMessage] = useState('');
-
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [sortOrder, setSortOrder]       = useState('newest');
-
+  const [issues, setIssues] = useState([]);
+  const [loading, setLoading] = useState(false); // Changed to false since we're not loading
+  const [error, setError] = useState(null);
   const { user, logout } = useAuth();
 
-  // Load issues whenever the user changes or on mount
   useEffect(() => {
-    if (!user) return;
-    loadIssues();
-  }, [user]);
-
-  const loadIssues = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const res = await fetchIssues();
-      setIssues(res.data);
-      setFilteredIssues(res.data);
-    } catch (err) {
-      console.error('Fetch error:', err);
-      setError('Could not load issues. Please try again.');
-      if (err.response?.status === 401) {
-        logout();
+    // Mock issues data
+    const mockIssues = [
+      {
+        id: 1,
+        title: "Network Connectivity",
+        description: "Unable to access university WiFi",
+        status: "Pending",
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 2,
+        title: "Library Access",
+        description: "Student ID not working at library entrance",
+        status: "In Progress",
+        createdAt: new Date().toISOString()
       }
-    } finally {
-      setLoading(false);
-    }
-  };
+    ];
 
-  // Apply search/filter/sort
-  useEffect(() => {
-    let data = [...issues];
+    setIssues(mockIssues);
+  }, []);
 
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      data = data.filter(i =>
-        i.title.toLowerCase().includes(q) ||
-        i.description.toLowerCase().includes(q)
-      );
-    }
-
-    if (statusFilter !== 'all') {
-      data = data.filter(i => i.status?.id === statusFilter);
-    }
-
-    data.sort((a,b) => {
-      const da = new Date(a.reported_date);
-      const db = new Date(b.reported_date);
-      return sortOrder === 'newest' ? db - da : da - db;
-    });
-
-    setFilteredIssues(data);
-  }, [issues, searchQuery, statusFilter, sortOrder]);
-
-  const flashMessage = msg => {
-    setStatusMessage(msg);
-    setTimeout(() => setStatusMessage(''), 3000);
-  };
-
-  const handleIssueCreated = newIssue => {
-    setIssues(prev => [newIssue, ...prev]);
+  const handleIssueCreated = (newIssue) => {
+    // For mock implementation, just add to local state
+    const mockIssue = {
+      ...newIssue,
+      id: Math.max(...issues.map(i => i.id), 0) + 1,
+      status: "Pending",
+      createdAt: new Date().toISOString()
+    };
+    setIssues(prevIssues => [mockIssue, ...prevIssues]);
     setActiveComponent('issueTracking');
-    flashMessage('Issue submitted successfully!');
   };
 
-  const handleIssueUpdated = updated =>
-    setIssues(prev => prev.map(i => i.id === updated.id ? updated : i));
+  const handleIssueUpdated = (updatedIssue) => {
+    setIssues(prevIssues => 
+      prevIssues.map(issue => 
+        issue.id === updatedIssue.id ? updatedIssue : issue
+      )
+    );
+  };
 
-  const handleIssueDeleted = id =>
-    setIssues(prev => prev.filter(i => i.id !== id));
+  const handleIssueDeleted = (issueId) => {
+    setIssues(prevIssues => 
+      prevIssues.filter(issue => issue.id !== issueId)
+    );
+  };
 
-  const renderContent = () => {
-    if (loading) return <p>Loading issues…</p>;
-    if (error)   return <div className="error">{error}</div>;
+  // Rest of the component remains the same
+  const renderComponent = () => {
+    if (loading) {
+      return <div className="loading-spinner">Loading...</div>;
+    }
 
-    switch(activeComponent) {
+    if (error) {
+      return <div className="error-message">{error}</div>;
+    }
+
+    switch (activeComponent) {
+      case 'notifications':
+        return <Notifications />;
       case 'issueReporting':
-        return (
-          <IssueReporting
-            onIssueCreated={handleIssueCreated}
-            userRole="student"
-            user={user}
-          />
-        );
+        return <IssueReporting onIssueCreated={handleIssueCreated} />;
       case 'issueTracking':
         return (
-          <IssueTracking
-            issues={filteredIssues}
+          <IssueTracking 
+            issues={issues} 
             onIssueUpdated={handleIssueUpdated}
             onIssueDeleted={handleIssueDeleted}
-            userRole="student"
-            onSearch={setSearchQuery}
-            onFilterChange={setStatusFilter}
-            onSortChange={setSortOrder}
+            userRole={user?.role}
           />
         );
       default:
@@ -120,45 +91,21 @@ const StudentDashboard = () => {
     }
   };
 
-  const issueStats = {
-    total:    issues.length,
-    low:      issues.filter(i => i.priority==='Low').length,
-    medium:   issues.filter(i => i.priority==='Medium').length,
-    high:     issues.filter(i => i.priority==='High').length,
-    urgent:   issues.filter(i => i.priority==='Urgent').length,
-  };
-
   return (
     <div className="dashboard">
-      {statusMessage && <div className="flash">{statusMessage}</div>}
-
-      <TopBar user={user} toggleSidebar={() => {/*…*/}} />
-
-      <Sidebar
-        active={activeComponent}
-        onSelect={setActiveComponent}
-        userRole="student"
+      <TopBar user={user} />
+      <Sidebar 
+        setActiveComponent={setActiveComponent} 
+        activeComponent={activeComponent}
+        userRole={user?.role}
       />
-
       <div className="main-content">
-        <div className="stats">
-          {Object.entries(issueStats).map(([key, val]) =>
-            <IssueStatsCard
-              key={key}
-              label={key}
-              value={val}
-              onClick={() => setStatusFilter(key)}
-              active={statusFilter===key}
-            />
-          )}
-        </div>
-
-        <div className="content-area">
-          {renderContent()}
+        <div className="content">
+          {renderComponent()}
         </div>
       </div>
     </div>
   );
 };
 
-export default StudentDashboard;
+export default Dashboard;

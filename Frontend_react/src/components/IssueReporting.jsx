@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useAuth } from '../context/AuthContext';
 import { createIssue } from '../api/issueService';
-import api from '../api/apiConfig';
 import '../styles/issueReporting.css';
 
 const colleges = [
@@ -17,7 +16,6 @@ const colleges = [
 
 const IssueReporting = ({ onIssueCreated }) => {
   const { user } = useAuth();
-  const [lecturers, setLecturers] = useState([]);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -29,18 +27,10 @@ const IssueReporting = ({ onIssueCreated }) => {
     course_code: "",
     category: "Academic",
     priority: "Medium",
-    assigned_to: ""
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-
-  // Fetch lecturers for assignment dropdown
-  useEffect(() => {
-    api.get('lecturers/')
-      .then(res => setLecturers(res.data))
-      .catch(err => console.error('Failed to load lecturers:', err));
-  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -62,33 +52,29 @@ const IssueReporting = ({ onIssueCreated }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
+  
     setIsSubmitting(true);
-
+  
     try {
-      // Use student_profile if available, fallback to user.id
-      const studentId = user.student_profile?.id || user.id;
-      const payload = { ...formData, student: studentId };
-      const newIssue = await createIssue(payload);
-      onIssueCreated?.(newIssue);
+      const payload = {
+        ...formData,
+        // Keep as strings (matches backend CharField)
+        year_of_study: formData.year_of_study,  // Already string from select
+        semester: formData.semester,            // Already string from select
+        // No student field included
+      };
+  
+      console.log('Submitting:', payload);
+      const response = await createIssue(payload);
+      
       setSuccessMessage('Issue submitted successfully!');
-      setFormData({
-        title: "",
-        description: "",
-        college: "",
-        program: "",
-        year_of_study: "1",
-        semester: "1",
-        course_unit: "",
-        course_code: "",
-        category: "Academic",
-        priority: "Medium",
-        assigned_to: ""
-      });
-      setTimeout(() => setSuccessMessage(''), 3000);
+      resetForm();
     } catch (err) {
-      console.error('Issue submission error:', err);
-      const backend = err.response?.data;
-      setErrors({ form: backend?.message || 'Failed to submit issue. Please try again.' });
+      console.error('Submission error:', err);
+      setErrors({
+        form: err.response?.data?.error || 
+             'Submission failed. Please try again.'
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -170,7 +156,7 @@ const IssueReporting = ({ onIssueCreated }) => {
               value={formData.year_of_study}
               onChange={handleChange}
             >
-              {[1,2,3,4].map(y => (
+              {[1, 2, 3, 4].map(y => (
                 <option key={y} value={y.toString()}>{y}</option>
               ))}
             </select>
@@ -217,7 +203,7 @@ const IssueReporting = ({ onIssueCreated }) => {
         </div>
 
         {/* Category & Priority */}
-        <div className="form-row">  
+        <div className="form-row">
           <div className="form-group">
             <label>Category</label>
             <select
@@ -225,7 +211,7 @@ const IssueReporting = ({ onIssueCreated }) => {
               value={formData.category}
               onChange={handleChange}
             >
-              {['Academic','Discipline','Financial','Other'].map(c => (
+              {['Academic', 'Discipline', 'Financial', 'Other'].map(c => (
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
@@ -238,28 +224,11 @@ const IssueReporting = ({ onIssueCreated }) => {
               value={formData.priority}
               onChange={handleChange}
             >
-              {['Low','Medium','High','Urgent'].map(p => (
+              {['Low', 'Medium', 'High', 'Urgent'].map(p => (
                 <option key={p} value={p}>{p}</option>
               ))}
             </select>
           </div>
-        </div>
-
-        {/* Assign to Lecturer */}
-        <div className="form-group">
-          <label>Assign to Lecturer</label>
-          <select
-            name="assigned_to"
-            value={formData.assigned_to}
-            onChange={handleChange}
-          >
-            <option value="">(none)</option>
-            {lecturers.map(l => (
-              <option key={l.id} value={l.id}>
-                {l.user.first_name} {l.user.last_name}
-              </option>
-            ))}
-          </select>
         </div>
 
         <button type="submit" disabled={isSubmitting} className="submit-btn">

@@ -62,7 +62,7 @@ const AdminDashboard = () => {
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to logout?")) {
       sessionStorage.removeItem("adminToken");
-      navigate("/login");
+      navigate("/");
     }
   };
 

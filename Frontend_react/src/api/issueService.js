@@ -3,13 +3,13 @@
 import api from './apiConfig';
 
 // Fetch all issues (list)
-export const fetchIssues = () =>
-  axios.get(`${API_URL}issues/`);
-  api.get('issues/');
+//export const fetchIssues = () =>
+  //axios.get(`${API_URL}issues/`);
+  //api.get('issues/');
 
 // Create a new issue
 export const createIssue = async issueData => {
-    const response = await api.post('issue/create/', issueData);
+    const response = await api.post('issues/', issueData);
     return response.data;
 };
 

@@ -61,9 +61,16 @@
   background-color: #2980b9; /* Darkens the button color on hover */
 }
 
-/* Styling for error messages displayed inside the form */
-.error {
+/* Styling for error messages displayed below form fields */
+.field-error {
   color: #e74c3c; /* Red color for error messages */
-  margin-bottom: 15px; /* Adds space below the error message */
-  text-align: center; /* Centers the error message */
+  font-size: 0.9rem; /* Slightly smaller font size for error messages */
+  margin-top: 5px; /* Adds space above the error message */
+  display: block; /* Ensures the error message appears on a new line */
+}
+
+/* Styling for input, textarea, and select elements with errors */
+input.error, textarea.error, select.error {
+  border: 1px solid #e74c3c; /* Red border for fields with errors */
+  background-color: #ffe6e6; /* Light red background for fields with errors */
 }

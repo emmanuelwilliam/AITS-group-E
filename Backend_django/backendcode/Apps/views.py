@@ -13,7 +13,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import exception_handler
 from .models import User
 from django.contrib.auth.hashers import make_password
-from django.shortcuts import get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.views.generic import TemplateView
 from django.conf import settings
 import os
@@ -39,7 +39,7 @@ class StudentViewSet(viewsets.ModelViewSet):
     serializer_class = StudentSerializer
 
 class LecturerViewSet(viewsets.ModelViewSet):
-    queryset = Lecturer.objects.select_related('student','lecturer').all()
+    queryset = Lecturer.objects.select_related('student','Lecturer').all()
     serializer_class = LecturerSerializer
 
 # ViewSet that provides full API access to Administrator objects
@@ -56,6 +56,7 @@ class IssueViewSet(viewsets.ModelViewSet):
     filterset_fields = ['status', 'priority', 'assigned_to']
     search_fields = ['title', 'description']
     ordering_fields = ['reported_date', 'priority']
+    filterset_class = IssueFilter 
 
 # ViewSet that provides full API access to Notification objects
 class NotificationViewSet(viewsets.ModelViewSet):
@@ -140,7 +141,7 @@ def register_student(request):
 
 @api_view(['POST', 'GET'])
 @permission_classes([AllowAny])
-def register_lecturer(request):
+def register_Lecturer(request):
     if request.method == 'POST':
         try:
             data = request.data
@@ -157,10 +158,10 @@ def register_lecturer(request):
             if User.objects.filter(email=data['email']).exists():
                 return Response({'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Get or create the lecturer role
-            lecturer_role, created = UserRole.objects.get_or_create(role_name='lecturer')
+            # Get or create the Lecturer role
+            Lecturer_role, created = UserRole.objects.get_or_create(role_name='Lecturer')
             if created:
-                print("Created new lecturer role")
+                print("Created new Lecturer role")
 
             # Create user with is_active=False
             user = User.objects.create_user(
@@ -171,7 +172,7 @@ def register_lecturer(request):
                 last_name=data['last_name'],
                 is_active=False
             )
-            user.role = lecturer_role
+            user.role = Lecturer_role
             user.save()
 
             print(f"Created user: {user.username} with role: {user.role}")
@@ -210,7 +211,7 @@ def register_lecturer(request):
                     'email': user.email,
                     'first_name': user.first_name,
                     'last_name': user.last_name,
-                    'role': 'lecturer'
+                    'role': 'Lecturer'
                 },
                 'tokens': {
                     'refresh': str(refresh),
@@ -398,12 +399,27 @@ def issue_list(request):
     return Response(serializer.data)
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def create_issue(request):
-    serializer = IssueSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=201)
-    return Response(serializer.errors, status=400)
+    try:
+        serializer = IssueSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(
+            {
+                'error': 'Validation failed',
+                'details': serializer.errors
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    except Exception as e:
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
   
 #View for updating an existing issue
 @api_view(['PUT'])
@@ -476,8 +492,6 @@ def serve_home_page(request):
             'error': str(e)
         }, status=status.HTTP_400_BAD_REQUEST)
     
-from django.views.generic import TemplateView
-from django.shortcuts import render
 
 class ReactAppView(TemplateView):
     template_name = 'index.html'

@@ -11,7 +11,7 @@ class Command(BaseCommand):
         # Clear existing roles using raw SQL
         UserRole.objects.raw('DELETE FROM user_roles')
         
-        roles = ['student', 'lecturer', 'admin']
+        roles = ['student', 'Lecturer', 'admin']
         created = []
 
         for role_name in roles:
