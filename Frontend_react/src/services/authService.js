@@ -101,19 +101,18 @@ const authService = {
     }
   },
 
-  // Login (uses publicAxios)
-  login: async (credentials) => {
+  login: async ({ username, password }) => {
     try {
       const formData = new FormData();
-      formData.append('username', credentials.email); // Use 'email' here if backend expects email field
-      formData.append('password', credentials.password);
-
+      formData.append('username', username); // ✅ Correct key
+      formData.append('password', password);
+  
       const response = await publicAxios.post('login/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
-
+  
       if (response.data?.access && response.data?.refresh) {
         localStorage.setItem('access_token', response.data.access);
         localStorage.setItem('refresh_token', response.data.refresh);
@@ -127,7 +126,7 @@ const authService = {
       });
       throw error.response?.data || error;
     }
-  },
+  }, 
 
   // Token Refresh (uses publicAxios)
   refreshToken: async () => {
