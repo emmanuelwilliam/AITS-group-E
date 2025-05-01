@@ -86,24 +86,31 @@ export const registerAdministrator = async (adminData) => {
 
 
 export const login = async ({ username, password }) => {
-    try {
-      const response = await axios.post(`${API_URL}login/`, {
-        username,
-        password
-      });
-  
-      // Save tokens to local storage
-      const { access, refresh } = response.data.tokens;
-      localStorage.setItem('access_token', access);
-      localStorage.setItem('refresh_token', refresh);
-  
-      return response.data;
-    } catch (error) {
-      console.error('Login error:', error.response?.data || error.message);
-      throw error.response?.data || error;
-    }
-  };
-  
+  try {
+    // 🔍 1) Log exactly what you send
+    console.log('→ POST /api/login/ payload:', { username, password });
+
+    // 2) Hit the correct endpoint
+    const { data } = await axios.post(
+      `${API_URL}login/`,
+      { username, password },
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+
+    // 🔑 3) SimpleJWT returns a flat { access, refresh }
+    console.log('← 200 OK, tokens:', data);
+    localStorage.setItem('access_token', data.access);
+    localStorage.setItem('refresh_token', data.refresh);
+
+    return data;
+  } catch (err) {
+    // Normalize the error so you see exactly what came back
+    const payload = err.response?.data || err.message || err;
+    console.error('← Login error payload:', payload);
+    throw payload;
+  }
+};
+
 export const verifyEmail = async (email, code) => {
     try {
         console.log("Sending verification request for:", email);
