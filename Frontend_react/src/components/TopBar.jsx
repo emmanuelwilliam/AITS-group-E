@@ -47,21 +47,21 @@ const TopBar = ({ firstName, lastName, studentNumber, registrationNumber, webmai
           </form>
         </div>
 
+        {/* Profile Section */}
         <div className="profile-section">
           <button className="profile-button" onClick={toggleProfile}>
             Profile
-            <span className="badge">*</span>
           </button>
           {showProfile && (
             <div className="profile-dropdown">
               <h2>Profile Information</h2>
-              <p><strong>First Name:</strong> {firstName}</p>
-              <p><strong>Last Name:</strong> {lastName}</p>
-              <p><strong>Student Number:</strong> {studentNumber}</p>
-              <p><strong>Registration Number:</strong> {registrationNumber}</p>
-              <p><strong>Webmail:</strong> {webmail}</p>
-              <p><strong>College:</strong> {college}</p>
-              <p><strong>Course:</strong> {course}</p>
+              <p><strong>First Name:</strong> {firstName || "N/A"}</p>
+              <p><strong>Last Name:</strong> {lastName || "N/A"}</p>
+              <p><strong>Student Number:</strong> {studentNumber || "N/A"}</p>
+              <p><strong>Registration Number:</strong> {registrationNumber || "N/A"}</p>
+              <p><strong>Webmail:</strong> {webmail || "N/A"}</p>
+              <p><strong>College:</strong> {college || "N/A"}</p>
+              <p><strong>Course:</strong> {course || "N/A"}</p>
             </div>
           )}
           <button className="logout-button" onClick={handleLogout}>Logout</button>
