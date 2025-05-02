@@ -32,6 +32,23 @@ const IssueReporting = ({ onIssueCreated }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
 
+  const resetForm = () => {
+    setFormData({
+      title: "",
+      description: "",
+      college: "",
+      program: "",
+      year_of_study: "1",
+      semester: "1",
+      course_unit: "",
+      course_code: "",
+      category: "Academic",
+      priority: "Medium",
+    });
+    setErrors({});
+    setSuccessMessage("");
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
