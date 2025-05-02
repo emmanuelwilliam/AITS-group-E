@@ -75,16 +75,15 @@ const IssueReporting = ({ onIssueCreated }) => {
     try {
       const payload = {
         ...formData,
-        // Keep as strings (matches backend CharField)
-        year_of_study: formData.year_of_study,  // Already string from select
-        semester: formData.semester,            // Already string from select
-        // No student field included
+        year_of_study: formData.year_of_study,
+        semester: formData.semester,
       };
   
       console.log('Submitting:', payload);
       const response = await createIssue(payload);
       
       setSuccessMessage('Issue submitted successfully!');
+      window.alert('Issue submitted successfully!'); // Display alert at the top
       resetForm();
     } catch (err) {
       console.error('Submission error:', err);
