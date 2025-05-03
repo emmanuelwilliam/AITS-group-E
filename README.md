@@ -5,4 +5,3 @@ lecturers to ensure that they are working on the issues assigned to them. Let's 
 and academic registrar.
 
 
-![image](https://github.com/user-attachments/assets/245e8de9-c5bc-4296-bbb6-dcff6d7e9410)
