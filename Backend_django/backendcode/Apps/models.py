@@ -60,7 +60,7 @@ class Lecturer(models.Model):
 
 class Administrator(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='admin_profile')
-    contact_email = models.EmailField(unique=True)
+    email = models.EmailField(unique=True)
 
 class CourseUnit(models.Model):
     course_code = models.CharField(max_length=8, unique=True)
