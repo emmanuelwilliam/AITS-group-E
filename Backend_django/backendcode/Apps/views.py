@@ -47,6 +47,7 @@ class AdministratorViewSet(viewsets.ModelViewSet):
     queryset = Administrator.objects.all()
     serializer_class = AdministratorSerializer
 
+
 # ViewSet for managing Issue objects with authentication, filtering, search, and ordering support
 class IssueViewSet(viewsets.ModelViewSet):
     queryset = Issue.objects.select_related('student', 'assigned_to', 'status').prefetch_related('notifications').all()
