@@ -90,8 +90,11 @@ class VerifyEmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
     token = serializers.CharField(max_length=50)
 
-# Role Serializer
-class UserRoleSerializer(serializers.ModelSerializer):
+# By default nested serializers are read-only. If you want to support 
+# write-operations to a nested serializer field you'll need to create
+# create() and/or update() methods in order to explicitly specify how
+# the child relationships should be saved:
+class UsializeerRoleSerializer(serrs.ModelSerializer):
     class Meta:
         model = UserRole
         fields = ['id', 'role_name']
