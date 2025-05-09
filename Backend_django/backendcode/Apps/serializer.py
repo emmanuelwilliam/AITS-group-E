@@ -94,7 +94,7 @@ class VerifyEmailSerializer(serializers.Serializer):
 # write-operations to a nested serializer field you'll need to create
 # create() and/or update() methods in order to explicitly specify how
 # the child relationships should be saved:
-class UsializeerRoleSerializer(serrs.ModelSerializer):
+class UserRoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserRole
         fields = ['id', 'role_name']
