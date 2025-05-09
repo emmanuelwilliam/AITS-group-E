@@ -12,3 +12,6 @@ AITS features a variety of modules tailored to different user roles. Students ca
 
 
 The development process emphasized best practices such as iterative progress through Agile methodologies, version control using Git and GitHub, and rigorous testing to ensure reliability. UML diagrams, including activity, sequence, and state machine diagrams, were used to visualize workflows and system interactions, ensuring clarity before implementation. The system’s database design was meticulously planned using Entity-Relationship Diagrams (ERDs) to define relationships between entities like students, issues, and lecturers, ensuring efficient data management.
+
+
+AITS is more than just a technical solution; it addresses real-world problems by improving communication, reducing delays, and enhancing transparency in academic issue resolution. The system’s deployment and maintenance phases ensure it remains functional and up-to-date, adapting to the evolving needs of the university. By combining theoretical knowledge with practical implementation, AITS serves as a model for how technology can transform administrative processes, making them more efficient and user-friendly.
