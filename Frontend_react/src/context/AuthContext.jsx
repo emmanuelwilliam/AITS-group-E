@@ -8,20 +8,29 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Load current user from backend
-  const loadUser = useCallback(async () => {
-    setLoading(true);
-    try {
-      const userData = await authService.getCurrentUser();
-      setUser(userData);
-      setError(null);
-    } catch (err) {
-      setError('Failed to load user data');
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+ // Load current user from backend (only if we have a token)
+const loadUser = useCallback(async () => {
+     const token = localStorage.getItem('access_token');
+     if (!token) {
+       // No token → skip the API hit, just stop loading
+       setLoading(false);
+       return;
+     }
+  
+     setLoading(true);
+     try {
+       const userData = await authService.getCurrentUser();
+       setUser(userData);
+     } catch (err) {
+       // On 401 (or other auth error), wipe stale tokens and redirect
+       console.error('Failed to fetch user:', err);
+       localStorage.removeItem('access_token');
+       localStorage.removeItem('refresh_token');
+       window.location.href = '/login';
+     } finally {
+       setLoading(false);
+     }
+   }, []);
 
   // Initial load
   useEffect(() => {
