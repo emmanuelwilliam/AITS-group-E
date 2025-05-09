@@ -53,7 +53,7 @@ urlpatterns = [
 
     # Custom views for registration, issues, etc.
     path('register/student/', register_student, name='register_student'),
-    path('register/Lecturer/', register_Lecturer, name='register_Lecturer'),
+    path('register/lecturer/', register_Lecturer, name='register_lecturer'),
     path('register/administrator/', register_administrator, name='register_administrator'),
     path('verify-email/', verify_email, name='verify-email'),
 
