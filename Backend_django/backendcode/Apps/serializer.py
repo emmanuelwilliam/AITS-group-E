@@ -91,7 +91,7 @@ class VerifyEmailSerializer(serializers.Serializer):
     token = serializers.CharField(max_length=50)
 
 # role serializer
-class UsializeerRoleSerializer(serrs.ModelSerializer):
+class UserRoleSerializer(serrs.ModelSerializer):
     class Meta:
         model = UserRole
         fields = ['id', 'role_name']
