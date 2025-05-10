@@ -55,12 +55,13 @@ class Lecturer(models.Model):
     position = models.CharField(max_length=100)
     course_units = models.ManyToManyField("CourseUnit", related_name="Lecturers")
     
+
     def __str__(self):
         return f"{self.user.get_full_name()} - {self.position if self.position else 'Lecturer'}"
 
 class Administrator(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='admin_profile')
-    email = models.EmailField(unique=True)
+    contact_email = models.EmailField(unique=True)
 
 class CourseUnit(models.Model):
     course_code = models.CharField(max_length=8, unique=True)

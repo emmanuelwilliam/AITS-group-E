@@ -17,7 +17,7 @@
 
 .main-content {
   flex: 1; /* Expands to fill available space */
-  padding: 20px; /* Inner spacing for content */
+  padding: 50px; /* Inner spacing for content */
   overflow-y: auto; /* Enables vertical scrolling for content overflow */
   background-color: #fff; /* White background for contrast and readability */
   margin: 10px; /* Space around the content block */
