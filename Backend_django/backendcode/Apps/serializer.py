@@ -90,7 +90,7 @@ class VerifyEmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
     token = serializers.CharField(max_length=50)
 
-# role serializer
+# Role Serializer
 class UserRoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserRole
