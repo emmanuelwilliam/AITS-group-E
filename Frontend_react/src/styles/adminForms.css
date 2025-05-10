@@ -2,8 +2,8 @@
   /* Container for admin form: centered with a max width, padding, and styled background */
   max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
-  background-color: white;
+  padding: 60px;
+  background-color: rgb(191, 195, 240);
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Soft shadow for depth */
 }
