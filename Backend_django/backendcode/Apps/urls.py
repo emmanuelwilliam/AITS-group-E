@@ -61,8 +61,8 @@ urlpatterns = [
     
     # Issue management
     path('issue/filter/', filter_issues, name='filter_issues'),
-    path('issues/', create_issue, name='create_issue'),
     path('issues/', issue_list, name='issue-list'),
+    path('issues/', create_issue, name='create_issue'),
     path('issue/update/<int:pk>/', update_issue, name='update_issue'),
     path('issue/delete/<int:pk>/', delete_issue, name='delete_issue'),
     
