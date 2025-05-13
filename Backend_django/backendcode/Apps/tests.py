@@ -19,7 +19,7 @@ class AcademicIssueTests(TestCase):
         # Create test course
         self.course = Course.objects.create(
             code='CS101',
-            name='Introduction to Programming',
+            name='Programming Fundamentals',
             department=self.department
         )
         # Create test issue
