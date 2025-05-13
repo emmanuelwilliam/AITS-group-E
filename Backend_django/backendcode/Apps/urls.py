@@ -22,6 +22,7 @@ from .views import (
     get_user_role,
     get_notifications,
     filter_issues,
+    issue_list,
     create_issue,
     update_issue,
     delete_issue,
