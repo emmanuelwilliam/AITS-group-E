@@ -37,6 +37,7 @@ class Command(BaseCommand):
             for admin in admins_updated:
                 admin.user.role = admin_role
                 admin.user.save()
+    
 
             self.stdout.write(
                 self.style.SUCCESS(
