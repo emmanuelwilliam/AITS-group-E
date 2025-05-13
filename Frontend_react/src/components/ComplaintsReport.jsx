@@ -1,28 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import "../styles/complaints.css";
 
 const ComplaintsReport = () => {
-  // Sample complaints data stored in state
-  const [complaints] = useState([
-    {
-      id: 1,
-      studentId: "ST2023001",
-      lecturer: "Dr. Muwanguzi",
-      date: "2023-06-15",
-      category: "Grading",
-      status: "Pending",
-      priority: "High"
-    },
-    {
-      id: 2,
-      studentId: "ST2023002",
-      lecturer: "Prof. Nalweyiso",
-      date: "2023-06-14",
-      category: "Attendance",
-      status: "In Progress",
-      priority: "Medium"
-    }
-  ]);
+  const [complaints, setComplaints] = useState([]);
+  const [sortField, setSortField] = useState("date"); // Default sort field
+  const [sortOrder, setSortOrder] = useState("desc"); // Default sort order
+
+  useEffect(() => {
+    const fetchComplaints = async () => {
+      try {
+        const response = await axios.get("/api/issues/"); // Adjust the URL if needed
+        setComplaints(response.data);
+      } catch (err) {
+        console.error("Failed to fetch complaints:", err);
+      }
+    };
+
+    fetchComplaints();
+  }, []);
+
+  // Function to handle sorting
+  const handleSort = (field) => {
+    const order = sortField === field && sortOrder === "asc" ? "desc" : "asc";
+    setSortField(field);
+    setSortOrder(order);
+
+    const sortedComplaints = [...complaints].sort((a, b) => {
+      if (order === "asc") {
+        return a[field] > b[field] ? 1 : -1;
+      } else {
+        return a[field] < b[field] ? 1 : -1;
+      }
+    });
+
+    setComplaints(sortedComplaints);
+  };
 
   return (
     <div className="complaints-report"> {/* Main container for complaints report */}
@@ -50,13 +63,13 @@ const ComplaintsReport = () => {
       <table className="complaints-table">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Student</th>
-            <th>Lecturer</th>
-            <th>Date</th>
-            <th>Category</th>
-            <th>Status</th>
-            <th>Priority</th>
+            <th onClick={() => handleSort("id")}>ID</th>
+            <th onClick={() => handleSort("studentId")}>Student</th>
+            <th onClick={() => handleSort("lecturer")}>Lecturer</th>
+            <th onClick={() => handleSort("date")}>Date</th>
+            <th onClick={() => handleSort("category")}>Category</th>
+            <th onClick={() => handleSort("status")}>Status</th>
+            <th onClick={() => handleSort("priority")}>Priority</th>
             <th>Actions</th>
           </tr>
         </thead>
