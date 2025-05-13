@@ -9,9 +9,23 @@ import api from './apiConfig';
 
 // Create a new issue
 export const createIssue = async issueData => {
+  try {
     const response = await api.post('issues/', issueData);
     return response.data;
+  } catch (error) {
+    if (error.response) {
+      // Backend responded with error status
+      console.error('Backend error:', error.response.data);
+    } else if (error.request) {
+      // Request was made but no response
+      console.error('No response received:', error.request);
+    } else {
+      console.error('Error setting up request:', error.message);
+    }
+    throw error;
+  }
 };
+
 
 // Fetch issues for the current student (if your backend filters by user)
 export const getStudentIssues = () =>
