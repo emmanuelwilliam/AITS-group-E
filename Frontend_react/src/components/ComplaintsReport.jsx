@@ -10,7 +10,13 @@ const ComplaintsReport = () => {
   useEffect(() => {
     const fetchComplaints = async () => {
       try {
-        const response = await axios.get("http://127.0.0.1:8000/api/issues/"); // Adjust the URL if needed
+        const token = localStorage.getItem('access_token');
+        const response = await axios.get("http://127.0.0.1:8000/api/issues/", {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        console.log("Fetched complaints:", response.data); // Debugging
         setComplaints(response.data);
       } catch (err) {
         console.error("Failed to fetch complaints:", err);
@@ -74,30 +80,23 @@ const ComplaintsReport = () => {
           </tr>
         </thead>
         <tbody>
-          {/* Map through complaints and render each one in a table row */}
           {complaints.map(complaint => (
             <tr key={complaint.id}>
               <td>{complaint.id}</td>
-              <td>{complaint.studentId}</td>
-              <td>{complaint.lecturer}</td>
-              <td>{complaint.date}</td>
-              <td>{complaint.category}</td>
-              
-              {/* Status with styling class based on status value */}
+              <td>{complaint.studentId || 'N/A'}</td>
+              <td>{complaint.lecturer || 'N/A'}</td>
+              <td>{complaint.date || 'N/A'}</td>
+              <td>{complaint.category || 'N/A'}</td>
               <td>
-                <span className={`status-badge ${complaint.status.toLowerCase()}`}>
-                  {complaint.status}
+                <span className={`status-badge ${complaint.status ? complaint.status.toLowerCase() : ''}`}>
+                  {complaint.status || 'Unknown'}
                 </span>
               </td>
-
-              {/* Priority with styling class based on priority value */}
               <td>
-                <span className={`priority-badge ${complaint.priority.toLowerCase()}`}>
-                  {complaint.priority}
+                <span className={`priority-badge ${complaint.priority ? complaint.priority.toLowerCase() : ''}`}>
+                  {complaint.priority || 'Unknown'}
                 </span>
               </td>
-
-              {/* Action buttons for each complaint */}
               <td>
                 <button className="btn-action">View</button>
                 <button className="btn-action">Resolve</button>

@@ -393,6 +393,7 @@ def reset_password(request):
         return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)   
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def issue_list(request):
     issues = Issue.objects.all()
     serializer = IssueSerializer(issues, many=True)
