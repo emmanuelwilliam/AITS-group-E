@@ -49,7 +49,7 @@ class LecturerForm(forms.ModelForm):
 
 # Form for Admin model
 class AdministratorForm(forms.ModelForm):
-    # Form for creating or updating an Administrator instance with email validation
+    # Form for updating an Administrator instance with email validation
     contact_email = forms.EmailField(validators=[EmailValidator()])
 
     class Meta:
