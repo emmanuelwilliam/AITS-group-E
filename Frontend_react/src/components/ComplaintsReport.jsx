@@ -10,7 +10,7 @@ const ComplaintsReport = () => {
   useEffect(() => {
     const fetchComplaints = async () => {
       try {
-        const response = await axios.get("/api/issues/"); // Adjust the URL if needed
+        const response = await axios.get("http://127.0.0.1:8000/api/issues/"); // Adjust the URL if needed
         setComplaints(response.data);
       } catch (err) {
         console.error("Failed to fetch complaints:", err);
