@@ -5,7 +5,7 @@ import random
 import string
 
 class UserRole(models.Model):
-    # Model representing different user roles within the system
+    # Model showing different user roles within the system
     ROLE_CHOICES = [
         ('student', 'Student'),
         ('Lecturer', 'Lecturer'),
