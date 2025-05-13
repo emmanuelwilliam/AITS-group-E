@@ -255,13 +255,15 @@ SIMPLE_JWT = {
 
 
 
-#EMAIL_HOST = 'smtp.gmail.com'
-#EMAIL_PORT = 587
-#EMAIL_USE_TLS = True
-#EMAIL_HOST_USER = 'your@gmail.com'
-#EMAIL_HOST_PASSWORD = 'your-app-password'
-#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# Use SMTP for real emails by default
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'                    # or your SMTP server
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')       # e.g. your Gmail address
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')  # app password
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-
-#For development/testing only (bypasses email sending)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Fallback to console backend if SMTP credentials are missing (handy for local dev)
+if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
