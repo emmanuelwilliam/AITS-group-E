@@ -11,7 +11,7 @@ class AcademicIssueTests(TestCase):
             password='testpass123',
             email='test@example.com'
         )
-        # Create test department
+        # Create test department 
         self.department = Department.objects.create(
             name='Computer Science',
             description='Computer Science Department'
@@ -34,7 +34,7 @@ class AcademicIssueTests(TestCase):
         self.client.login(username='testuser', password='testpass123')
 
     def test_issue_creation(self):
-        """Test that an academic issue can be created"""
+        """Test that the academic issue can be created"""
         
         # Validate that all key fields of the created issue match expected values
         self.assertEqual(self.issue.title, 'Test Issue')
