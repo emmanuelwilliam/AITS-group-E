@@ -58,6 +58,12 @@ class IssueViewSet(viewsets.ModelViewSet):
     ordering_fields = ['reported_date', 'priority']
     filterset_class = IssueFilter 
 
+    def get_permissions(self):
+         # Allow anyone to create issues; require auth for all other actions
+         if self.action == 'create':
+             return [AllowAny()]
+         return super().get_permissions()
+
 # ViewSet that provides full API access to Notification objects
 class NotificationViewSet(viewsets.ModelViewSet):
     queryset = Notification.objects.all()
