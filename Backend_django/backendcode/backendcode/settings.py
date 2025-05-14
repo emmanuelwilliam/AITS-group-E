@@ -9,7 +9,11 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
+from dotenv import load_dotenv
 import os
+
+load_dotenv()
+
 import dj_database_url
 from pathlib import Path
 from corsheaders.defaults import default_headers
@@ -127,16 +131,8 @@ WSGI_APPLICATION = 'backendcode.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-#DATABASE_URL = "postgresql://postgres:bdQPXeEVcmwHjMUdDnOyViVfNxLQqbco@caboose.proxy.rlwy.net:32741/railway"
-#DATABASES = {
-#    'default': dj_database_url.parse(DATABASE_URL)
-#}
-
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
 }
 
 AUTH_USER_MODEL = 'Apps.User'
