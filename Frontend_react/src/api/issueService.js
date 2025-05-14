@@ -10,7 +10,7 @@ import api from './apiConfig';
 // Create a new issue
 export const createIssue = async issueData => {
   try {
-    const response = await api.post('issues/', issueData);
+    const response = await api.post('issues/create/', issueData);
     return response.data;
   } catch (error) {
     if (error.response) {
