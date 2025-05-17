@@ -10,7 +10,8 @@ const AdminIssueResolveForm = () => {
 
   return (
     <div className="issue-resolve-form">
-      <h2>Resolve Issue</h2>
+      <h1>Resolve Issue</h1>
+      
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label>Resolution Details</label>
