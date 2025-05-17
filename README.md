@@ -13,6 +13,10 @@ The system architecture of AITS is built on a robust full-stack framework. The f
 AITS features a variety of modules tailored to different user roles. Students can submit issues through an intuitive form, which includes client-side and server-side validation to ensure data accuracy. The student dashboard allows them to track the status of their submitted issues, providing transparency and reducing anxiety about unresolved cases. Lecturers, on the other hand, have access to a dashboard where they can view and resolve issues assigned to them. The academic registrar’s dashboard is the most comprehensive, offering tools to filter, assign, and monitor all issues across the university. Notifications are a critical component of the system, keeping all parties informed about status changes via email, in-app alerts, or SMS.
 
 
+![image](https://github.com/user-attachments/assets/bdaf3acb-f627-4c97-a417-997467ba81aa)
+
+
+
 The development process emphasized best practices such as iterative progress through Agile methodologies, version control using Git and GitHub, and rigorous testing to ensure reliability. UML diagrams, including activity, sequence, and state machine diagrams, were used to visualize workflows and system interactions, ensuring clarity before implementation. The system’s database design was meticulously planned using Entity-Relationship Diagrams (ERDs) to define relationships between entities like students, issues, and lecturers, ensuring efficient data management.
 
 
