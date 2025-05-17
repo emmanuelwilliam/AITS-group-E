@@ -3,8 +3,11 @@ import React, { useState } from 'react';
 const AdminIssueResolveForm = () => {
   const [resolution, setResolution] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
+    try{
+      const responce = await axios.post()
+      alert('Submition successfull')
     // Add form submission logic
   };
 
