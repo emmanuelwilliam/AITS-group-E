@@ -13,3 +13,4 @@ requests==2.32.3
 gunicorn==21.2.0
 dj_database_url
 django-extensions==3.2.3
+python-dotenv==1.0.1
