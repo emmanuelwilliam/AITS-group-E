@@ -29,6 +29,10 @@ from .views import (
     login_view,
     verify_email,
     current_user,
+    assign_issue_to_lecturer,
+    update_issue_status,
+    student_issues,
+    admin_statistics,
 )
 
 # Create a router object and register viewsets only once
@@ -65,6 +69,10 @@ urlpatterns = [
     path('issues/create/', create_issue, name='create_issue'),
     path('issue/update/<int:pk>/', update_issue, name='update_issue'),
     path('issue/delete/<int:pk>/', delete_issue, name='delete_issue'),
+    path('assign-issue/', assign_issue_to_lecturer, name='assign_issue_to_lecturer'),
+    path('update-issue-status/', update_issue_status, name='update_issue_status'),
+    path('student/issues/', student_issues, name='student_issues'),
+    path('admin/statistics/', admin_statistics, name='admin_statistics'),
     
     # Other API endpoints
     #path('login-history/', get_login_history, name='get_login_history'),
