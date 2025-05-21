@@ -29,7 +29,12 @@ SECRET_KEY = 'django-insecure-qx(-v9-7@$9m$o*3l)nxr)z#iqm(z_q0u3p@wd#0al357a_01=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['aits-group-e-1.onrender.com']
+# Update ALLOWED_HOSTS to include both local and production domains
+ALLOWED_HOSTS = [
+    'aits-group-e-1.onrender.com',
+    'localhost',
+    '127.0.0.1',
+]
 
 
 # Application definition
@@ -66,6 +71,7 @@ MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
 # CORS Configuration
 CORS_ALLOWED_ORIGINS = [
+    "https://aits-group-e-1.onrender.com",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:3000",#need to confirm this though
@@ -86,10 +92,18 @@ CORS_ALLOW_METHODS = [
     'PUT',
 ]
 
-# Add these settings for development
-if DEBUG:
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-    CORS_ALLOW_ALL_ORIGINS = True
+# Update CORS settings for both local and production
+CORS_ALLOWED_ORIGINS = [
+    "https://aits-group-e-1.onrender.com",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+# Remove the DEBUG conditional for ALLOWED_HOSTS
+# Delete or comment out this block:
+# if DEBUG:
+#     ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+#     CORS_ALLOW_ALL_ORIGINS = True
 
 #CORS_ALLOW_ALL_ORIGINS = True
 '''
@@ -188,6 +202,9 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+
+# WhiteNoise configuration
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Ensure static directories exist
 os.makedirs(BASE_DIR / 'static', exist_ok=True)
