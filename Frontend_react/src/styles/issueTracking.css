@@ -24,6 +24,8 @@
   padding: 20px; /* Adds padding inside the issue card */
   border-radius: 8px; /* Rounds the corners of the issue card */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Adds subtle shadow to the card */
+  position: relative;
+  border-left: 5px solid transparent;
 }
 
 /* Header of each issue card */
@@ -67,9 +69,96 @@
   color: white; /* White text color */
 }
 
-/* Footer section of each issue card */
-.issue-footer {
-  margin-top: 10px; /* Adds space above the footer */
-  font-size: 14px; /* Sets font size for the footer text */
-  color: #7f8c8d; /* Light gray color for the footer text */
+/* Status badge styles */
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge-new {
+  background-color: #3498db;
+  color: white;
+}
+
+.status-badge-assigned {
+  background-color: #f39c12;
+  color: white;
+}
+
+.status-badge-progress {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.status-badge-resolved {
+  background-color: #27ae60;
+  color: white;
+}
+
+.status-badge-closed {
+  background-color: #7f8c8d;
+  color: white;
+}
+
+.status-badge-default {
+  background-color: #95a5a6;
+  color: white;
+}
+
+/* Issue card status indicators */
+.issue-card.status-badge-new {
+  border-left-color: #3498db;
+}
+
+.issue-card.status-badge-assigned {
+  border-left-color: #f39c12;
+}
+
+.issue-card.status-badge-progress {
+  border-left-color: #2ecc71;
+}
+
+.issue-card.status-badge-resolved {
+  border-left-color: #27ae60;
+}
+
+.issue-card.status-badge-closed {
+  border-left-color: #7f8c8d;
+}
+
+/* Meta information styling */
+.issue-meta {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.issue-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Character count */
+.character-count {
+  font-size: 0.75rem;
+  color: #666;
+  text-align: right;
+  margin-top: 0.25rem;
+}
+
+/* No issues message */
+.no-issues {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-top: 1rem;
 }
