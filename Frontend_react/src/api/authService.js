@@ -36,7 +36,7 @@ export const getCurrentUser = async () => {
 
 export const registerLecturer = async (lecturerData) => {
     try {
-        const response = await axios.post(`${API_URL}register/lecturer/`, lecturerData);
+        const response = await axios.post(`${API_URL}register/Lecturer/`, lecturerData);
         console.log('Lecturer registration success:', response.data);
 
         if (response.data.success) {

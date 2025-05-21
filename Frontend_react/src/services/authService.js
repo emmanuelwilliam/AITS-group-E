@@ -44,6 +44,10 @@ privateAxios.interceptors.response.use(
   }
 );
 
+// --- AUTHENTICATION: Fix login endpoint to accept both username and email ---
+// Instruct users to log in with either username or email (case-insensitive)
+// Ensure frontend always sends JSON, not FormData, for login
+
 // 🔧 Auth Service
 const authService = {
   // Student Registration (uses publicAxios)
@@ -68,7 +72,7 @@ const authService = {
    // Add Lecturer Registration
    registerLecturer: async (userData) => {
     try {
-      const response = await publicAxios.post('register/lecturer/', userData);
+      const response = await publicAxios.post('register/Lecturer/', userData);
       if (response.data?.tokens) {
         localStorage.setItem('access_token', response.data.tokens.access);
         localStorage.setItem('refresh_token', response.data.tokens.refresh);
@@ -103,19 +107,17 @@ const authService = {
 
   login: async ({ username, password }) => {
     try {
-      const formData = new FormData();
-      formData.append('username', username); // ✅ Correct key
-      formData.append('password', password);
-  
-      const response = await publicAxios.post('login/', formData, {
+      const response = await publicAxios.post('login/', { username, password }, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'application/json'
         }
       });
-  
+      console.log('[authService] Login response:', response.data);
       if (response.data?.access && response.data?.refresh) {
         localStorage.setItem('access_token', response.data.access);
         localStorage.setItem('refresh_token', response.data.refresh);
+        console.log('[authService] Set access_token:', response.data.access);
+        console.log('[authService] Set refresh_token:', response.data.refresh);
         return response.data;
       }
       throw new Error('Login failed: No tokens received');
