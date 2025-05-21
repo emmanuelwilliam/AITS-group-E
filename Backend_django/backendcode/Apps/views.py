@@ -1,4 +1,4 @@
-from rest_framework.decorators import api_view ,permission_classes
+from rest_framework.decorators import api_view ,permission_classes, action
 from rest_framework.permissions import AllowAny
 from rest_framework import viewsets, mixins, status,filters
 from rest_framework.response import Response
@@ -32,6 +32,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 from .serializer import UserSerializer
+from django.db import models
 
 # DRF Viewsets
 class StudentViewSet(viewsets.ModelViewSet):
@@ -62,7 +63,7 @@ class IssueViewSet(viewsets.ModelViewSet):
          # Allow anyone to create issues; require auth for all other actions
          if self.action == 'create':
              return [AllowAny()]
-         return super().get_permissions()
+         return super().get_permissions()     
 
 # ViewSet that provides full API access to Notification objects
 class NotificationViewSet(viewsets.ModelViewSet):
@@ -118,13 +119,17 @@ def register_student(request):
             code = verification.generate_code()
             verification.save()
 
-            send_mail(
-                'Verify your email',
-                f'Your verification code is: {code}',
-                'no-reply@yourdomain.com',
-                [student.user.email],
-                fail_silently=False,
-            )
+            try:
+                send_mail(
+                    'Verify your email',
+                    f'Your verification code is: {code}',
+                    settings.EMAIL_HOST_USER,
+                    [student.user.email],
+                    fail_silently=False,
+                )
+                print(f"Verification email sent to {student.user.email} with code: {code}")
+            except Exception as e:
+                print(f"Failed to send verification email: {e}")
 
             return Response({
                 'success': True,
@@ -152,36 +157,46 @@ def register_Lecturer(request):
         try:
             data = request.data
             required_fields = ['username', 'email', 'password', 'first_name', 'last_name']
+            
+            # Validate required fields
             for field in required_fields:
                 if not data.get(field):
                     return Response({
                         'error': f'Missing required field: {field}',
                         'required_fields': required_fields
                     }, status=status.HTTP_400_BAD_REQUEST)
-
-            if User.objects.filter(username=data['username']).exists():
-                return Response({'error': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
-            if User.objects.filter(email=data['email']).exists():
+            
+            # Clean and validate email
+            email = data['email'].strip().lower()
+            if User.objects.filter(email=email).exists():
                 return Response({'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Validate username
+            username = data['username'].strip()
+            if User.objects.filter(username=username).exists():
+                return Response({'error': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
             # Get or create the Lecturer role
-            Lecturer_role, created = UserRole.objects.get_or_create(role_name='Lecturer')
+            Lecturer_role, created = UserRole.objects.get_or_create(
+                role_name='Lecturer',
+                defaults={'name': 'Lecturer'})
+            
             if created:
-                print("Created new Lecturer role")
+                logger.info("Created new Lecturer role")
 
             # Create user with is_active=False
             user = User.objects.create_user(
-                username=data['username'],
-                email=data['email'],
+                username=username,
+                email=email,
                 password=data['password'],
-                first_name=data['first_name'],
-                last_name=data['last_name'],
+                first_name=data['first_name'].strip(),
+                last_name=data['last_name'].strip(),
                 is_active=False
             )
             user.role = Lecturer_role
             user.save()
 
-            print(f"Created user: {user.username} with role: {user.role}")
+            logger.info(f"Created lecturer user: {user.username} with role: {user.role}")
 
             # Generate verification code
             verification = EmailVerification.objects.create(
@@ -191,12 +206,24 @@ def register_Lecturer(request):
             verification_code = verification.generate_code()
             verification.save()
 
+            # Log the verification code for development
+            logger.info(f"Generated verification code for {user.email}: {verification_code}")
+
             # Send verification email
             try:
+                email_content = f'''Welcome to the Academic Issue Tracking System!
+                
+Your verification code is: {verification_code}
+
+This code will expire in 30 minutes.
+
+Please use this code to verify your email and activate your Lecturer account.
+                '''
+                
                 send_mail(
                     'Verify your email - Lecturer Registration',
-                    f'Your verification code is: {verification_code}\nThis code will expire in 30 minutes.',
-                    'from@yourdomain.com',
+                    email_content,
+                    settings.EMAIL_HOST_USER,
                     [user.email],
                     fail_silently=False,
                 )
@@ -240,6 +267,8 @@ def register_administrator(request):
     try:
         data = request.data
         required_fields = ['username', 'email', 'password', 'first_name', 'last_name']
+        
+        # Validate required fields
         for field in required_fields:
             if not data.get(field):
                 return Response({
@@ -247,28 +276,39 @@ def register_administrator(request):
                     'required_fields': required_fields
                 }, status=status.HTTP_400_BAD_REQUEST)
 
-        if User.objects.filter(username=data['username']).exists():
-            return Response({'error': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
-        if User.objects.filter(email=data['email']).exists():
+        # Clean and validate email
+        email = data['email'].strip().lower()
+        if User.objects.filter(email=email).exists():
             return Response({'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Validate username
+        username = data['username'].strip()
+        if User.objects.filter(username=username).exists():
+            return Response({'error': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
         # Get or create the administrator role
-        admin_role, created = UserRole.objects.get_or_create(role_name='administrator')
+        admin_role, created = UserRole.objects.get_or_create(
+            role_name='administrator',
+            defaults={'name': 'Academic Registrar'})
+        
         if created:
-            print("Created new administrator role")
+            logger.info("Created new administrator role")
 
         # Create inactive admin user
         user = User.objects.create_user(
-            username=data['username'],
-            email=data['email'],
+            username=username,
+            email=email,
             password=data['password'],
-            first_name=data['first_name'],
-            last_name=data['last_name'],
+            first_name=data['first_name'].strip(),
+            last_name=data['last_name'].strip(),
             is_active=False
         )
         user.role = admin_role
         user.save()
 
+        logger.info(f"Created administrator user: {user.username}")
+
+        # Generate verification code
         verification = EmailVerification.objects.create(
             user=user,
             expires_at=timezone.now() + timedelta(minutes=30)
@@ -276,11 +316,25 @@ def register_administrator(request):
         code = verification.generate_code()
         verification.save()
 
+        # Log the verification code for development
+        logger.info(f"Generated verification code for administrator {user.email}: {code}")
+
         # Send email
+        email_content = f'''Welcome to the Academic Issue Tracking System!
+
+As an Academic Registrar, you will be responsible for managing and assigning academic issues.
+
+Your verification code is: {code}
+
+This code will expire in 30 minutes.
+
+Please use this code to verify your email and activate your administrator account.
+'''
+        
         send_mail(
             'Verify your email - Admin Registration',
-            f'Your verification code is: {code}\nThis code will expire in 30 minutes.',
-            'from@yourdomain.com',
+            email_content,
+            settings.EMAIL_HOST_USER,
             [user.email],
             fail_silently=False,
         )
@@ -406,14 +460,86 @@ def issue_list(request):
     return Response(serializer.data)
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def create_issue(request):
     try:
-        serializer = IssueSerializer(data=request.data)
+        # Check if user is a student
+        if not hasattr(request.user, 'student_profile'):
+            return Response({'error': 'Only students can create issues.'}, status=403)
+
+        # Add the student to the issue data
+        issue_data = request.data.copy()
+        issue_data['student'] = request.user.id
+        
+        # Create initial status
+        initial_status, _ = Status.objects.get_or_create(status_name='Open')
+        issue_data['status'] = initial_status.id
+
+        serializer = IssueSerializer(data=issue_data)
         if serializer.is_valid():
-            serializer.save()
+            issue = serializer.save()
+            
+            # Create notification for admin
+            admin_notification = Notification.objects.create(
+                issue=issue,
+                message=f'New academic issue submitted: {issue.title}',
+                notification_type='info'
+            )
+            
+            # Create notification for student
+            student_notification = Notification.objects.create(
+                issue=issue,
+                message=f'Your issue "{issue.title}" has been submitted successfully',
+                notification_type='info'
+            )
+            
+            # Email student confirmation
+            student_email = f'''Hello {request.user.get_full_name()},
+
+Your academic issue has been submitted successfully:
+
+Title: {issue.title}
+Description: {issue.description}
+Priority: {issue.priority}
+Status: Pending
+
+You will receive notifications as your issue is processed.
+You can track the status of your issue in the Academic Issue Tracking System.
+'''
+            send_mail(
+                'Issue Submitted Successfully',
+                student_email,
+                settings.EMAIL_HOST_USER,
+                [request.user.email],
+                fail_silently=False,
+            )
+            
+            # Email admins about new issue
+            admins = User.objects.filter(role__role_name='administrator')
+            for admin in admins:
+                admin_email = f'''Hello {admin.get_full_name()},
+
+A new academic issue has been submitted:
+
+Title: {issue.title}
+Student: {request.user.get_full_name()}
+Priority: {issue.priority}
+Description: {issue.description}
+
+Please review and assign this issue to an appropriate lecturer.
+'''
+                send_mail(
+                    'New Academic Issue Submitted',
+                    admin_email,
+                    settings.EMAIL_HOST_USER,
+                    [admin.email],
+                    fail_silently=False,
+                )
+            
+            logger.info(f"Issue created: {issue.title} by {request.user.username}")
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         
+        logger.warning(f"Issue creation validation failed: {serializer.errors}")
         return Response(
             {
                 'error': 'Validation failed',
@@ -475,16 +601,81 @@ def filter_issues(request):
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_notifications(request):
     try:
         user = request.user
-        if user.is_authenticated:
-            notifications = Notification.objects.filter(user=user)
+        
+        # First check if user exists and has a role
+        if not user:
+            return Response(
+                {'error': 'No authenticated user found'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        if not hasattr(user, 'role') or not user.role or not user.role.role_name:
+            return Response(
+                {'error': 'User role not configured properly'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        role = user.role.role_name.lower()  # Convert to lowercase for consistent comparison
+        
+        # Base queryset with select_related for better performance
+        notifications = Notification.objects.select_related(
+            'issue', 
+            'issue__student', 
+            'issue__assigned_to',
+            'issue__status'
+        ).prefetch_related(
+            'issue__notifications'
+        )
+        
+        # Query notifications based on role
+        if role == 'student':
+            # Get notifications for issues reported by this student
+            notifications = notifications.filter(issue__student=user)
+        elif role == 'lecturer':
+            # Get notifications for issues assigned to this lecturer
+            notifications = notifications.filter(issue__assigned_to=user)
+        elif role in ['administrator', 'admin']:
+            # Admins see all notifications, no filter needed
+            pass
+        else:
+            return Response(
+                {"error": f"Invalid user role: {role}"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            # Order by created_at and limit to recent notifications
+            notifications = notifications.order_by('-created_at')[:100]
             serializer = NotificationSerializer(notifications, many=True)
             return Response(serializer.data)
-        return Response({"error":"Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
+            
+        except Exception as e:
+            import logging
+            logger = logging.getLogger('Apps')
+            logger.error(f"Error serializing notifications: {str(e)}", exc_info=True)
+            return Response(
+                {'error': 'Error retrieving notifications. Please try again.'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        import logging
+        logger = logging.getLogger('Apps')
+        logger.error(f"Error in get_notifications view: {str(e)}", exc_info=True)
+        
+        if 'role' in str(e):
+            return Response(
+                {'error': 'User role not configured properly'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        return Response(
+            {'error': 'An error occurred while retrieving notifications'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 @api_view(['GET'])
 def serve_home_page(request):
@@ -654,3 +845,229 @@ class EmailOrUsernameTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class EmailOrUsernameTokenObtainPairView(TokenObtainPairView):
     serializer_class = EmailOrUsernameTokenObtainPairSerializer
+
+# --- ADMIN: Assign Issue to Lecturer ---
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def assign_issue_to_lecturer(request):
+    if not hasattr(request.user, 'role') or request.user.role.role_name.lower() != 'admin':
+        return Response({'error': 'Only admin can assign issues.'}, status=403)
+    issue_id = request.data.get('issue_id')
+    lecturer_id = request.data.get('lecturer_id')
+    try:
+        issue = Issue.objects.get(id=issue_id)
+        lecturer = Lecturer.objects.get(id=lecturer_id)
+        issue.assigned_to = lecturer.user
+        
+        # Update status
+        status_obj, _ = Status.objects.get_or_create(status_name='Assigned')
+        old_status = issue.status
+        issue.status = status_obj
+        issue.save()
+        
+        # Create notification for lecturer
+        Notification.objects.create(
+            issue=issue,
+            message=f'You have been assigned a new issue: {issue.title}',
+            notification_type='info'
+        )
+        
+        # Create notification for student about assignment
+        Notification.objects.create(
+            issue=issue,
+            message=f'Your issue "{issue.title}" has been assigned to {lecturer.user.get_full_name()}',
+            notification_type='info'
+        )
+        
+        # Email lecturer
+        lecturer_email = f'''Hello {lecturer.user.get_full_name()},
+
+You have been assigned a new academic issue that requires your attention:
+
+Issue Title: {issue.title}
+Student: {issue.student.get_full_name()}
+Description: {issue.description}
+
+Please log in to the Academic Issue Tracking System to review and resolve this issue.
+'''
+        send_mail(
+            'New Academic Issue Assigned',
+            lecturer_email,
+            settings.EMAIL_HOST_USER,
+            [lecturer.user.email],
+            fail_silently=False,
+        )
+        
+        # Email student about assignment
+        student_email = f'''Hello {issue.student.get_full_name()},
+
+Your academic issue "{issue.title}" has been assigned to {lecturer.user.get_full_name()}.
+The issue status has been updated from "{old_status}" to "Assigned".
+
+You can track the progress of your issue in the Academic Issue Tracking System.
+'''
+        send_mail(
+            'Issue Update: Assigned to Lecturer',
+            student_email,
+            settings.EMAIL_HOST_USER,
+            [issue.student.email],
+            fail_silently=False,
+        )
+        return Response({'success': True, 'message': 'Issue assigned to lecturer.'})
+    except Exception as e:
+        return Response({'error': str(e)}, status=400)
+
+# --- LECTURER: Update Issue Status ---
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_issue_status(request):
+    issue_id = request.data.get('issue_id')
+    new_status = request.data.get('status')
+    resolution_notes = request.data.get('resolution_notes', '')
+    attachments = request.data.get('attachments', [])
+    
+    try:
+        issue = Issue.objects.get(id=issue_id)
+        
+        # Only assigned lecturer can update
+        if issue.assigned_to != request.user:
+            return Response({
+                'error': 'Not allowed. Only the assigned lecturer can update the issue status.'
+            }, status=403)
+        
+        old_status = issue.status.status_name if issue.status else 'Unknown'
+        
+        # Create or get status object
+        status_obj, _ = Status.objects.get_or_create(status_name=new_status)
+        issue.status = status_obj
+        issue.save()
+        
+        # Determine notification type based on status
+        notification_type = 'info'
+        if new_status.lower() == 'resolved':
+            notification_type = 'success'
+        elif new_status.lower() == 'pending information':
+            notification_type = 'warning'
+        elif new_status.lower() == 'closed':
+            notification_type = 'info'
+            
+        # Create notification for student
+        Notification.objects.create(
+            issue=issue,
+            message=f'Your issue "{issue.title}" status has been updated to {new_status}.\n\nNotes: {resolution_notes}',
+            notification_type=notification_type
+        )
+        
+        # Email student with detailed update
+        status_context = {
+            'Pending Information': 'additional information is required',
+            'In Progress': 'being worked on',
+            'Resolved': 'been resolved',
+            'Closed': 'been closed'
+        }.get(new_status, 'been updated')
+        
+        email_content = f"""Hello {issue.student.get_full_name()},
+
+Your academic issue has {status_context}:
+
+Title: {issue.title}
+Previous Status: {old_status}
+New Status: {new_status}
+
+Additional Notes:
+{resolution_notes if resolution_notes else "No additional notes provided"}
+
+Next Steps:
+{
+    "Please provide the requested additional information." if new_status == "Pending Information"
+    else "No further action is required." if new_status in ["Resolved", "Closed"]
+    else "You will receive updates as your issue progresses."
+}
+
+You can view the full details and track this issue's progress in the Academic Issue Tracking System.
+"""
+        
+        send_mail(
+            f'Issue Update: {issue.title}',
+            email_content,
+            settings.EMAIL_HOST_USER,
+            [issue.student.email],
+            fail_silently=False,
+        )
+        
+        # If issue is resolved or closed, notify admin
+        if new_status.lower() in ['resolved', 'closed']:
+            admin_notification = Notification.objects.create(
+                issue=issue,
+                message=f'Issue "{issue.title}" has been {new_status.lower()} by {request.user.get_full_name()}',
+                notification_type='info'
+            )
+            
+            # Notify admins via email
+            admins = User.objects.filter(role__role_name='administrator')
+            for admin in admins:
+                send_mail(
+                    f'Issue {new_status}: {issue.title}',
+                    f"""Hello {admin.get_full_name()},
+
+The following academic issue has been {new_status.lower()}:
+
+Title: {issue.title}
+{new_status} By: {request.user.get_full_name()}
+Student: {issue.student.get_full_name()}
+
+Resolution Notes:
+{resolution_notes if resolution_notes else "No additional notes provided"}
+
+You can review the details in the Academic Issue Tracking System.
+""",
+                    settings.EMAIL_HOST_USER,
+                    [admin.email],
+                    fail_silently=False,
+                )
+        
+        return Response({
+            'success': True,
+            'message': f'Issue status updated to {new_status}.',
+            'notification_created': True
+        })
+    
+    except Issue.DoesNotExist:
+        return Response({'error': 'Issue not found'}, status=404)
+    except Exception as e:
+        logger.error(f"Error updating issue status: {str(e)}")
+        return Response({'error': str(e)}, status=500)
+
+# --- STUDENT: List Own Issues (Issue Tracking) ---
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def student_issues(request):
+    try:
+        # Verify user is a student
+        if not hasattr(request.user, 'student_profile'):
+            return Response({'error': 'Only students can view their issues.'}, status=403)
+        
+        # Get all issues for the student with related fields
+        issues = Issue.objects.select_related('status', 'assigned_to').filter(
+            student=request.user
+        ).order_by('-reported_date')
+
+        serializer = IssueSerializer(issues, many=True)
+        return Response(serializer.data)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+# --- ADMIN: Statistics Endpoint ---
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def admin_statistics(request):
+    if not hasattr(request.user, 'role') or request.user.role.role_name.lower() != 'admin':
+        return Response({'error': 'Only admin can view statistics.'}, status=403)
+    total_issues = Issue.objects.count()
+    by_status = Issue.objects.values('status__status_name').annotate(count=models.Count('id'))
+    by_lecturer = Issue.objects.values('assigned_to__username').annotate(count=models.Count('id'))
+    return Response({
+        'total_issues': total_issues,
+        'issues_by_status': list(by_status),
+        'issues_by_lecturer': list(by_lecturer),
+    })
