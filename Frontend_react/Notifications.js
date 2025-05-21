@@ -2,14 +2,14 @@
 
 // src/components/Notifications.js
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from './src/api/apiConfig';
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
-    // Fetch notifications from the backend API
-    axios.get('http://localhost:8000/api/notifications/')
+    // Fetch notifications from the backend API using authenticated instance
+    api.get('notifications/')
       .then((res) => {
         setNotifications(res.data); // Set notifications data
       })
