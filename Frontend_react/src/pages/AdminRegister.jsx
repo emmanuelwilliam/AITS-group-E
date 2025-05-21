@@ -40,8 +40,10 @@ const AdminRegister = () => {
     if (!validateForm()) return;
 
     try {
+      // Ensure unique username by appending timestamp
+      const username = formData.email + '_' + Date.now();
       const payload = {
-        username: formData.email, // Using email as username
+        username,
         email: formData.email,
         password: formData.password,
         first_name: formData.firstName,

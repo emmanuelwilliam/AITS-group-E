@@ -5,6 +5,7 @@ import AdminTopBar from "../components/AdminTopBar";
 import AdminStatCard from "../components/AdminStatCard";
 import "../styles/adminDashboard.css";
 import logo from "../assets/Makerere Logo.png";
+import { fetchAdminStatistics } from "../api/issueService";
 
 const AdminDashboard = () => {
   const location = useLocation();
@@ -18,12 +19,12 @@ const AdminDashboard = () => {
   const [hasUnread, setHasUnread] = useState(false);
   const [menuCollapsed, setMenuCollapsed] = useState(window.innerWidth < 768);
   const [issueSummary, setIssueSummary] = useState({
-   
     open: 0,
     inProgress: 0,
     resolved: 0,
     total: 0,
   });
+  const [statsError, setStatsError] = useState(null);
 
   // Responsive menu toggle on resize
   useEffect(() => {
@@ -36,7 +37,7 @@ const AdminDashboard = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Load mock notifications and stats
+  // Load notifications and stats
   useEffect(() => {
     const mockNotifications = [
       { id: 1, title: "New urgent issue reported", read: false, time: "10 mins ago" },
@@ -48,15 +49,21 @@ const AdminDashboard = () => {
     fetchIssueSummary();
   }, []);
 
-  const fetchIssueSummary = () => {
-    setTimeout(() => {
+  // Fetch real admin statistics from backend
+  const fetchIssueSummary = async () => {
+    try {
+      const stats = await fetchAdminStatistics();
       setIssueSummary({
-        open: 18,
-        inProgress: 12,
-        resolved: 34,
-        total: 64,
+        open: stats.issues_by_status.find(s => s.status__status_name === 'Open')?.count || 0,
+        inProgress: stats.issues_by_status.find(s => s.status__status_name === 'In Progress')?.count || 0,
+        resolved: stats.issues_by_status.find(s => s.status__status_name === 'Resolved')?.count || 0,
+        total: stats.total_issues || 0,
       });
-    }, 500);
+      setStatsError(null);
+    } catch (err) {
+      setIssueSummary({ open: 0, inProgress: 0, resolved: 0, total: 0 });
+      setStatsError("Failed to load statistics");
+    }
   };
 
   const handleLogout = () => {
@@ -108,6 +115,7 @@ const AdminDashboard = () => {
 
         <main className={`main-content ${menuCollapsed ? "expanded" : ""}`}>
           {/* Stats Summary Cards */}
+          {statsError && <div className="error-message">{statsError}</div>}
           <div className="admin-stats-summary">
             <AdminStatCard label="Open Issues" value={issueSummary.open} />
             <AdminStatCard label="In Progress" value={issueSummary.inProgress} />

@@ -7,11 +7,11 @@ const AdminSidebar = () => {
 
   // Sidebar menu items with labels and paths
   const menuItems = [
-    { id: "dashboard", label: "Dashboard", path: "dashboard" },
-    { id: "complaints", label: "Complaints", path: "complaints" },
-    { id: "activity", label: "Student Activity", path: "activity" },
-    { id: "colleges", label: "College Statistics", path: "colleges" },
-    { id: "resolve-issue", label: "Resolve Issues", path: "resolve-issue" }
+    { id: "dashboard", label: "Dashboard", path: "/admin-dashboard/dashboard" },
+    { id: "complaints", label: "Complaints", path: "/admin-dashboard/complaints" },
+    { id: "activity", label: "Student Activity", path: "/admin-dashboard/activity" },
+    { id: "colleges", label: "College Statistics", path: "/admin-dashboard/colleges" },
+    { id: "resolve-issue", label: "Resolve Issues", path: "/admin-dashboard/resolve-issue" }
   ];
 
   return (
