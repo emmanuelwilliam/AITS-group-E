@@ -191,32 +191,64 @@ class StatusSerializer(serializers.ModelSerializer):
 
 # Serializer for handling issue data, including related student, Lecturer, and status information.
 class IssueSerializer(serializers.ModelSerializer):
+    status_name = serializers.SerializerMethodField()
+    student_name = serializers.SerializerMethodField()
+    assigned_to_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Issue
         fields = [
-            'title', 'description', 'college', 'program', 
-            'year_of_study', 'semester', 'course_unit', 
-            'course_code', 'category', 'priority'
+            'id', 'title', 'description', 'college', 'program',
+            'year_of_study', 'semester', 'course_unit', 'course_code',
+            'category', 'reported_date', 'priority', 'student',
+            'assigned_to', 'status', 'status_name', 'student_name',
+            'assigned_to_name'
         ]
-        extra_kwargs = {
-            'title': {'required': True},
-            'description': {'required': True},
-            'college': {'required': True},
-            'program': {'required': True},
-            'year_of_study': {'required': True},
-            'semester': {'required': True},
-            'course_unit': {'required': True},
-            'course_code': {'required': True},
-        }
+
+    def get_status_name(self, obj):
+        return obj.status.status_name if obj.status else 'Open'
+
+    def get_student_name(self, obj):
+        if obj.student:
+            return f"{obj.student.first_name} {obj.student.last_name}"
+        return None
+
+    def get_assigned_to_name(self, obj):
+        if obj.assigned_to:
+            return f"{obj.assigned_to.first_name} {obj.assigned_to.last_name}"
+        return None
 
 # Serializer for Notification model with related issue data.
 class NotificationSerializer(serializers.ModelSerializer):
-    issue = IssueSerializer(read_only=True)
+    issue_title = serializers.SerializerMethodField()
+    issue_status = serializers.SerializerMethodField()
+    student_name = serializers.SerializerMethodField()
+    assigned_to = serializers.SerializerMethodField()
 
     class Meta:
         model = Notification
-        fields = '__all__'
-        read_only_fields = ['created_at']
+        fields = [
+            'id', 'message', 'notification_type', 'is_read', 'created_at',
+            'issue', 'issue_title', 'issue_status', 'student_name', 'assigned_to'
+        ]
+
+    def get_issue_title(self, obj):
+        return obj.issue.title if obj.issue else None
+
+    def get_issue_status(self, obj):
+        if obj.issue and obj.issue.status:
+            return obj.issue.status.status_name
+        return None
+
+    def get_student_name(self, obj):
+        if obj.issue and obj.issue.student:
+            return f"{obj.issue.student.first_name} {obj.issue.student.last_name}".strip()
+        return None
+
+    def get_assigned_to(self, obj):
+        if obj.issue and obj.issue.assigned_to:
+            return f"{obj.issue.assigned_to.first_name} {obj.issue.assigned_to.last_name}".strip()
+        return None
 
 class LoginHistorySerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
