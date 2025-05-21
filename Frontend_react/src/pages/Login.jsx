@@ -27,16 +27,11 @@ const Login = () => {
 
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
-
-    // Debug raw input state
-    console.log("🛠️ State at submit:", { email, password, rememberMe });
-
     setError("");
     if (!email.trim() || !password) {
       setError("Please enter both email/username and password");
       return;
     }
-
     setIsLoading(true);
     try {
       // Perform login via context (sets tokens + currentUser)
@@ -58,12 +53,9 @@ const Login = () => {
 
       navigate(destination);
     } catch (err) {
-      console.error("Login error:", err);
-      let errorMessage = "Invalid credentials. Please try again.";
-      if (err.detail || err.error) {
-        errorMessage = err.detail || err.error;
-      }
-      setError(errorMessage);
+      setError(
+        err?.error || err?.detail || err?.message || "Login failed. Please check your credentials."
+      );
     } finally {
       setIsLoading(false);
     }
