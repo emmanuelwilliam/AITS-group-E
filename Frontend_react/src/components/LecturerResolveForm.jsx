@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "../styles/lecturerResolveForm.css";
+import { updateIssueStatus } from '../api/issueService';
 
 const LecturerResolveForm = ({ issue, onResolve, onRequestInfo, onAssign, onClose }) => {
   const [resolution, setResolution] = useState("");
@@ -7,32 +8,56 @@ const LecturerResolveForm = ({ issue, onResolve, onRequestInfo, onAssign, onClos
   const [attachments, setAttachments] = useState([]);
   const [newAttachment, setNewAttachment] = useState(null);
 
-  const handleSubmit = (action) => {
-    if (action === "resolve" && resolution.trim().length < 20) {
-      alert("Resolution must be at least 20 characters");
+  const validateResolution = (action, resolutionText) => {
+    if (action === "resolve" || action === "close") {
+      if (resolutionText.trim().length < 20) {
+        return "Resolution must be at least 20 characters long";
+      }
+    }
+    return null;
+  };
+
+  const handleSubmit = async (action) => {
+    const validationError = validateResolution(action, resolution);
+    if (validationError) {
+      alert(validationError);
       return;
     }
-    
-    const resolutionData = {
-      status,
-      resolution,
-      attachments,
-      action
-    };
-    
-    switch(action) {
-      case "request-info":
-        onRequestInfo(resolutionData);
-        break;
-      case "resolve":
+
+    try {
+      const resolutionData = {
+        status,
+        resolution,
+        attachments,
+        action
+      };
+
+      if (action === "resolve") {
+        await updateIssueStatus(issue.id, {
+          status: status,
+          resolution_notes: resolution,
+          attachments: attachments
+        });
         onResolve(resolutionData);
-        break;
-      case "close":
+      } else if (action === "request-info") {
+        await updateIssueStatus(issue.id, {
+          status: 'Pending Information',
+          resolution_notes: resolution
+        });
+        onRequestInfo(resolutionData);
+      } else if (action === "close") {
+        await updateIssueStatus(issue.id, {
+          status: 'Closed',
+          resolution_notes: resolution,
+          attachments: attachments
+        });
         onClose(resolutionData);
-        break;
-      case "assign":
+      } else if (action === "assign") {
         onAssign(resolutionData);
-        break;
+      }
+    } catch (error) {
+      console.error('Error updating issue:', error);
+      alert('Failed to update issue. Please try again.');
     }
   };
 
@@ -161,6 +186,7 @@ const LecturerResolveForm = ({ issue, onResolve, onRequestInfo, onAssign, onClos
             <option value="Open">Open</option>
             <option value="In Progress">In Progress</option>
             <option value="Resolved">Resolved</option>
+            <option value="Pending Information">Need More Information</option>
             <option value="Closed">Closed</option>
           </select>
         </div>
@@ -171,10 +197,14 @@ const LecturerResolveForm = ({ issue, onResolve, onRequestInfo, onAssign, onClos
             id="resolution"
             value={resolution}
             onChange={(e) => setResolution(e.target.value)}
-            placeholder="Enter detailed resolution..."
+            placeholder="Enter detailed resolution or response..."
             rows={8}
             required
+            minLength={20}
           />
+          <div className="character-count">
+            {resolution.length} characters (minimum 20)
+          </div>
         </div>
 
         <div className="form-group">
@@ -203,38 +233,41 @@ const LecturerResolveForm = ({ issue, onResolve, onRequestInfo, onAssign, onClos
             </div>
           )}
         </div>
-      </div>
 
-      {/* Action Buttons */}
-      <div className="action-buttons">
-        <button
-          type="button"
-          onClick={() => handleSubmit("request-info")}
-          className="btn request-info-btn"
-        >
-          Request More Information
-        </button>
-        <button
-          type="button"
-          onClick={() => handleSubmit("assign")}
-          className="btn assign-btn"
-        >
-          Assign to Another Lecturer
-        </button>
-        <button
-          type="button"
-          onClick={() => handleSubmit("resolve")}
-          className="btn resolve-btn"
-        >
-          Mark as Resolved
-        </button>
-        <button
-          type="button"
-          onClick={() => handleSubmit("close")}
-          className="btn close-btn"
-        >
-          Close Issue
-        </button>
+        {/* Action Buttons */}
+        <div className="action-buttons">
+          <button
+            type="button"
+            onClick={() => handleSubmit("request-info")}
+            className="btn request-info-btn"
+            disabled={!resolution.trim()}
+          >
+            Request More Information
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSubmit("assign")}
+            className="btn assign-btn"
+          >
+            Assign to Another Lecturer
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSubmit("resolve")}
+            className="btn resolve-btn"
+            disabled={!resolution.trim() || resolution.length < 20}
+          >
+            Mark as Resolved
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSubmit("close")}
+            className="btn close-btn"
+            disabled={!resolution.trim() || resolution.length < 20}
+          >
+            Close Issue
+          </button>
+        </div>
       </div>
     </div>
   );

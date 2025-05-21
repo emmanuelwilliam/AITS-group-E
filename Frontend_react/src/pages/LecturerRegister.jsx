@@ -38,37 +38,35 @@ const LecturerRegister = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // LecturerRegister.jsx
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (isSubmitting) return;
-  if (!validateForm()) return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+    if (!validateForm()) return;
 
-  setIsSubmitting(true);
+    setIsSubmitting(true);
 
-  try {
-    // Use authService instead of direct fetch
-    await authService.registerLecturer({
-      first_name: formData.firstName,
-      last_name: formData.lastName,
-      email: formData.webmail,
-      username: formData.webmail,
-      contact_number: formData.contact,
-      department: formData.department,
-      password: formData.password
-    });
-
-    navigate("/verify", { 
-      state: { email: formData.webmail, role: "lecturer" }
-    });
-
-  } catch (error) {
-    console.error("Registration Error:", error);
-    setErrors({ form: error.message || "Registration failed" });
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+    try {
+      // Ensure unique username by appending timestamp
+      const username = formData.webmail + '_' + Date.now();
+      await authService.registerLecturer({
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.webmail,
+        username,
+        contact_number: formData.contact,
+        department: formData.department,
+        password: formData.password
+      });
+      navigate("/verify", {
+        state: { email: formData.webmail, role: "lecturer" }
+      });
+    } catch (error) {
+      console.error("Registration Error:", error);
+      setErrors({ form: error.message || "Registration failed" });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="register-container">

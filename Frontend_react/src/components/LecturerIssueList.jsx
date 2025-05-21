@@ -1,19 +1,15 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "../styles/lecturerIssueList.css";
+import api from "../api/apiConfig";
 
 const LecturerIssueList = ({ onSelectIssue }) => {
-  // Sample issues data
-  const issues = [
-    {
-      id: 1,
-      title: "Missing Lecture Notes",
-      courseCode: "CSC 101",
-      courseName: "Introduction to Computing",
-      studentName: "John Doe",
-      description: "Lecture notes for week 5 missing"
-    },
-    // Add more sample issues as needed
-  ];
+  const [issues, setIssues] = useState([]);
+
+  useEffect(() => {
+    api.get('issues/?assigned_to=me')
+      .then(res => setIssues(res.data))
+      .catch(() => setIssues([]));
+  }, []);
 
   return (
     <div className="issue-list-container">
@@ -23,14 +19,11 @@ const LecturerIssueList = ({ onSelectIssue }) => {
           <div 
             key={issue.id}
             className="issue-card"
-            onClick={() => {
-              onSelectIssue(issue); // This should trigger the selection
-              console.log("Issue selected:", issue.title); // For debugging
-            }}
+            onClick={() => onSelectIssue(issue)}
           >
             <h3>{issue.title}</h3>
-            <p><strong>Course:</strong> {issue.courseCode}</p>
-            <p><strong>Student:</strong> {issue.studentName}</p>
+            <p><strong>Course:</strong> {issue.course_code || issue.courseCode}</p>
+            <p><strong>Student:</strong> {issue.student_name || issue.studentName}</p>
           </div>
         ))}
       </div>
