@@ -70,6 +70,37 @@ class CourseUnit(models.Model):
     def __str__(self):
         return f"{self.course_code}-{self.course_name}"
 
+class Status(models.Model):
+    STATUS_CHOICES = [
+        ('Open', 'Open'), 
+        ('Assigned', 'Assigned'),
+        ('In Progress', 'In Progress'),
+        ('Resolved', 'Resolved'),
+        ('Closed', 'Closed'),
+        ('Pending Information', 'Pending Information'),
+    ]
+    
+    status_name = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Open')
+    last_update = models.DateTimeField(auto_now=True)
+    description = models.TextField(blank=True, null=True, help_text="Optional description or notes about this status")
+
+    def __str__(self):
+        return self.status_name
+
+    class Meta:
+        verbose_name = 'Status'
+        verbose_name_plural = 'Statuses'
+        ordering = ['status_name']
+
+    @classmethod
+    def get_default_status(cls):
+        """Get or create the default 'Open' status"""
+        status, _ = cls.objects.get_or_create(
+            status_name='Open',
+            defaults={'description': 'Initial status when an issue is created'}
+        )
+        return status
+
 class Issue(models.Model):    
     PRIORITY_CHOICES = [
         ('Low', 'Low'),
@@ -111,6 +142,26 @@ class Issue(models.Model):
     category = models.CharField(max_length=100, choices=CATEGORY_CHOICES, default='Academic')
     reported_date = models.DateTimeField(auto_now_add=True)
     priority = models.CharField(max_length=50, choices=PRIORITY_CHOICES, default='Medium')
+    student = models.ForeignKey(
+        'Apps.User',
+        on_delete=models.CASCADE,
+        related_name='student_issues',
+        null=True,  # Allow null temporarily for migration
+        blank=True
+    )
+    assigned_to = models.ForeignKey(
+        'Apps.User',
+        null=True, 
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='assigned_issues'
+    )
+    status = models.ForeignKey(
+        'Apps.Status',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL
+    )
     
     def __str__(self):
         return f"{self.title} - {self.student}"
@@ -132,13 +183,6 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.issue.title} ({self.notification_type})"
-
-class Status(models.Model):
-    status_name = models.CharField(max_length=50)
-    last_update = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.status_name
 
 class LoginHistory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='login_history')
