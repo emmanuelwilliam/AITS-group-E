@@ -1,0 +1,4 @@
+# --- FAVICON: Add fallback favicon for 404 error ---
+# Place a default favicon.ico in the public directory for React
+# to resolve the 404 favicon error in the browser.
+# --- END FAVICON ---
