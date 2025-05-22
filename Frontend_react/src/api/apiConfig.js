@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api/',
+  baseURL: 'https://aits-group-e-1.onrender.com/api/',
 });
 
 // Request interceptor: attach access token
@@ -27,7 +27,7 @@ api.interceptors.response.use(
         try {
           // Call the refresh endpoint
           const { data } = await axios.post(
-            'http://127.0.0.1:8000/api/token/refresh/',
+            'https://aits-group-e-1.onrender.com/api/token/refresh/',
             { refresh: refreshToken }
           );
           // Save new access token

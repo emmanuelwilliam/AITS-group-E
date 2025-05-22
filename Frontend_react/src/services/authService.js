@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base API URL
-const API_URL = 'http://127.0.0.1:8000/api/';
+const API_URL = 'https://aits-group-e-1.onrender.com/api/';
 
 // 🔓 Axios instance for public (unauthenticated) requests
 const publicAxios = axios.create({

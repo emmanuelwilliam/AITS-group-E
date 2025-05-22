@@ -1,7 +1,10 @@
 import axios from 'axios';
 
+const API_URL = 'https://aits-group-e-1.onrender.com/api/';
+
+// Create an Axios instance for API requests
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api/',
+  baseURL: 'https://aits-group-e-1.onrender.com/api/',
 });
 
 // Auto-attach JWT
