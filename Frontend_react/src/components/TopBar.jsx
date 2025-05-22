@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MakerereLogo from "../assets/Makerere Logo.png";
 import { FiSearch } from "react-icons/fi"; // Import search icon
-import "../styles/topBar.css";
+import "../styles/topbar.css";
 
 const TopBar = ({ firstName, lastName, studentNumber, registrationNumber, webmail, college, course }) => {
   const [showProfile, setShowProfile] = useState(false);
