@@ -1,4 +1,4 @@
-import ErrorBoundary from "./components/Errorboundary";
+import ErrorBoundary from "./components/ErrorBoundary";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import Login from "./pages/Login";
