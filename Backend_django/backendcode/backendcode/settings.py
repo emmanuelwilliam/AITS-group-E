@@ -32,6 +32,7 @@ DEBUG = True
 # Update ALLOWED_HOSTS to include both local and production domains
 ALLOWED_HOSTS = [
     'aits-group-e-1.onrender.com',
+    'aits-group-qiq8wt4oi-muhaise-samsons-projects.vercel.app/',
     'localhost',
     '127.0.0.1',
 ]
@@ -72,6 +73,7 @@ MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 # CORS Configuration
 CORS_ALLOWED_ORIGINS = [
     "https://aits-group-e-1.onrender.com",
+    "https://aits-group-qiq8wt4oi-muhaise-samsons-projects.vercel.app/",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:3000",#need to confirm this though
@@ -95,6 +97,7 @@ CORS_ALLOW_METHODS = [
 # Update CORS settings for both local and production
 CORS_ALLOWED_ORIGINS = [
     "https://aits-group-e-1.onrender.com",
+    "https://aits-group-qiq8wt4oi-muhaise-samsons-projects.vercel.app/",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
