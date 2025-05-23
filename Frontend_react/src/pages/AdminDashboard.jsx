@@ -11,6 +11,7 @@ const AdminDashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+ // Destructure user details from location state with default values
   const { firstName = "Admin", lastName = "User", email = "admin@mak.ac.ug" } =
     location?.state || {};
 
