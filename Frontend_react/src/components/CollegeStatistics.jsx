@@ -52,7 +52,7 @@ const CollegeStatistics = () => {
             <th>Complaint Rate</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody> {/* Render a row for each college */}
           {colleges.map((college, index) => (
             <tr key={index}>
               <td>{college.name}</td>
