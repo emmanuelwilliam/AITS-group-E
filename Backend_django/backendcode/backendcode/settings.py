@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-qx(-v9-7@$9m$o*3l)nxr)z#iqm(z_q0u3p@wd#0al357a_01=')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', 'False').lower() == 'true'
+DEBUG = True if os.environ.get('RENDER_EXTERNAL_URL') is None else False
 
 # Update ALLOWED_HOSTS to include both local and production domains
 ALLOWED_HOSTS = [
@@ -139,14 +139,24 @@ WSGI_APPLICATION = 'backendcode.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 import dj_database_url
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default='postgresql://postgres:1234567@localhost:5432/AITSDB',
-        conn_max_age=600,
-        conn_health_checks=True,
-        ssl_require=not DEBUG,
-    )
-}
+if not DEBUG:
+    # Production database settings using DATABASE_URL
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL', ''),
+            conn_max_age=600,
+            conn_health_checks=True,
+            ssl_require=True,
+        )
+    }
+else:
+    # Local development database settings using SQLite
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 AUTH_USER_MODEL = 'Apps.User'
 
