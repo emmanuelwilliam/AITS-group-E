@@ -137,19 +137,15 @@ WSGI_APPLICATION = 'backendcode.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+import dj_database_url
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME', 'AITSDB'),
-        'USER': os.environ.get('DB_USER', 'postgres'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', '1234567'),
-        'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
-        'OPTIONS': {
-            'sslmode': 'require' if not DEBUG else 'disable',
-        },
-    }
+    'default': dj_database_url.config(
+        default='postgresql://postgres:1234567@localhost:5432/AITSDB',
+        conn_max_age=600,
+        conn_health_checks=True,
+        ssl_require=not DEBUG,
+    )
 }
 
 AUTH_USER_MODEL = 'Apps.User'
