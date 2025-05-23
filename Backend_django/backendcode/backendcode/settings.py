@@ -24,10 +24,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-qx(-v9-7@$9m$o*3l)nxr)z#iqm(z_q0u3p@wd#0al357a_01='
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-qx(-v9-7@$9m$o*3l)nxr)z#iqm(z_q0u3p@wd#0al357a_01=')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False').lower() == 'true'
 
 # Update ALLOWED_HOSTS to include both local and production domains
 ALLOWED_HOSTS = [
@@ -65,11 +65,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]   
-
-MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')
-# Add WhiteNoise middleware for production
-MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+]
 
 # CORS Configuration
 CORS_ALLOWED_ORIGINS = [
@@ -77,8 +73,6 @@ CORS_ALLOWED_ORIGINS = [
     "https://aits-group-e.vercel.app",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "http://localhost:3000",#need to confirm this though
-    "http://127.0.0.1:3000",
 ]
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
@@ -97,14 +91,6 @@ CORS_ALLOW_METHODS = [
     'PATCH',
     'POST',
     'PUT',
-]
-
-# Update CORS settings for both local and production
-CORS_ALLOWED_ORIGINS = [
-    "https://aits-group-e-1.onrender.com",
-    "https://aits-group-e.vercel.app",
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
 ]
 
 # Remove the DEBUG conditional for ALLOWED_HOSTS
@@ -152,17 +138,16 @@ WSGI_APPLICATION = 'backendcode.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# Always use manual configuration for local development
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'AITSDB',
-        'USER': 'postgres',
-        'PASSWORD': '1234567',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'NAME': os.environ.get('DB_NAME', 'AITSDB'),
+        'USER': os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', '1234567'),
+        'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
         'OPTIONS': {
-            'sslmode': 'disable',
+            'sslmode': 'require' if not DEBUG else 'disable',
         },
     }
 }
