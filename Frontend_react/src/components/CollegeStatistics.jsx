@@ -34,6 +34,7 @@ const CollegeStatistics = () => {
             <option>2020/2021</option>
           </select>
         </div>
+        {/* Export options for the statistics table */}
         <div className="export-options">
           <button className="btn-export">Export as CSV</button>
           <button className="btn-export">Export as PDF</button>
