@@ -1,6 +1,7 @@
 import React from "react";
 import "../styles/collegeStats.css";
 
+// CollegeStatistics component displays statistics for different colleges
 const CollegeStatistics = () => {
   // Sample data - replace with real data from your backend
   const colleges = [
@@ -23,7 +24,7 @@ const CollegeStatistics = () => {
   return (
     <div className="college-statistics">
       <h2>College Performance Statistics</h2>
-      
+      {/* Controls for filtering and exporting data */}
       <div className="stats-controls">
         <div className="time-filter">
           <label>Academic Year:</label>
@@ -33,6 +34,7 @@ const CollegeStatistics = () => {
             <option>2020/2021</option>
           </select>
         </div>
+        {/* Export options for the statistics table */}
         <div className="export-options">
           <button className="btn-export">Export as CSV</button>
           <button className="btn-export">Export as PDF</button>
@@ -50,7 +52,7 @@ const CollegeStatistics = () => {
             <th>Complaint Rate</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody> {/* Render a row for each college */}
           {colleges.map((college, index) => (
             <tr key={index}>
               <td>{college.name}</td>
