@@ -1,6 +1,7 @@
 import React from "react";
 import "../styles/collegeStats.css";
 
+// CollegeStatistics component displays statistics for different colleges
 const CollegeStatistics = () => {
   // Sample data - replace with real data from your backend
   const colleges = [
