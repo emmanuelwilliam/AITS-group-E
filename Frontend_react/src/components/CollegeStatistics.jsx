@@ -24,7 +24,7 @@ const CollegeStatistics = () => {
   return (
     <div className="college-statistics">
       <h2>College Performance Statistics</h2>
-      
+      {/* Controls for filtering and exporting data */}
       <div className="stats-controls">
         <div className="time-filter">
           <label>Academic Year:</label>
