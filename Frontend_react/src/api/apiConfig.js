@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://aits-group-e-1.onrender.com/api/',
+  baseURL: 'http://localhost:8000/api/',
 });
 
 // Request interceptor: attach access token
@@ -24,10 +24,9 @@ api.interceptors.response.use(
       originalReq._retry = true;
       const refreshToken = localStorage.getItem('refresh_token');
       if (refreshToken) {
-        try {
-          // Call the refresh endpoint
+        try {          // Call the refresh endpoint
           const { data } = await axios.post(
-            'https://aits-group-e-1.onrender.com/api/token/refresh/',
+            'http://localhost:8000/api/token/refresh/',
             { refresh: refreshToken }
           );
           // Save new access token

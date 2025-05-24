@@ -30,14 +30,8 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-qx(-v9-7@$9m$o
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# Update ALLOWED_HOSTS to include both local and production domains
-ALLOWED_HOSTS = [
-    'aits-group-e-1.onrender.com',
-    'aits-group-e.vercel.app',
-    'localhost',
-    '127.0.0.1',
-    '*',  # Temporarily allow all hosts while testing
-]
+# Only allow localhost for local development
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition
@@ -69,12 +63,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# CORS Configuration
+# CORS Configuration - only allow local development origins
 CORS_ALLOWED_ORIGINS = [
-    "https://aits-group-e-1.onrender.com",
-    "https://aits-group-e.vercel.app",
     "http://localhost:5173",
-    "http://127.0.0.1:5173",
+    "http://127.0.0.1:5173"
 ]
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
@@ -141,24 +133,13 @@ WSGI_APPLICATION = 'backendcode.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 import dj_database_url
 
-# Database configuration
+# Use SQLite for local development
 DATABASES = {
-    'default': dj_database_url.config(
-        default='sqlite:///' + str(BASE_DIR / 'db.sqlite3'),
-        conn_max_age=600,
-        conn_health_checks=True,
-        ssl_require=False,
-    )
-}
-
-# Add a fallback to SQLite if PostgreSQL connection fails
-if os.environ.get('USE_SQLITE', 'False').lower() == 'true':
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
+}
 
 AUTH_USER_MODEL = 'Apps.User'
 
@@ -211,11 +192,8 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 os.makedirs(BASE_DIR / 'static', exist_ok=True)
 os.makedirs(STATIC_ROOT, exist_ok=True)
 
-# Add WhiteNoise for serving static files
-MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
-
-# Configure WhiteNoise
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Use default static files storage for local development
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
