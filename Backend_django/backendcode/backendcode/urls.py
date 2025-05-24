@@ -6,10 +6,10 @@ from django.views.generic import TemplateView
 
 urlpatterns = [
     # Admin panel route
-    path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls, name='admin'),
 
-    # Backend API routes for your app (make sure Apps/urls.py is correctly set up)
-    path('api/', include('Apps.urls')),
+    # Backend API routes for your app
+    path('api/', include(('Apps.urls', 'Apps'), namespace='api')),
 
     # React frontend route (catch-all for any frontend route)
     # This will be the fallback for routes that aren't handled by 'api/' or 'admin/'

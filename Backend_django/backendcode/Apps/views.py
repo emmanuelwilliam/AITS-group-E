@@ -1,38 +1,40 @@
-from rest_framework.decorators import api_view ,permission_classes, action
-from rest_framework.permissions import AllowAny
-from rest_framework import viewsets, mixins, status,filters
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework import viewsets, status, filters
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from .models import User, Student, Lecturer, Administrator, Issue, Notification, Status, LoginHistory, UserRole, EmailVerification
-from .serializer import (
-    UserRegistrationSerializer, StudentSerializer, LecturerSerializer, AdministratorSerializer,
-    IssueSerializer, NotificationSerializer, StatusSerializer, LoginHistorySerializer, UserRoleSerializer
-)
-from .filters import IssueFilter
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.views import exception_handler
-from .models import User
-from django.contrib.auth.hashers import make_password
-from django.shortcuts import render, get_object_or_404
-from django.views.generic import TemplateView
+from django.core.mail import send_mail
+from django.utils import timezone
+from datetime import timedelta
 from django.conf import settings
-import os
+from django.db import transaction, IntegrityError, models
+from rest_framework_simplejwt.tokens import RefreshToken
+from django_filters.rest_framework import DjangoFilterBackend
+from django.views.generic import TemplateView
+from django.shortcuts import get_object_or_404
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.utils import timezone
-from django.core.mail import send_mail
-from datetime import timedelta
-from django.db import IntegrityError
-from django.contrib.auth import get_user_model
-from django.db.models import Q
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.exceptions import AuthenticationFailed
-from .serializer import UserSerializer
-from django.db import models
+from rest_framework.views import exception_handler
+from django.contrib.auth.hashers import make_password
+import logging
+import os
+import traceback
+
+from .models import (
+    User, Student, Lecturer, Administrator, Issue, 
+    Notification, Status, LoginHistory, UserRole, 
+    EmailVerification
+)
+from .serializer import (
+    UserRegistrationSerializer, StudentSerializer, 
+    LecturerSerializer, AdministratorSerializer,
+    IssueSerializer, NotificationSerializer, 
+    StatusSerializer, LoginHistorySerializer, 
+    UserRoleSerializer, UserSerializer
+)
+from .filters import IssueFilter
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 # DRF Viewsets
 class StudentViewSet(viewsets.ModelViewSet):
@@ -93,277 +95,333 @@ def get_user_role(request):
     user = request.user
     return Response({'role': user.role.name if hasattr(user, 'role') else 'unknown'})
 
-@api_view(['POST'])
+@api_view(['GET', 'POST'])
 @permission_classes([AllowAny])
 def register_student(request):
-    print("Incoming student registration data:", request.data) 
-    serializer = StudentSerializer(data=request.data)
+    if request.method == 'GET':
+        return Response({
+            'message': 'Please submit registration data using POST method',
+            'required_fields': {
+                'user': {
+                    'username': 'string',
+                    'email': 'string',
+                    'password': 'string',
+                    'first_name': 'string',
+                    'last_name': 'string',
+                    'role_name': 'string'
+                },
+                'college': 'string',
+                'course': 'string',
+                'student_number': 'string',
+                'registration_number': 'string'
+            }
+        }, status=status.HTTP_200_OK)
+
+    logger.info("Incoming student registration data: %s", request.data)
     
-    if serializer.is_valid():
-        try:
-            # Check if student number already exists
-            student_number = serializer.validated_data.get('student_number')
-            if Student.objects.filter(student_number=student_number).exists():
+    try:
+        with transaction.atomic():
+            # Create or get student role
+            student_role, _ = UserRole.objects.get_or_create(role_name='student')
+            
+            # Add role to validated data
+            data = request.data.copy()
+            if 'user' not in data:
+                data['user'] = {}
+            data['user']['role'] = student_role.id
+            
+            serializer = StudentSerializer(data=data)
+            
+            if not serializer.is_valid():
+                logger.warning('Validation errors: %s', serializer.errors)
                 return Response(
-                    {"error": "Student number already exists."},
+                    {'error': 'Validation failed', 'details': serializer.errors},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
-            student = serializer.save()  # <-- Now it's safe to save
-
-            refresh = RefreshToken.for_user(student.user)
-            verification = EmailVerification.objects.create(
-                user=student.user,
-                expires_at=timezone.now() + timedelta(minutes=30)
-            )
-            code = verification.generate_code()
-            verification.save()
-
-            try:
-                send_mail(
-                    'Verify your email',
-                    f'Your verification code is: {code}',
-                    settings.EMAIL_HOST_USER,
-                    [student.user.email],
-                    fail_silently=False,
+            # Check for existing student numbers and registration numbers
+            student_number = serializer.validated_data.get('student_number')
+            registration_number = serializer.validated_data.get('registration_number')
+            
+            if Student.objects.filter(student_number=student_number).exists():
+                return Response(
+                    {'error': 'Student number already exists.'},
+                    status=status.HTTP_400_BAD_REQUEST
                 )
-                print(f"Verification email sent to {student.user.email} with code: {code}")
-            except Exception as e:
-                print(f"Failed to send verification email: {e}")
+            
+            if Student.objects.filter(registration_number=registration_number).exists():
+                return Response(
+                    {'error': 'Registration number already exists.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Create the student
+            try:
+                student = serializer.save()
+                logger.info('Created student: %s', student)
+                
+                # Create email verification
+                verification = EmailVerification.objects.create(
+                    user=student.user,
+                    expires_at=timezone.now() + timedelta(minutes=30)
+                )
+                verification_code = verification.generate_code()
+                verification.save()
+                
+                logger.info('Generated verification code for %s', student.user.email)
+                
+                # Send verification email
+                try:
+                    send_mail(
+                        'Verify your email - Student Registration',
+                        f'''Welcome to the Academic Issue Tracking System!\n\nYour verification code is: {verification_code}\n\nThis code will expire in 30 minutes.''',
+                        settings.EMAIL_HOST_USER,
+                        [student.user.email],
+                        fail_silently=False,
+                    )
+                    
+                    # Generate tokens
+                    refresh = RefreshToken.for_user(student.user)
+                    
+                    return Response({
+                        'success': True,
+                        'message': 'Student registered successfully! Check your email for verification.',
+                        'tokens': {
+                            'refresh': str(refresh),
+                            'access': str(refresh.access_token),
+                        }
+                    }, status=status.HTTP_201_CREATED)
+                    
+                except Exception as e:
+                    logger.error('Failed to send verification email: %s', str(e))
+                    raise Exception('Failed to send verification email')
+                
+            except IntegrityError as e:
+                logger.error('Database integrity error: %s', str(e))
+                return Response(
+                    {'error': 'Database error. This student number or email may already exist.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+                
+    except Exception as e:
+        logger.error('Unexpected registration error: %s', str(e))
+        logger.error(traceback.format_exc())
+        return Response(
+            {'error': 'Registration failed. Please try again later.', 'details': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
-            return Response({
-                'success': True,
-                'message': 'Student registered successfully! Check your email for verification.',
-                'tokens': {
-                    'refresh': str(refresh),
-                    'access': str(refresh.access_token),
-                }
-            }, status=status.HTTP_201_CREATED)
-        
-        except IntegrityError as e:
-            print("Integrity error:", str(e))
-            return Response(
-                {"error": "Database integrity error. Please try again."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-    print("Validation errors:", serializer.errors)  
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-@api_view(['POST', 'GET'])
+@api_view(['GET', 'POST'])
 @permission_classes([AllowAny])
 def register_Lecturer(request):
-    if request.method == 'POST':
-        try:
-            data = request.data
-            required_fields = ['username', 'email', 'password', 'first_name', 'last_name']
+    if request.method == 'GET':
+        return Response({
+            'message': 'Please submit registration data using POST method',
+            'required_fields': {
+                'user': {
+                    'username': 'string',
+                    'email': 'string',
+                    'password': 'string',
+                    'first_name': 'string',
+                    'last_name': 'string',
+                    'role_name': 'string'
+                },
+                'employee_id': 'string',
+                'department': 'string',
+                'college': 'string',
+                'position': 'string'
+            }
+        }, status=status.HTTP_200_OK)
+        
+    logger.info("Incoming lecturer registration data: %s", request.data)
+    
+    try:
+        with transaction.atomic():
+            serializer = LecturerSerializer(data=request.data)
             
-            # Validate required fields
-            for field in required_fields:
-                if not data.get(field):
-                    return Response({
-                        'error': f'Missing required field: {field}',
-                        'required_fields': required_fields
-                    }, status=status.HTTP_400_BAD_REQUEST)
+            if not serializer.is_valid():
+                logger.warning("Validation errors: %s", serializer.errors)
+                return Response(
+                    {"error": "Validation failed", "details": serializer.errors},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             
-            # Clean and validate email
-            email = data['email'].strip().lower()
-            if User.objects.filter(email=email).exists():
-                return Response({'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
+            # Check for existing employee_id
+            employee_id = serializer.validated_data.get('employee_id')
+            if Lecturer.objects.filter(employee_id=employee_id).exists():
+                return Response(
+                    {"error": "Employee ID already exists."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             
-            # Validate username
-            username = data['username'].strip()
-            if User.objects.filter(username=username).exists():
-                return Response({'error': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Get or create the Lecturer role
-            Lecturer_role, created = UserRole.objects.get_or_create(
-                role_name='Lecturer',
-                defaults={'name': 'Lecturer'})
-            
-            if created:
-                logger.info("Created new Lecturer role")
-
-            # Create user with is_active=False
-            user = User.objects.create_user(
-                username=username,
-                email=email,
-                password=data['password'],
-                first_name=data['first_name'].strip(),
-                last_name=data['last_name'].strip(),
-                is_active=False
-            )
-            user.role = Lecturer_role
-            user.save()
-
-            logger.info(f"Created lecturer user: {user.username} with role: {user.role}")
-
-            # Generate verification code
-            verification = EmailVerification.objects.create(
-                user=user,
-                expires_at=timezone.now() + timedelta(minutes=30)
-            )
-            verification_code = verification.generate_code()
-            verification.save()
-
-            # Log the verification code for development
-            logger.info(f"Generated verification code for {user.email}: {verification_code}")
-
-            # Send verification email
+            # Create the lecturer
             try:
-                email_content = f'''Welcome to the Academic Issue Tracking System!
+                lecturer = serializer.save()
+                logger.info("Created lecturer: %s", lecturer)
                 
+                # Create email verification
+                verification = EmailVerification.objects.create(
+                    user=lecturer.user,
+                    expires_at=timezone.now() + timedelta(minutes=30)
+                )
+                verification_code = verification.generate_code()
+                verification.save()
+                
+                logger.info("Generated verification code for %s", lecturer.user.email)
+                
+                # Send verification email
+                try:
+                    send_mail(
+                        'Verify your email - Lecturer Registration',
+                        f'''Welcome to the Academic Issue Tracking System!
+
 Your verification code is: {verification_code}
 
 This code will expire in 30 minutes.
 
 Please use this code to verify your email and activate your Lecturer account.
-                '''
-                
-                send_mail(
-                    'Verify your email - Lecturer Registration',
-                    email_content,
-                    settings.EMAIL_HOST_USER,
-                    [user.email],
-                    fail_silently=False,
+''',
+                        settings.EMAIL_HOST_USER,
+                        [lecturer.user.email],
+                        fail_silently=False,
+                    )
+                    
+                    # Generate tokens
+                    refresh = RefreshToken.for_user(lecturer.user)
+                    
+                    return Response({
+                        'success': True,
+                        'message': 'Lecturer registered successfully! Check your email for verification.',
+                        'tokens': {
+                            'refresh': str(refresh),
+                            'access': str(refresh.access_token),
+                        }
+                    }, status=status.HTTP_201_CREATED)
+                    
+                except Exception as e:
+                    logger.error("Failed to send verification email: %s", str(e))
+                    # Since we're in a transaction, this will roll back the lecturer creation
+                    raise Exception("Failed to send verification email")
+                    
+            except IntegrityError as e:
+                logger.error("Database integrity error: %s", str(e))
+                return Response(
+                    {"error": "Database error. This employee ID or email may already exist."},
+                    status=status.HTTP_400_BAD_REQUEST
                 )
-            except Exception as e:
-                print(f"Failed to send email: {str(e)}")
-                user.delete()
-                return Response({'error': 'Failed to send verification email'}, status=500)
-
-            # Generate tokens
-            refresh = RefreshToken.for_user(user)
-
-            return Response({
-                'success': True,
-                'message': 'Lecturer registered successfully. Please check your email for verification code.',
-                'user': {
-                    'id': user.id,
-                    'username': user.username,
-                    'email': user.email,
-                    'first_name': user.first_name,
-                    'last_name': user.last_name,
-                    'role': 'Lecturer'
-                },
-                'tokens': {
-                    'refresh': str(refresh),
-                    'access': str(refresh.access_token),
-                }
-            }, status=201)
-
-        except Exception as e:
-            import traceback
-            print("Registration error:", str(e))
-            print("Traceback:", traceback.format_exc())
-            return Response({'error': str(e), 'detail': 'Registration failed'}, status=400)
-
-    return Response({'message': 'Use POST method to register'}, status=405)
+                
+    except Exception as e:
+        logger.error("Unexpected registration error: %s", str(e))
+        return Response(
+            {"error": "Registration failed. Please try again later."},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
       
 
-@api_view(['POST'])
+@api_view(['GET', 'POST'])
 @permission_classes([AllowAny])
 def register_administrator(request):
+    if request.method == 'GET':
+        return Response({
+            'message': 'Please submit registration data using POST method',
+            'required_fields': {
+                'user': {
+                    'username': 'string',
+                    'email': 'string',
+                    'password': 'string',
+                    'first_name': 'string',
+                    'last_name': 'string',
+                    'role_name': 'string'
+                },
+                'contact_email': 'string'
+            }
+        }, status=status.HTTP_200_OK)
+        
+    logger.info("Incoming administrator registration data: %s", request.data)
+    
     try:
-        data = request.data
-        required_fields = ['username', 'email', 'password', 'first_name', 'last_name']
-        
-        # Validate required fields
-        for field in required_fields:
-            if not data.get(field):
-                return Response({
-                    'error': f'Missing required field: {field}',
-                    'required_fields': required_fields
-                }, status=status.HTTP_400_BAD_REQUEST)
-
-        # Clean and validate email
-        email = data['email'].strip().lower()
-        if User.objects.filter(email=email).exists():
-            return Response({'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Validate username
-        username = data['username'].strip()
-        if User.objects.filter(username=username).exists():
-            return Response({'error': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Get or create the administrator role
-        admin_role, created = UserRole.objects.get_or_create(
-            role_name='administrator',
-            defaults={'name': 'Academic Registrar'})
-        
-        if created:
-            logger.info("Created new administrator role")
-
-        # Create inactive admin user
-        user = User.objects.create_user(
-            username=username,
-            email=email,
-            password=data['password'],
-            first_name=data['first_name'].strip(),
-            last_name=data['last_name'].strip(),
-            is_active=False
-        )
-        user.role = admin_role
-        user.save()
-
-        logger.info(f"Created administrator user: {user.username}")
-
-        # Generate verification code
-        verification = EmailVerification.objects.create(
-            user=user,
-            expires_at=timezone.now() + timedelta(minutes=30)
-        )
-        code = verification.generate_code()
-        verification.save()
-
-        # Log the verification code for development
-        logger.info(f"Generated verification code for administrator {user.email}: {code}")
-
-        # Send email
-        email_content = f'''Welcome to the Academic Issue Tracking System!
+        with transaction.atomic():
+            serializer = AdministratorSerializer(data=request.data)
+            
+            if not serializer.is_valid():
+                logger.warning("Validation errors: %s", serializer.errors)
+                return Response(
+                    {"error": "Validation failed", "details": serializer.errors},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Check for existing contact email
+            contact_email = serializer.validated_data.get('contact_email')
+            if Administrator.objects.filter(contact_email=contact_email).exists():
+                return Response(
+                    {"error": "Contact email already exists."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Create the administrator
+            try:
+                administrator = serializer.save()
+                logger.info("Created administrator: %s", administrator)
+                
+                # Create email verification
+                verification = EmailVerification.objects.create(
+                    user=administrator.user,
+                    expires_at=timezone.now() + timedelta(minutes=30)
+                )
+                verification_code = verification.generate_code()
+                verification.save()
+                
+                logger.info("Generated verification code for %s", administrator.user.email)
+                
+                # Send verification email
+                try:
+                    send_mail(
+                        'Verify your email - Admin Registration',
+                        f'''Welcome to the Academic Issue Tracking System!
 
 As an Academic Registrar, you will be responsible for managing and assigning academic issues.
 
-Your verification code is: {code}
+Your verification code is: {verification_code}
 
 This code will expire in 30 minutes.
 
 Please use this code to verify your email and activate your administrator account.
-'''
-        
-        send_mail(
-            'Verify your email - Admin Registration',
-            email_content,
-            settings.EMAIL_HOST_USER,
-            [user.email],
-            fail_silently=False,
-        )
-
-        # Generate JWT tokens
-        refresh = RefreshToken.for_user(user)
-
-        return Response({
-            'success': True,
-            'message': 'Administrator registered successfully. Please check your email for verification code.',
-            'user': {
-                'id': user.id,
-                'username': user.username,
-                'email': user.email,
-                'first_name': user.first_name,
-                'last_name': user.last_name,
-                'role': 'administrator'
-            },
-            'tokens': {
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-            }
-        }, status=status.HTTP_201_CREATED)
-
+''',
+                        settings.EMAIL_HOST_USER,
+                        [administrator.user.email],
+                        fail_silently=False,
+                    )
+                    
+                    # Generate tokens
+                    refresh = RefreshToken.for_user(administrator.user)
+                    
+                    return Response({
+                        'success': True,
+                        'message': 'Administrator registered successfully! Check your email for verification.',
+                        'tokens': {
+                            'refresh': str(refresh),
+                            'access': str(refresh.access_token),
+                        }
+                    }, status=status.HTTP_201_CREATED)
+                    
+                except Exception as e:
+                    logger.error("Failed to send verification email: %s", str(e))
+                    # Since we're in a transaction, this will roll back the administrator creation
+                    raise Exception("Failed to send verification email")
+                    
+            except IntegrityError as e:
+                logger.error("Database integrity error: %s", str(e))
+                return Response(
+                    {"error": "Database error. This contact email or user email may already exist."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+                
     except Exception as e:
-        import traceback
-        print("Admin registration error:", str(e))
-        print(traceback.format_exc())
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.error("Unexpected registration error: %s", str(e))
+        return Response(
+            {"error": "Registration failed. Please try again later."},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 from django.utils import timezone
 

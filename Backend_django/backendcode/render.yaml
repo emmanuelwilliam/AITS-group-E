@@ -2,7 +2,7 @@ services:
   - type: web
     name: aits-group-e
     env: python
-    buildCommand: "./build.sh"
+    buildCommand: "chmod +x build.sh && ./build.sh"
     startCommand: "gunicorn backendcode.wsgi:application"
     envVars:
       - key: PYTHON_VERSION
@@ -23,6 +23,9 @@ services:
         fromDatabase:
           name: aits-db
           property: connectionString
+      - key: DJANGO_SETTINGS_MODULE
+        value: backendcode.settings
+    autoDeploy: true
 
   - type: postgres
     name: aits-db
