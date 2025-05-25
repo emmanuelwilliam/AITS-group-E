@@ -147,11 +147,20 @@ import dj_database_url
 
 # Use SQLite for local development
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+#    'default': {
+#        'ENGINE': 'django.db.backends.sqlite3',
+#        'NAME': BASE_DIR / 'db.sqlite3',
+#    }
+#}
+     'default': {
+         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+         'NAME': 'railway',
+         'USER': 'postgres',
+         'PASSWORD': 'UPPIzjjtMewQHIrmfMzblShDavFJlYFy',
+         'HOST': 'gondola.proxy.rlwy.net',
+         'PORT': '53175',
+     }
+ }
 
 AUTH_USER_MODEL = 'Apps.User'
 
