@@ -15,10 +15,11 @@ from .models import (
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
-    list_display = ('username', 'email', 'role', 'is_staff', 'is_active')
-    list_filter = ('role', 'is_staff', 'is_active')
+    list_display = ('username', 'email', 'role' )
+    list_filter = ('role', )
     search_fields = ('username', 'email')
     ordering = ('username',)
+    readonly_fields = ('last_login', 'date_joined')
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
