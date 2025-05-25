@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api/',
+  baseURL: 'https://aits-group-e-1.onrender.com/api/',
   withCredentials: true, // Required for CSRF token to be sent
 });
 
@@ -27,7 +27,7 @@ api.interceptors.response.use(
       if (refreshToken) {
         try {          // Call the refresh endpoint
           const { data } = await axios.post(
-            'http://localhost:8000/api/token/refresh/',
+            'https://aits-group-e-1.onrender.com/api/token/refresh/',
             { refresh: refreshToken }
           );
           // Save new access token
