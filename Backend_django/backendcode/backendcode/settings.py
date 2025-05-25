@@ -30,7 +30,8 @@ DEBUG = True  # Enable debug for development to see detailed error messages
 ALLOWED_HOSTS = [
     'localhost', 
     '127.0.0.1',
-    'aits-group-e-1.onrender.com'
+    'aits-group-e-1.onrender.com',
+    'aits-group-e-4te4.vercel.app'
 ]
 
 
@@ -67,13 +68,15 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://aits-group-e-1.onrender.com"
+    "https://aits-group-e-1.onrender.com",
+    "https://aits-group-e-4te4.vercel.app"
 ]
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://aits-group-e-1.onrender.com"
+    "https://aits-group-e-1.onrender.com",
+    "https://aits-group-e-4te4.vercel.app"
 ]
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
