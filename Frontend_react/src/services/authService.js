@@ -6,6 +6,7 @@ const API_URL = 'http://localhost:8000/api/';
 // 🔓 Axios instance for public (unauthenticated) requests
 const publicAxios = axios.create({
   baseURL: API_URL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -67,33 +68,41 @@ const authService = {
       });
       throw error.response?.data || error;
     }
-  },
-
-   // Add Lecturer Registration
+  },   // Add Lecturer Registration
    registerLecturer: async (userData) => {
     try {
-      const response = await publicAxios.post('register/Lecturer/', userData);
-      if (response.data?.tokens) {
-        localStorage.setItem('access_token', response.data.tokens.access);
-        localStorage.setItem('refresh_token', response.data.tokens.refresh);
+      const response = await publicAxios.post('register/lecturer/', userData);
+      if (response.data?.success) {
+        if (response.data.tokens) {
+          localStorage.setItem('access_token', response.data.tokens.access);
+          localStorage.setItem('refresh_token', response.data.tokens.refresh);
+        }
+        return response.data;
       }
       return response.data;
     } catch (error) {
       console.error('Lecturer registration error:', {
-        message: error.response?.data?.error || error.message,
+        message: error.response?.data || error.message,
         status: error.response?.status,
       });
-      throw error.response?.data || error;
+      throw error;
     }
-  },
-
-  // Admin Registration (uses publicAxios)
+  },  // Admin Registration (uses publicAxios)
   registerAdmin: async (userData) => {
     try {
+      // Validate contact number before sending
+      const contactNumber = userData.contact_number;
+      if (!contactNumber || !/^07\d{8}$/.test(contactNumber)) {
+        throw new Error('Invalid contact number format. Must start with 07 followed by 8 digits.');
+      }
+
       const response = await publicAxios.post('register/administrator/', userData);
-      if (response.data?.tokens) {
-        localStorage.setItem('access_token', response.data.tokens.access);
-        localStorage.setItem('refresh_token', response.data.tokens.refresh);
+      if (response.data?.success) {
+        if (response.data.tokens) {
+          localStorage.setItem('access_token', response.data.tokens.access);
+          localStorage.setItem('refresh_token', response.data.tokens.refresh);
+        }
+        return response.data;
       }
       return response.data;
     } catch (error) {

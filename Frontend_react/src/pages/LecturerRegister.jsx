@@ -10,27 +10,65 @@ const LecturerRegister = () => {
     webmail: "",
     contact: "",
     department: "",
+    college: "",
     password: "",
     confirmPassword: ""
   });
 
+  // List of colleges
+  const colleges = [
+    "College of Computing and IT",
+    "College of Engineering",
+    "College of Science",
+    "College of Business",
+    "College of Education",
+    "College of Health Sciences"
+  ];
+
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
-
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    if (name === 'contact') {
+      // Only allow numbers and limit to 10 digits
+      const numbersOnly = value.replace(/[^0-9]/g, '');
+      if (numbersOnly.length <= 10) {
+        setFormData(prev => ({ ...prev, [name]: numbersOnly }));
+      }
+    } else if (name === 'webmail') {
+      // Convert webmail to lowercase
+      setFormData(prev => ({ ...prev, [name]: value.toLowerCase() }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+    
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: "" }));
+    }
   };
-
   const validateForm = () => {
     const newErrors = {};
     if (!formData.firstName) newErrors.firstName = "First name is required";
     if (!formData.lastName) newErrors.lastName = "Last name is required";
-    if (!formData.webmail) newErrors.webmail = "Webmail is required";
-    if (!formData.contact) newErrors.contact = "Contact is required";
+    if (!formData.webmail) {
+      newErrors.webmail = "Webmail is required";
+    } else if (!formData.webmail.endsWith('@mak.ac.ug')) {
+      newErrors.webmail = "Please use your Makerere University webmail (@mak.ac.ug)";
+    }
+    if (!formData.contact) {
+      newErrors.contact = "Contact is required";
+    } else if (!/^07\d{8}$/.test(formData.contact)) {
+      newErrors.contact = "Please enter a valid phone number starting with '07' (e.g., 0712345678)";
+    }
     if (!formData.department) newErrors.department = "Department is required";
-    if (!formData.password) newErrors.password = "Password is required";
+    if (!formData.college) newErrors.college = "College is required";
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    } else if (formData.password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters";
+    }
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
@@ -46,16 +84,21 @@ const LecturerRegister = () => {
     setIsSubmitting(true);
 
     try {
-      // Ensure unique username by appending timestamp
       const username = formData.webmail + '_' + Date.now();
       await authService.registerLecturer({
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        email: formData.webmail,
-        username,
-        contact_number: formData.contact,
+        user: {
+          username: username,
+          email: formData.webmail,
+          password: formData.password,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          role_name: "lecturer"
+        },
+        employee_id: username,
         department: formData.department,
-        password: formData.password
+        contact_number: formData.contact,
+        college: formData.college,
+        position: 'Lecturer'
       });
       navigate("/verify", {
         state: { email: formData.webmail, role: "lecturer" }
@@ -137,6 +180,24 @@ const LecturerRegister = () => {
               />
               {errors.department && <span className="error">{errors.department}</span>}
             </div>
+          </div>
+
+          {/* College Selection */}
+          <div className="form-group">
+            <label>College</label>
+            <select
+              name="college"
+              value={formData.college}
+              onChange={handleChange}
+              disabled={isSubmitting}
+              className="select-input"
+            >
+              <option value="">Select your college</option>
+              {colleges.map((college, index) => (
+                <option key={index} value={college}>{college}</option>
+              ))}
+            </select>
+            {errors.college && <span className="error">{errors.college}</span>}
           </div>
 
           {/* Password and Confirm Password Row */}

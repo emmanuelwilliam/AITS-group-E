@@ -190,7 +190,7 @@ class AdministratorSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
-        user_data['role_name'] = 'administrator'  # Force role
+        user_data['role_name'] = 'admin'  # Force role
 
         user_serializer = UserSerializer(data=user_data)
         user_serializer.is_valid(raise_exception=True)

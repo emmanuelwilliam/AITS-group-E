@@ -5,6 +5,7 @@ const API_URL = 'http://localhost:8000/api/';
 // Create an Axios instance for API requests
 const api = axios.create({
   baseURL: API_URL,
+  withCredentials: true, // Required for CSRF token to be sent
 });
 
 // Auto-attach JWT

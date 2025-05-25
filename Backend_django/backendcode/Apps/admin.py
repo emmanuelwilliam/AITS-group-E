@@ -32,8 +32,8 @@ class LecturerAdmin(admin.ModelAdmin):
 
 @admin.register(Administrator)
 class AdministratorAdmin(admin.ModelAdmin):
-    list_display = ('user', 'contact_email')
-    search_fields = ('user__username', 'contact_email')
+    list_display = ('user', 'contact_number')
+    search_fields = ('user__username', 'contact_number')
 
 @admin.register(Issue)
 class IssueAdmin(admin.ModelAdmin):

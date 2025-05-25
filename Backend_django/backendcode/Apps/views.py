@@ -220,8 +220,8 @@ def register_Lecturer(request):
             'required_fields': {
                 'user': {
                     'username': 'string',
-                    'email': 'string',
-                    'password': 'string',
+                    'email': 'string (@mak.ac.ug email)',
+                    'password': 'string (min 8 characters)',
                     'first_name': 'string',
                     'last_name': 'string',
                     'role_name': 'string'
@@ -229,6 +229,7 @@ def register_Lecturer(request):
                 'employee_id': 'string',
                 'department': 'string',
                 'college': 'string',
+                'contact_number': 'string (10 digits, starts with 07)',
                 'position': 'string'
             }
         }, status=status.HTTP_200_OK)
@@ -237,6 +238,27 @@ def register_Lecturer(request):
     
     try:
         with transaction.atomic():
+            # Validate email domain
+            email = request.data.get('user', {}).get('email', '')
+            if not email.endswith('@mak.ac.ug'):
+                return Response({
+                    'error': 'Invalid email domain. Please use your Makerere University email (@mak.ac.ug).'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Validate contact number
+            contact_number = request.data.get('contact_number', '')
+            if not contact_number.startswith('07') or not contact_number.isdigit() or len(contact_number) != 10:
+                return Response({
+                    'error': 'Invalid contact number. Please provide a 10-digit phone number starting with 07.'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Validate password length
+            password = request.data.get('user', {}).get('password', '')
+            if len(password) < 8:
+                return Response({
+                    'error': 'Password must be at least 8 characters long.'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
             serializer = LecturerSerializer(data=request.data)
             
             if not serializer.is_valid():
@@ -246,11 +268,17 @@ def register_Lecturer(request):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
-            # Check for existing employee_id
+            # Check for existing employee_id or email
             employee_id = serializer.validated_data.get('employee_id')
             if Lecturer.objects.filter(employee_id=employee_id).exists():
                 return Response(
                     {"error": "Employee ID already exists."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            if User.objects.filter(email=email).exists():
+                return Response(
+                    {"error": "Email already registered."},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
@@ -300,7 +328,6 @@ Please use this code to verify your email and activate your Lecturer account.
                     
                 except Exception as e:
                     logger.error("Failed to send verification email: %s", str(e))
-                    # Since we're in a transaction, this will roll back the lecturer creation
                     raise Exception("Failed to send verification email")
                     
             except IntegrityError as e:
@@ -317,7 +344,6 @@ Please use this code to verify your email and activate your Lecturer account.
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
       
-
 @api_view(['GET', 'POST'])
 @permission_classes([AllowAny])
 def register_administrator(request):
@@ -333,7 +359,7 @@ def register_administrator(request):
                     'last_name': 'string',
                     'role_name': 'string'
                 },
-                'contact_email': 'string'
+                'contact_number': 'string (10-digit phone number)'
             }
         }, status=status.HTTP_200_OK)
         
@@ -341,6 +367,14 @@ def register_administrator(request):
     
     try:
         with transaction.atomic():
+            # Validate contact number format
+            contact_number = request.data.get('contact_number', '')
+            if not contact_number.isdigit() or len(contact_number) != 10:
+                return Response(
+                    {"error": "Invalid contact number. Please provide a 10-digit phone number."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+                
             serializer = AdministratorSerializer(data=request.data)
             
             if not serializer.is_valid():
@@ -350,11 +384,10 @@ def register_administrator(request):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
-            # Check for existing contact email
-            contact_email = serializer.validated_data.get('contact_email')
-            if Administrator.objects.filter(contact_email=contact_email).exists():
+            # Check for existing contact number
+            if Administrator.objects.filter(contact_number=contact_number).exists():
                 return Response(
-                    {"error": "Contact email already exists."},
+                    {"error": "An administrator with this contact number already exists."},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
@@ -412,7 +445,7 @@ Please use this code to verify your email and activate your administrator accoun
             except IntegrityError as e:
                 logger.error("Database integrity error: %s", str(e))
                 return Response(
-                    {"error": "Database error. This contact email or user email may already exist."},
+                    {"error": "Database error. This contact number or user email may already exist."},
                     status=status.HTTP_400_BAD_REQUEST
                 )
                 

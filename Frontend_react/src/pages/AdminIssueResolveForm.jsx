@@ -5,10 +5,13 @@ const AdminIssueResolveForm = () => {
 
   const handleSubmit = async(e) => {
     e.preventDefault();
-    try{
-      const responce = await axios.post()
-      alert('Submition successfull')
-    // Add form submission logic
+    try {
+      const response = await axios.post();
+      alert('Submission successful');
+    } catch (error) {
+      console.error('Submission error:', error);
+      alert('Submission failed');
+    }
   };
 
   return (

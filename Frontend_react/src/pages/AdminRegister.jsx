@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import authService from "../services/authService"; // 🔌 Import auth service
+import authService from "../services/authService";
 import "../styles/register.css";
 
 const AdminRegister = () => {
@@ -14,19 +14,50 @@ const AdminRegister = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    // For contact field, only allow numbers
+    if (name === 'contact' && value.length > 0) {
+      const numbersOnly = value.replace(/[^0-9]/g, '');
+      if (numbersOnly.length <= 10) {
+        setFormData(prev => ({ ...prev, [name]: numbersOnly }));
+      }
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: "" }));
+    }
+  };
+  const validatePhoneNumber = (phone) => {
+    const phoneRegex = /^07\d{8}$/;  // Ugandan phone number starting with 07
+    return phoneRegex.test(phone);
+  };
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   };
 
   const validateForm = () => {
     const newErrors = {};
     if (!formData.firstName) newErrors.firstName = "First name is required";
     if (!formData.lastName) newErrors.lastName = "Last name is required";
-    if (!formData.email) newErrors.email = "Email is required";
-    if (!formData.contact) newErrors.contact = "Contact is required";
+    if (!formData.email) {
+      newErrors.email = "Email is required";
+    } else if (!validateEmail(formData.email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+    if (!formData.contact) {
+      newErrors.contact = "Contact number is required";
+    } else if (!validatePhoneNumber(formData.contact)) {
+      newErrors.contact = "Please enter a valid phone number starting with '07' (e.g., 0712345678)";
+    }
     if (!formData.password) newErrors.password = "Password is required";
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
@@ -37,17 +68,23 @@ const AdminRegister = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (!validateForm()) return;
 
+    setIsSubmitting(true);
+
     try {
-      // Ensure unique username by appending timestamp
       const username = formData.email + '_' + Date.now();
       const payload = {
-        username,
-        email: formData.email,
-        password: formData.password,
-        first_name: formData.firstName,
-        last_name: formData.lastName,
+        user: {
+          username: username,
+          email: formData.email,
+          password: formData.password,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          role_name: "administrator"
+        },
+        contact_number: formData.contact
       };
 
       const response = await authService.registerAdmin(payload);
@@ -60,7 +97,23 @@ const AdminRegister = () => {
       }
     } catch (error) {
       console.error("Admin registration error:", error);
-      setErrors({ form: error.message || "An error occurred. Please try again." });
+      
+      // Handle validation errors from the backend
+      if (error.response?.data) {
+        const backendErrors = {};
+        Object.entries(error.response.data).forEach(([key, value]) => {
+          if (Array.isArray(value)) {
+            backendErrors[key] = value[0];
+          } else {
+            backendErrors[key] = value;
+          }
+        });
+        setErrors(backendErrors);
+      } else {
+        setErrors({ form: error.message || "An error occurred. Please try again." });
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -78,6 +131,7 @@ const AdminRegister = () => {
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
+                disabled={isSubmitting}
               />
               {errors.firstName && <span className="error">{errors.firstName}</span>}
             </div>
@@ -88,6 +142,7 @@ const AdminRegister = () => {
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
+                disabled={isSubmitting}
               />
               {errors.lastName && <span className="error">{errors.lastName}</span>}
             </div>
@@ -101,16 +156,21 @@ const AdminRegister = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
+                disabled={isSubmitting}
+                placeholder="Enter your email address"
               />
               {errors.email && <span className="error">{errors.email}</span>}
             </div>
             <div className="form-group">
-              <label>Contact</label>
+              <label>Contact Number</label>
               <input
-                type="text"
+                type="tel"
                 name="contact"
                 value={formData.contact}
                 onChange={handleChange}
+                disabled={isSubmitting}
+                placeholder="Enter your phone number (e.g., 0712345678)"
+                maxLength={10}
               />
               {errors.contact && <span className="error">{errors.contact}</span>}
             </div>
@@ -124,6 +184,7 @@ const AdminRegister = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
+                disabled={isSubmitting}
               />
               {errors.password && <span className="error">{errors.password}</span>}
             </div>
@@ -134,12 +195,19 @@ const AdminRegister = () => {
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
+                disabled={isSubmitting}
               />
               {errors.confirmPassword && <span className="error">{errors.confirmPassword}</span>}
             </div>
           </div>
 
-          <button type="submit" className="submit-btn">Register</button>
+          <button 
+            type="submit" 
+            className="submit-btn"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Registering..." : "Register"}
+          </button>
         </form>
       </div>
     </div>

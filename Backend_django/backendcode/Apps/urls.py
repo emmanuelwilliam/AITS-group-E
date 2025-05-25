@@ -7,6 +7,8 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView
 )
 from .views import *
+from django.views.decorators.csrf import csrf_exempt
+
 
 # Create a router and register our viewsets with it
 router = DefaultRouter()
@@ -30,13 +32,13 @@ urlpatterns = [
     # User management
     path('user/me/', current_user, name='current-user'),
     path('user-role/', get_user_role, name='get_user_role'),
-    
+
     # Registration endpoints
-    path('register/student/', register_student, name='register_student'),
-    path('register/lecturer/', register_Lecturer, name='register_lecturer'),
-    path('register/administrator/', register_administrator, name='register_administrator'),
+    path('register/student/', csrf_exempt(register_student), name='register_student'),
+    path('register/lecturer/', csrf_exempt(register_Lecturer), name='register-lecturer'),
+    path('register/administrator/', csrf_exempt(register_administrator), name='register-administrator'),
     path('verify-email/', verify_email, name='verify-email'),
-    
+
     # Issue management
     path('issue/filter/', filter_issues, name='filter_issues'),
     path('issues/', issue_list, name='issue-list'),
