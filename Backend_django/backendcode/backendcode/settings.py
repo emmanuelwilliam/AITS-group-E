@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-qx(-v9-7@$9m$o*3l)nxr)z#iqm(z_q0u3p@wd#0al357a_01=
 DEBUG = True  # Enable debug for development to see detailed error messages
 
 # Only allow localhost for local development
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1','aits-group-e-1.onrender.com']
 
 
 # Application definition
