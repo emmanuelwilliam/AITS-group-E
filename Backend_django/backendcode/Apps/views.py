@@ -233,6 +233,121 @@ def register_Lecturer(request):
                 'position': 'string'
             }
         }, status=status.HTTP_200_OK)
+
+    logger.info("Incoming lecturer registration data: %s", request.data)
+
+    try:
+        with transaction.atomic():
+            # Ensure the lecturer role exists and inject its PK
+            lecturer_role, _ = UserRole.objects.get_or_create(role_name='lecturer')
+            data = request.data.copy()
+            if 'user' not in data:
+                data['user'] = {}
+            data['user']['role'] = lecturer_role.id
+
+            # Validate email domain
+            email = data['user'].get('email', '')
+            if not email.endswith('@mak.ac.ug'):
+                return Response(
+                    {'error': 'Invalid email domain. Please use your Makerere University email (@mak.ac.ug).'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Validate contact number
+            contact_number = data.get('contact_number', '')
+            if not (contact_number.startswith('07') and contact_number.isdigit() and len(contact_number) == 10):
+                return Response(
+                    {'error': 'Invalid contact number. Please provide a 10-digit phone number starting with 07.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Validate password length
+            password = data['user'].get('password', '')
+            if len(password) < 8:
+                return Response(
+                    {'error': 'Password must be at least 8 characters long.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            serializer = LecturerSerializer(data=data)
+            if not serializer.is_valid():
+                logger.warning("Validation errors: %s", serializer.errors)
+                return Response(
+                    {"error": "Validation failed", "details": serializer.errors},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Prevent duplicates
+            employee_id = serializer.validated_data['employee_id']
+            if Lecturer.objects.filter(employee_id=employee_id).exists():
+                return Response({"error": "Employee ID already exists."}, status=status.HTTP_400_BAD_REQUEST)
+            if User.objects.filter(email=email).exists():
+                return Response({"error": "Email already registered."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Save lecturer
+            lecturer = serializer.save()
+            logger.info("Created lecturer: %s", lecturer)
+
+            # Email verification
+            verification = EmailVerification.objects.create(
+                user=lecturer.user,
+                expires_at=timezone.now() + timedelta(minutes=30)
+            )
+            code = verification.generate_code()
+            verification.save()
+
+            # Send email
+            send_mail(
+                'Verify your email - Lecturer Registration',
+                f"Your verification code is: {code}\nIt expires in 30 minutes.",
+                settings.EMAIL_HOST_USER,
+                [lecturer.user.email],
+                fail_silently=False
+            )
+
+            # Issue tokens
+            refresh = RefreshToken.for_user(lecturer.user)
+            return Response({
+                'success': True,
+                'message': 'Lecturer registered successfully! Check your email for verification.',
+                'tokens': {
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                }
+            }, status=status.HTTP_201_CREATED)
+
+    except IntegrityError as e:
+        logger.error('Database integrity error: %s', str(e))
+        return Response(
+            {"error": "Database error. This employee ID or email may already exist."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    except Exception as e:
+        logger.error('Unexpected registration error: %s', str(e))
+        logger.error(traceback.format_exc())
+        return Response(
+            {"error": "Registration failed. Please try again later.", "details": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    if request.method == 'GET':
+        return Response({
+            'message': 'Please submit registration data using POST method',
+            'required_fields': {
+                'user': {
+                    'username': 'string',
+                    'email': 'string (@mak.ac.ug email)',
+                    'password': 'string (min 8 characters)',
+                    'first_name': 'string',
+                    'last_name': 'string',
+                    'role_name': 'string'
+                },
+                'employee_id': 'string',
+                'department': 'string',
+                'college': 'string',
+                'contact_number': 'string (10 digits, starts with 07)',
+                'position': 'string'
+            }
+        }, status=status.HTTP_200_OK)
         
     logger.info("Incoming lecturer registration data: %s", request.data)
     
