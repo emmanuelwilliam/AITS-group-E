@@ -477,55 +477,66 @@ def register_administrator(request):
                 'contact_number': 'string (10-digit phone number)'
             }
         }, status=status.HTTP_200_OK)
-        
+
     logger.info("Incoming administrator registration data: %s", request.data)
-    
+
     try:
         with transaction.atomic():
+            # Ensure the administrator role exists and inject its PK
+            admin_role, _ = UserRole.objects.get_or_create(role_name='admin')
+            data = request.data.copy()
+            if 'user' not in data:
+                data['user'] = {}
+            data['user']['role'] = admin_role.id
+
             # Validate contact number format
-            contact_number = request.data.get('contact_number', '')
-            if not contact_number.isdigit() or len(contact_number) != 10:
+            contact_number = data.get('contact_number', '')
+            if not (contact_number.isdigit() and len(contact_number) == 10):
                 return Response(
                     {"error": "Invalid contact number. Please provide a 10-digit phone number."},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-                
-            serializer = AdministratorSerializer(data=request.data)
-            
+
+            serializer = AdministratorSerializer(data=data)
             if not serializer.is_valid():
                 logger.warning("Validation errors: %s", serializer.errors)
                 return Response(
                     {"error": "Validation failed", "details": serializer.errors},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            
-            # Check for existing contact number
+
+            # Check for existing contact number or email
             if Administrator.objects.filter(contact_number=contact_number).exists():
                 return Response(
                     {"error": "An administrator with this contact number already exists."},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            
-            # Create the administrator
-            try:
-                administrator = serializer.save()
-                logger.info("Created administrator: %s", administrator)
-                
-                # Create email verification
-                verification = EmailVerification.objects.create(
-                    user=administrator.user,
-                    expires_at=timezone.now() + timedelta(minutes=30)
+            email = data['user'].get('email', '')
+            if User.objects.filter(email=email).exists():
+                return Response(
+                    {"error": "Email already registered."},
+                    status=status.HTTP_400_BAD_REQUEST
                 )
-                verification_code = verification.generate_code()
-                verification.save()
-                
-                logger.info("Generated verification code for %s", administrator.user.email)
-                
-                # Send verification email
-                try:
-                    send_mail(
-                        'Verify your email - Admin Registration',
-                        f'''Welcome to the Academic Issue Tracking System!
+
+            # Create the administrator
+            administrator = serializer.save()
+            logger.info("Created administrator: %s", administrator)
+
+            # Create email verification
+            verification = EmailVerification.objects.create(
+                user=administrator.user,
+                expires_at=timezone.now() + timedelta(minutes=30)
+            )
+            verification_code = verification.generate_code()
+            verification.save()
+
+            logger.info("Generated verification code for %s", administrator.user.email)
+
+            # Send verification email
+            try:
+                send_mail(
+                    'Verify your email - Admin Registration',
+                    f"""Welcome to the Academic Issue Tracking System!
 
 As an Academic Registrar, you will be responsible for managing and assigning academic issues.
 
@@ -534,40 +545,37 @@ Your verification code is: {verification_code}
 This code will expire in 30 minutes.
 
 Please use this code to verify your email and activate your administrator account.
-''',
-                        settings.EMAIL_HOST_USER,
-                        [administrator.user.email],
-                        fail_silently=False,
-                    )
-                    
-                    # Generate tokens
-                    refresh = RefreshToken.for_user(administrator.user)
-                    
-                    return Response({
-                        'success': True,
-                        'message': 'Administrator registered successfully! Check your email for verification.',
-                        'tokens': {
-                            'refresh': str(refresh),
-                            'access': str(refresh.access_token),
-                        }
-                    }, status=status.HTTP_201_CREATED)
-                    
-                except Exception as e:
-                    logger.error("Failed to send verification email: %s", str(e))
-                    # Since we're in a transaction, this will roll back the administrator creation
-                    raise Exception("Failed to send verification email")
-                    
-            except IntegrityError as e:
-                logger.error("Database integrity error: %s", str(e))
-                return Response(
-                    {"error": "Database error. This contact number or user email may already exist."},
-                    status=status.HTTP_400_BAD_REQUEST
+""",
+                    settings.EMAIL_HOST_USER,
+                    [administrator.user.email],
+                    fail_silently=False,
                 )
-                
+            except Exception as e:
+                logger.error("Failed to send verification email: %s", str(e))
+                raise
+
+            # Generate tokens
+            refresh = RefreshToken.for_user(administrator.user)
+            return Response({
+                'success': True,
+                'message': 'Administrator registered successfully! Check your email for verification.',
+                'tokens': {
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                }
+            }, status=status.HTTP_201_CREATED)
+
+    except IntegrityError as e:
+        logger.error("Database integrity error: %s", str(e))
+        return Response(
+            {"error": "Database error. This contact number or email may already exist."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
     except Exception as e:
         logger.error("Unexpected registration error: %s", str(e))
+        logger.error(traceback.format_exc())
         return Response(
-            {"error": "Registration failed. Please try again later."},
+            {"error": "Registration failed. Please try again later.", "details": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
