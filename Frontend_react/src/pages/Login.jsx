@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import Swal from "sweetalert2"; // Import SweetAlert2
 import "../styles/login.css";
 import MakerereLogo from "../assets/Makerere Logo.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -16,7 +17,6 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -27,35 +27,49 @@ const Login = () => {
 
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
-    setError("");
+    if (isLoading) return; // Prevent multiple submissions
+
     if (!email.trim() || !password) {
-      setError("Please enter both email/username and password");
+      Swal.fire({
+        title: "Error",
+        text: "Please enter both email/username and password.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
       return;
     }
+
     setIsLoading(true);
     try {
-      // Perform login via context (sets tokens + currentUser)
-      console.log("→ Sending login:", { username: email.trim(), password });
       const currentUser = await authLogin({
         username: email.trim(),
         password,
         rememberMe,
       });
-      console.log("← Current user:", currentUser);
 
-      // Normalize role: could be string or object
       const rawRole =
-        typeof currentUser.role === 'string'
+        typeof currentUser.role === "string"
           ? currentUser.role
           : currentUser.role?.name;
       const normalizedRole = rawRole?.toLowerCase() || roleDefault;
       const destination = roleRoutes[normalizedRole] || "/dashboard";
 
+      Swal.fire({
+        title: "Success",
+        text: `Successfully logged in as ${normalizedRole.charAt(0).toUpperCase() + normalizedRole.slice(1)}.`,
+        icon: "success",
+        confirmButtonText: "Proceed",
+      });
+
       navigate(destination);
     } catch (err) {
-      setError(
-        err?.error || err?.detail || err?.message || "Login failed. Please check your credentials."
-      );
+      console.error(err); // Log the error for debugging
+      Swal.fire({
+        title: "Login Failed",
+        text: err?.message || "Please check your credentials.",
+        icon: "error",
+        confirmButtonText: "Try Again",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -69,8 +83,6 @@ const Login = () => {
         <p className="role-info">
           Logging in as: {roleDefault.charAt(0).toUpperCase() + roleDefault.slice(1)}
         </p>
-
-        {error && <div className="error-message" role="alert">{error}</div>}
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="input-group">
@@ -108,7 +120,7 @@ const Login = () => {
               />
               <button
                 type="button"
-                onClick={() => setShowPassword(prev => !prev)}
+                onClick={() => setShowPassword((prev) => !prev)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
                 className="password-toggle-button"
               >
@@ -122,7 +134,7 @@ const Login = () => {
               <input
                 type="checkbox"
                 checked={rememberMe}
-                onChange={() => setRememberMe(prev => !prev)}
+                onChange={() => setRememberMe((prev) => !prev)}
               />
               Remember me
             </label>
@@ -141,7 +153,7 @@ const Login = () => {
         </form>
 
         <div className="register-link">
-          Don't have an account?{' '}
+          Don't have an account?{" "}
           <button
             onClick={() => navigate("/register", { state: { role: roleDefault } })}
             className="register-btn"

@@ -22,6 +22,7 @@
     "react-icons": "^5.5.0",
     "react-router-dom": "^6.30.0",
     "react-scripts": "^3.0.1",
+    "sweetalert2": "^11.22.0",
     "terser": "^5.39.2"
   },
   "devDependencies": {
